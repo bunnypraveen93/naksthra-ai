@@ -1,0 +1,350 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:#050B2A;
+    color:white;
+    overflow-x:hidden;
+    width:100%;
+}
+
+/* Background Image */
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background:url("images/nakshatra_bg.png");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    opacity:.65;
+    z-index:-2;
+}
+
+body::after{
+    content:'';
+    position:fixed;
+    inset:0;
+    background:linear-gradient(
+        rgba(5,11,42,.4),
+        rgba(5,11,42,.92)
+    );
+    z-index:-1;
+}
+
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 6%;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo img{
+    width:45px;
+    height:auto;
+}
+
+.logo span{
+    font-size:22px;
+    font-weight:700;
+}
+
+/* AI Text Color */
+.ai-text {
+    color: #DF4FFF;
+    font-style: italic;
+}
+
+nav{
+    display:flex;
+    gap:25px;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+}
+
+/* Hero Section - Side by Side Layout */
+.hero{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:100px 6% 80px 6%; 
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content{
+    max-width:600px;
+}
+
+.badge{
+    display:inline-block;
+    padding:8px 16px;
+    border-radius:50px;
+    background:rgba(255,255,255,.08);
+    margin-bottom:20px;
+    font-size:14px;
+}
+
+.hero h1{
+    font-size:56px;
+    line-height:1.2;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+}
+
+.hero h1 span{
+    background:linear-gradient(90deg, #27D7FF, #DF4FFF);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.hero p{
+    margin-top:18px;
+    color:#D0D8FF;
+    line-height:1.6;
+    font-size:16px;
+}
+
+.buttons{
+    margin-top:30px;
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.btn-primary{
+    text-decoration:none;
+    color:white;
+    padding:14px 28px;
+    border-radius:12px;
+    font-weight:600;
+    background:linear-gradient(90deg, #27D7FF, #DF4FFF);
+}
+
+.btn-secondary{
+    text-decoration:none;
+    color:white;
+    padding:14px 28px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.2);
+}
+
+/* App Image right side lo premium ga kanipinchela */
+.hero-image {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0; /* Text peddaga unna image size thaggakunda */
+}
+
+.hero-image img {
+    width: 320px; /* Reference image ki thaggatlu correct size */
+    max-width: 100%;
+    height: auto;
+    border-radius: 28px; 
+    border: 2px solid rgba(255, 255, 255, 0.1); 
+    
+    /* 3D Floating Effect */
+    transform: perspective(1000px) rotateY(-25deg) rotateX(15deg) rotateZ(3deg);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+    
+    box-shadow: 
+        -20px 20px 50px rgba(39, 215, 255, 0.15), 
+        20px -20px 50px rgba(223, 79, 255, 0.15);
+}
+
+.hero-image img:hover {
+    transform: perspective(1000px) rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.05);
+    box-shadow: 
+        0 20px 60px rgba(39, 215, 255, 0.3), 
+        0 -20px 60px rgba(223, 79, 255, 0.3);
+}
+
+/* Features Section */
+.features{
+    padding:80px 6%;
+}
+
+.features h2{
+    text-align:center;
+    margin-bottom:40px;
+    font-size:36px;
+}
+
+.feature-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:rgba(255,255,255,.05);
+    border-radius:18px;
+    padding:25px;
+    backdrop-filter:blur(20px);
+}
+
+/* Privacy & Install Sections */
+.privacy, .install-guide {
+    padding: 60px 6%;
+}
+
+.privacy h2, .install-guide h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 36px;
+}
+
+.privacy-content, .install-content {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+    padding: 30px;
+    backdrop-filter: blur(20px);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.privacy-content ul {
+    list-style-position: inside;
+}
+
+.privacy-content ul li {
+    margin-bottom: 15px;
+    line-height: 1.6;
+    color: #D0D8FF;
+}
+
+.privacy-content ul li strong {
+    color: #27D7FF;
+}
+
+.install-content p {
+    color: #D0D8FF;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.install-content ol {
+    margin-left: 20px;
+    color: #D0D8FF;
+    margin-bottom: 25px;
+}
+
+.install-content ol li {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.install-content ol li strong {
+    color: white;
+}
+
+.coming-soon {
+    color: #DF4FFF !important;
+    font-weight: 500;
+    text-align: center;
+}
+
+.download{
+    text-align:center;
+    padding:60px 6% 100px 6%;
+}
+
+.download-btn{
+    display:inline-block;
+    margin-top:25px;
+    text-decoration:none;
+    color:white;
+    padding:16px 36px;
+    border-radius:12px;
+    font-weight:600;
+    background:linear-gradient(90deg, #27D7FF, #DF4FFF);
+}
+
+footer{
+    text-align:center;
+    padding:30px;
+    font-size:14px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.developer-info {
+    margin-top: 10px;
+    color: #A0ABDF;
+    font-size: 14px;
+}
+
+.dev-name {
+    background: linear-gradient(90deg, #27D7FF, #DF4FFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Mobile & Tablet Responsive View */
+@media (max-width: 900px){
+    header{
+        padding:20px 5%;
+    }
+
+    nav{
+        display:none;
+    }
+
+    .hero{
+        flex-direction:column;
+        text-align:center;
+        justify-content:center;
+        padding:60px 5%; 
+        gap:50px;
+    }
+
+    .hero-content{
+        width:100%;
+    }
+
+    .hero h1{
+        font-size:34px;
+        line-height:1.25;
+    }
+
+    .hero p{
+        font-size:15px;
+        line-height:1.6;
+        padding:0 5px;
+    }
+
+    .buttons{
+        justify-content:center;
+        gap:12px;
+    }
+
+    .btn-primary, .btn-secondary{
+        width:100%;
+        max-width:280px;
+        text-align:center;
+    }
+
+    .hero-image img{
+        width: 260px;
+        transform: perspective(1000px) rotateY(0deg) rotateX(0deg) rotateZ(0deg); /* Mobile lo straight ga */
+    }
+
+    .privacy h2, .install-guide h2 {
+        font-size: 28px;
+    }
+}
