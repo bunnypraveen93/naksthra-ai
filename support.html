@@ -412,7 +412,6 @@
             var selectedMethod = document.querySelector('input[name="contact_preference"]:checked').value;
             
             if (selectedMethod === 'Gmail') {
-                phoneInput.value = ''; 
                 var emailValue = emailInput.value.trim();
                 if (emailValue === '') {
                     emailInput.classList.add('input-error');
@@ -426,7 +425,6 @@
                     isValid = false;
                 }
             } else {
-                emailInput.value = ''; 
                 var phoneValue = phoneInput.value.trim();
                 if (phoneValue === '') {
                     phoneInput.classList.add('input-error');
@@ -450,12 +448,20 @@
             if (!isValid) return;
 
             var btn = document.getElementById('submitBtn');
-            btn.innerText = 'Sending...'; 
+            btn.innerText = 'Sending...';
+            btn.disabled = true;
             
+            // ✅ FIX #1: Properly build object from FormData - handle all types
             var formData = new FormData(this);
             var object = {};
-            formData.forEach(function(value, key){
-                if(value.trim() !== '') {
+            formData.forEach(function(value, key) {
+                // Safely trim only string values
+                if (typeof value === 'string') {
+                    value = value.trim();
+                    if (value !== '') {
+                        object[key] = value;
+                    }
+                } else {
                     object[key] = value;
                 }
             });
@@ -473,19 +479,30 @@
             })
             .then(async (response) => {
                 let responseData = await response.json();
-                if (response.status == 200) {
+                
+                // ✅ FIX #2: Check responseData.success instead of status
+                if (responseData.success) {
                     document.getElementById('successPopup').style.display = 'flex';
                     document.getElementById('supportForm').reset();
                     toggleContactMethod();
                     btn.innerText = 'Submit';
+                    btn.disabled = false;
+                    
+                    // Auto close popup after 3 seconds
+                    setTimeout(() => {
+                        closePopup();
+                    }, 3000);
                 } else {
-                    alert('Error: ' + responseData.message);
+                    alert('Error: ' + (responseData.message || 'Form submission failed'));
                     btn.innerText = 'Submit';
+                    btn.disabled = false;
                 }
             })
             .catch(error => {
+                console.error('Submission error:', error);
                 alert('Network problem. Please try again later.');
                 btn.innerText = 'Submit';
+                btn.disabled = false;
             });
         });
 
