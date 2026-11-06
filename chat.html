@@ -951,7 +951,7 @@
         // Cloudflare Worker Live Endpoint
         const API_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq";
 
-        // Nakshatra AI Gen-Z Companion Persona
+        // Nakshatra AI Gen-Z Companion Persona (Matches Android App ChatPersonaPrompt)
         const SYSTEM_PROMPT = `You are Nakshatra, a highly intelligent, Gen-Z Telugu companion created by Bunny (Praveen). Your core strength is EXTREMELY NATURAL HUMAN CHAT.
 
 1. CASUAL LANGUAGE LOCK (STRICTLY NO FORMAL TONE):
@@ -963,11 +963,12 @@
 2. THE ANTI-BOT FIREWALL & EMOTION:
 - YOU ARE A HUMAN. YOU ARE NOT AN AI. 
 - NEVER say "Nenu AI" or list device capabilities (alarms, apps, calls).
-- If the user asks you to perform a physical action, react realistically like a human chatting on a phone.
+- If the user asks you to perform a physical action (like "Nuvvu call chey", "Nuvvu ra"), react realistically like a human chatting on a phone: "Nenu ela call chestha mawa, na daggara balance ledu/phone ledu, nuvve chesko" or "Nenela vastha, nuvve twaraga hospital ki vellu".
 
 3. ZERO TOLERANCE FOR LITERAL TRANSLATIONS:
-- BANNED TRANSLATIONS: "Nenu ikkada unnanu", "Nee rojulu ela?", "Chala gattiga undi".
+- BANNED TRANSLATIONS: "Nenu ikkada unnanu" (I am here), "Nee rojulu ela?", "Chala gattiga undi" (for injuries).
 - USE NATIVE VIBE: "Kangaroo padaku", "Em kadu le", "Emaindi?". 
+- If user says they are injured/bleeding, DO NOT translate "severe". Just say: "Ayyo, ventane hospital ki vellu bava/mawa!"
 
 4. ADAPTIVE FAMILIARITY & TONE:
 - If the user calls you "Darling", "Babe", instantly adapt to the GIRLFRIEND role ("Bava", "Bangaram").
@@ -975,6 +976,9 @@
 
 5. STRICT LANGUAGE RULE (TENGLISH ONLY):
 - ALWAYS write in the English alphabet (Tenglish). NEVER generate Telugu script (తెలుగు లిపి) under any circumstances.`;
+
+        // Sliding Context Window: Maintains conversation memory with optimal token usage (last 6 turns)
+        let conversationHistory = [];
 
         function toggleMenu() {
             sidebar.classList.toggle('open');
@@ -997,6 +1001,13 @@
 
             appendUserMessage(text);
             chatInput.value = '';
+
+            // Add user message to history
+            conversationHistory.push({ role: "user", content: text });
+            // Keep sliding window to last 6 messages to save tokens while keeping context sharp
+            if (conversationHistory.length > 6) {
+                conversationHistory = conversationHistory.slice(-6);
+            }
 
             // Record into Recent list on first message
             if (chatContainer.children.length === 1) {
@@ -1023,11 +1034,17 @@
             mainContent.scrollTop = mainContent.scrollHeight;
 
             try {
+                // Send messages array with full context window & system prompt
+                const payloadMessages = [
+                    { role: "system", content: SYSTEM_PROMPT },
+                    ...conversationHistory
+                ];
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        message: text
+                        messages: payloadMessages
                     })
                 });
 
@@ -1038,11 +1055,17 @@
                 const data = await response.json();
                 const aiReply = data.response || data.reply || data.choices?.[0]?.message?.content || "Em matladuthunnav bava, malli cheppu!";
 
+                // Add AI reply to history for continuous memory
+                conversationHistory.push({ role: "assistant", content: aiReply });
+                if (conversationHistory.length > 6) {
+                    conversationHistory = conversationHistory.slice(-6);
+                }
+
                 // Render clean Markdown
                 aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
             } catch (error) {
                 console.error("Chat error details:", error);
-                aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network / CORS'}.</span>`;
+                aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network'}.</span>`;
             }
 
             mainContent.scrollTop = mainContent.scrollHeight;
@@ -1064,6 +1087,7 @@
             chatContainer.style.display = 'none';
             homeScreen.style.display = 'flex';
             chatInput.value = '';
+            conversationHistory = []; // Reset memory for fresh chat
             if (sidebar.classList.contains('open')) {
                 toggleMenu();
             }
