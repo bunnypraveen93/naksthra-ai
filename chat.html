@@ -855,6 +855,274 @@
             transform: scale(0.92);
         }
 
+        .live-toggle-btn {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #00f2fe 0%, #8a2be2 100%);
+            color: #ffffff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 14px rgba(0, 242, 254, 0.45);
+            transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.2s ease;
+            touch-action: manipulation;
+            will-change: transform;
+        }
+
+        .live-toggle-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.7);
+        }
+
+        .live-toggle-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ===== LIVE VOICE MODE MODAL ===== */
+        .live-modal {
+            position: fixed;
+            inset: 0;
+            background: #02010d;
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .live-modal.active {
+            display: flex;
+        }
+
+        .live-header {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+        }
+
+        .live-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .live-pulse-dot {
+            width: 9px;
+            height: 9px;
+            background: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00f2fe;
+            animation: pulseGlow 1.4s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 16px #00f2fe; }
+        }
+
+        .live-close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .live-close-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+
+        /* Center Orb Visualizer */
+        .live-orb-container {
+            position: relative;
+            width: 240px;
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+        }
+
+        .live-orb-glow {
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.28) 0%, rgba(138, 43, 226, 0.25) 45%, rgba(248, 87, 166, 0.15) 70%, transparent 80%);
+            filter: blur(28px);
+            animation: orbBreathe 4s ease-in-out infinite alternate;
+            will-change: transform, opacity;
+        }
+
+        .live-orb-core {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 35%, #8a2be2 70%, #f857a6 100%);
+            box-shadow: 0 0 50px rgba(0, 242, 254, 0.6), 0 0 80px rgba(138, 43, 226, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            will-change: transform, box-shadow;
+        }
+
+        /* Waves around Orb */
+        .live-wave {
+            position: absolute;
+            border: 2px solid rgba(0, 242, 254, 0.35);
+            border-radius: 50%;
+            width: 140px;
+            height: 140px;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        /* States: Listening, Thinking, Speaking */
+        .live-modal.listening .live-orb-core {
+            animation: listeningPulse 1.8s infinite ease-in-out;
+            box-shadow: 0 0 60px rgba(0, 242, 254, 0.8), 0 0 100px rgba(79, 172, 254, 0.5);
+        }
+
+        .live-modal.listening .live-wave {
+            animation: waveRipple 2s infinite linear;
+        }
+
+        .live-modal.thinking .live-orb-core {
+            animation: orbSpin 2s linear infinite;
+            filter: hue-rotate(90deg);
+        }
+
+        .live-modal.speaking .live-orb-core {
+            animation: speakingBounce 0.6s infinite alternate ease-in-out;
+            box-shadow: 0 0 80px rgba(248, 87, 166, 0.8), 0 0 120px rgba(138, 43, 226, 0.7);
+        }
+
+        @keyframes orbBreathe {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.2); opacity: 0.95; }
+        }
+
+        @keyframes listeningPulse {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(0.95); }
+        }
+
+        @keyframes waveRipple {
+            0% { width: 140px; height: 140px; opacity: 0.8; }
+            100% { width: 260px; height: 260px; opacity: 0; }
+        }
+
+        @keyframes orbSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.05); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes speakingBounce {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+
+        /* Live Status Text */
+        .live-status-container {
+            text-align: center;
+            max-width: 520px;
+            margin-bottom: 20px;
+        }
+
+        .live-status-badge {
+            display: inline-block;
+            font-size: 0.82rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #00f2fe;
+            margin-bottom: 10px;
+        }
+
+        .live-transcript-box {
+            font-size: clamp(1rem, 3.2vw, 1.25rem);
+            color: #f1f5f9;
+            min-height: 48px;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* Live Controls Bar */
+        .live-controls {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        .live-action-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .live-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .live-action-btn.end-call {
+            background: #ef4444;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.45);
+        }
+
+        .live-action-btn.end-call:hover {
+            background: #dc2626;
+            transform: scale(1.08);
+        }
+
+        .live-action-btn.interrupt {
+            background: rgba(0, 242, 254, 0.2);
+            border: 1px solid rgba(0, 242, 254, 0.5);
+            color: #00f2fe;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -947,15 +1215,58 @@
     <footer class="bottom-bar">
         <div class="chat-box-wrapper">
             <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything"
-                onkeypress="if(event.key === 'Enter') sendMessage()">
+                onkeypress="if(event.key === 'Enter') sendMessage()" oninput="handleInputChange()">
             <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice Input">
                 <i class="fa-solid fa-microphone"></i>
             </button>
-            <button class="send-btn" onclick="sendMessage()" title="Send">
+            <!-- Live voice mode button (Shown when no text entered) -->
+            <button class="live-toggle-btn" id="liveToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
+                <i class="fa-solid fa-wave-square"></i>
+            </button>
+            <!-- Send button (Shown only when text is entered) -->
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send" style="display: none;">
                 <i class="fa-solid fa-arrow-up"></i>
             </button>
         </div>
     </footer>
+
+    <!-- ChatGPT-style Live Voice Mode Overlay Screen -->
+    <div class="live-modal" id="liveModal">
+        <div class="live-header">
+            <div class="live-header-title">
+                <span class="live-pulse-dot"></span>
+                <span>Nakshatra Live</span>
+            </div>
+            <button class="live-close-btn" onclick="closeLiveMode()" title="Exit Live Mode">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Center Glowing Cosmic Sound Orb -->
+        <div class="live-orb-container" id="liveOrbContainer">
+            <div class="live-orb-glow"></div>
+            <div class="live-wave"></div>
+            <div class="live-orb-core" id="liveOrbCore">
+                <img src="images/ic_launcher.png" alt="Nakshatra" style="width: 58px; height: 58px; border-radius: 50%; opacity: 0.9;">
+            </div>
+        </div>
+
+        <!-- Transcript & Live Feedback -->
+        <div class="live-status-container">
+            <div class="live-status-badge" id="liveStatusBadge">CONNECTING...</div>
+            <div class="live-transcript-box" id="liveTranscript">"Hey bava, matladu! Nenu vintunna..."</div>
+        </div>
+
+        <!-- Action Controls (End call & Interrupt) -->
+        <div class="live-controls">
+            <button class="live-action-btn interrupt" id="liveInterruptBtn" onclick="interruptAI()" title="Interrupt / Speak Now">
+                <i class="fa-solid fa-hand"></i>
+            </button>
+            <button class="live-action-btn end-call" onclick="closeLiveMode()" title="End Live Voice">
+                <i class="fa-solid fa-phone-slash"></i>
+            </button>
+        </div>
+    </div>
 
     <script>
         // Configure Marked.js — enable line breaks + GitHub Flavored Markdown
@@ -1142,8 +1453,287 @@
             }
         }
 
-        // Real Browser Speech Recognition (Voice Input)
-        let recognition = null;
+        const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
+        const SARVAM_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam-stt";
+
+        const liveToggleBtn = document.getElementById('liveToggleBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const liveModal = document.getElementById('liveModal');
+        const liveStatusBadge = document.getElementById('liveStatusBadge');
+        const liveTranscript = document.getElementById('liveTranscript');
+
+        // Dynamic Input Toggle: When text typed -> show Send button; when empty -> show Live button
+        function handleInputChange() {
+            const hasText = chatInput.value.trim().length > 0;
+            if (hasText) {
+                liveToggleBtn.style.display = 'none';
+                sendBtn.style.display = 'flex';
+            } else {
+                liveToggleBtn.style.display = 'flex';
+                sendBtn.style.display = 'none';
+            }
+        }
+
+        // Live Voice Mode State
+        let isLiveActive = false;
+        let liveRecognition = null;
+        let currentAudio = null;
+        let isAITalking = false;
+
+        function setLiveState(state, badgeText, transcriptText) {
+            liveModal.classList.remove('listening', 'thinking', 'speaking');
+            if (state) liveModal.classList.add(state);
+            if (badgeText) liveStatusBadge.textContent = badgeText;
+            if (transcriptText) liveTranscript.textContent = transcriptText;
+        }
+
+        function openLiveMode() {
+            isLiveActive = true;
+            liveModal.classList.add('active');
+            setLiveState('listening', 'LISTENING...', 'Hey bava, matladu! Nenu vintunna...');
+            startLiveListening();
+        }
+
+        function closeLiveMode() {
+            isLiveActive = false;
+            liveModal.classList.remove('active');
+            stopAudioPlayback();
+            if (liveRecognition) {
+                try { liveRecognition.stop(); } catch(e) {}
+            }
+        }
+
+        function interruptAI() {
+            // Immediate interruption when user clicks or starts talking
+            if (isAITalking) {
+                stopAudioPlayback();
+                setLiveState('listening', 'INTERRUPTED', 'Cheppu bava, vintunna...');
+                startLiveListening();
+            }
+        }
+
+        function stopAudioPlayback() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            isAITalking = false;
+        }
+
+        // Real-time Speech to Text with Auto-interruption
+        function startLiveListening() {
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                alert("Live Voice Mode works best in Chrome!");
+                return;
+            }
+
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!liveRecognition) {
+                liveRecognition = new SpeechRec();
+                liveRecognition.continuous = false;
+                liveRecognition.interimResults = true;
+                liveRecognition.lang = 'te-IN'; // Telugu + English mixed recognition
+
+                liveRecognition.onstart = function() {
+                    setLiveState('listening', 'LISTENING...', 'Cheppu bava, vintunna...');
+                };
+
+                liveRecognition.onspeechstart = function() {
+                    // Auto-interrupt AI speech if user begins talking
+                    if (isAITalking) {
+                        stopAudioPlayback();
+                    }
+                };
+
+                liveRecognition.onresult = function(event) {
+                    let interimText = '';
+                    let finalText = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalText += event.results[i][0].transcript;
+                        } else {
+                            interimText += event.results[i][0].transcript;
+                        }
+                    }
+
+                    if (interimText && isLiveActive) {
+                        if (isAITalking) stopAudioPlayback();
+                        setLiveState('listening', 'LISTENING...', `"${interimText}"`);
+                    }
+
+                    if (finalText && isLiveActive) {
+                        processLiveUserVoice(finalText.trim());
+                    }
+                };
+
+                liveRecognition.onerror = function(err) {
+                    if (isLiveActive && !isAITalking) {
+                        setTimeout(() => {
+                            try { liveRecognition.start(); } catch(e) {}
+                        }, 800);
+                    }
+                };
+
+                liveRecognition.onend = function() {
+                    if (isLiveActive && !isAITalking) {
+                        setTimeout(() => {
+                            try { liveRecognition.start(); } catch(e) {}
+                        }, 500);
+                    }
+                };
+            }
+
+            try {
+                liveRecognition.start();
+            } catch(e) {
+                // already active
+            }
+        }
+
+        // Send Voice to Groq -> Get Text -> Convert to Sarvam Female Voice Audio
+        async function processLiveUserVoice(userVoiceText) {
+            if (!userVoiceText) return;
+
+            setLiveState('thinking', 'THINKING...', `"${userVoiceText}"`);
+
+            // Add user turn to conversation history
+            conversationHistory.push({ role: "user", content: userVoiceText });
+            if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+
+            // Also mirror user message in main chat container
+            appendUserMessage(userVoiceText);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: "system", content: SYSTEM_PROMPT },
+                            ...conversationHistory
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                let aiText = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || "Em matladuthunnav bava, malli cheppu!";
+                
+                // Add to history
+                conversationHistory.push({ role: "assistant", content: aiText });
+                if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+
+                // Mirror AI message in main chat container
+                const aiRow = document.createElement('div');
+                aiRow.className = 'msg-row ai';
+                aiRow.innerHTML = `
+                    <img src="images/ic_launcher.png" class="ai-avatar" alt="Nakshatra">
+                    <div class="msg-bubble">${marked.parse(aiText)}</div>
+                `;
+                chatContainer.appendChild(aiRow);
+                scrollToBottom();
+
+                // Convert AI Text to Natural Female Voice (Sarvam Bulbul v3 - Kavitha)
+                await speakAIResponse(aiText);
+
+            } catch (err) {
+                console.error("Live voice error:", err);
+                setLiveState('listening', 'TRY AGAIN', "Connection drop aindi bava, malli cheppu!");
+                setTimeout(() => {
+                    if (isLiveActive) startLiveListening();
+                }, 1500);
+            }
+        }
+
+        // Play Natural Female Voice with Sarvam Bulbul v3
+        async function speakAIResponse(textToSpeak) {
+            setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
+
+            // Clean text for TTS (remove emojis or markdown asterisks)
+            const cleanSpeechText = textToSpeak.replace(/[\*\_#`~]/g, '').trim();
+
+            try {
+                const ttsResponse = await fetch(SARVAM_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        inputs: [cleanSpeechText],
+                        target_language_code: "te-IN",
+                        speaker: "kavitha", // Native expressive female voice
+                        model: "bulbul:v3"
+                    })
+                });
+
+                if (!ttsResponse.ok) {
+                    throw new Error("TTS failed");
+                }
+
+                const ttsData = await ttsResponse.json();
+                if (ttsData.audios && ttsData.audios.length > 0) {
+                    const audioBase64 = ttsData.audios[0];
+                    playAudioBlob(audioBase64, textToSpeak);
+                } else {
+                    fallbackBrowserSpeech(cleanSpeechText);
+                }
+            } catch (ttsErr) {
+                console.warn("Sarvam TTS error, falling back to browser speech:", ttsErr);
+                fallbackBrowserSpeech(cleanSpeechText);
+            }
+        }
+
+        function playAudioBlob(base64Audio, displayText) {
+            stopAudioPlayback();
+            isAITalking = true;
+            setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
+
+            currentAudio = new Audio("data:audio/wav;base64," + base64Audio);
+
+            currentAudio.onended = function() {
+                isAITalking = false;
+                if (isLiveActive) {
+                    setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
+                    startLiveListening();
+                }
+            };
+
+            currentAudio.onerror = function() {
+                isAITalking = false;
+                if (isLiveActive) startLiveListening();
+            };
+
+            currentAudio.play().catch(e => {
+                isAITalking = false;
+                if (isLiveActive) startLiveListening();
+            });
+        }
+
+        // Browser speech fallback if network drops
+        function fallbackBrowserSpeech(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'te-IN';
+                utterance.rate = 1.05;
+                utterance.pitch = 1.15; // sweet female tone
+
+                isAITalking = true;
+                setLiveState('speaking', 'SPEAKING', `"${text}"`);
+
+                utterance.onend = function() {
+                    isAITalking = false;
+                    if (isLiveActive) {
+                        setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
+                        startLiveListening();
+                    }
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
+                startLiveListening();
+            }
+        }
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
