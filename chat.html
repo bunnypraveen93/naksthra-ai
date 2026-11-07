@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -47,6 +47,10 @@
             top: 0;
             left: 0;
             background-color: #020210;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overscroll-behavior: none;
         }
 
         body {
@@ -62,7 +66,8 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            transition: background 0.35s ease;
+            transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: background;
         }
 
         /* Once chat starts, background becomes PURE BLACK */
@@ -204,24 +209,27 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar Navigation - GPU accelerated */
         .sidebar-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.65);
             display: none;
             z-index: 99;
+            opacity: 0;
+            transition: opacity 0.25s ease;
         }
 
         .sidebar-overlay.show {
             display: block;
+            opacity: 1;
         }
 
         .sidebar {
             position: fixed;
             top: 0;
-            left: -290px;
+            left: 0;
+            transform: translateX(-100%);
             width: 270px;
             max-width: 82vw;
             height: 100vh;
@@ -231,12 +239,13 @@
             display: flex;
             flex-direction: column;
             padding: 18px 14px;
-            transition: left 0.3s ease;
+            transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+            will-change: transform;
             z-index: 100;
         }
 
         .sidebar.open {
-            left: 0;
+            transform: translateX(0);
         }
 
         .sidebar-top-header {
@@ -341,15 +350,19 @@
             gap: 4px;
         }
 
-        /* Main Scrollable View */
+        /* Main Scrollable View - Hardware Accelerated Smooth Scrolling */
         .main-content {
             flex: 1;
             min-height: 0;
             overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             padding: 10px 12px;
             width: 100%;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            overscroll-behavior-y: contain;
         }
 
         .home-center {
@@ -360,12 +373,13 @@
             align-items: center;
             gap: 12px;
             padding: 0 12px;
-            animation: fadeIn 0.4s ease;
+            animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
         }
 
         .center-logo {
-            width: 100px;
-            height: 100px;
+            width: 96px;
+            height: 96px;
             border-radius: 50%;
             background: transparent;
             border: none;
@@ -375,17 +389,16 @@
             justify-content: center;
             overflow: hidden;
             animation: floatGlow 3s ease-in-out infinite alternate;
+            will-change: transform;
         }
 
         @keyframes floatGlow {
             0% {
                 transform: translateY(0px);
-                box-shadow: 0 0 25px rgba(0, 242, 254, 0.3);
             }
 
             100% {
-                transform: translateY(-6px);
-                box-shadow: 0 0 45px rgba(138, 43, 226, 0.5), 0 0 25px rgba(0, 242, 254, 0.5);
+                transform: translateY(-5px);
             }
         }
 
@@ -408,7 +421,7 @@
 
         /* "How can I help you?" text */
         .home-help-text {
-            font-size: clamp(1.4rem, 4.5vw, 2rem);
+            font-size: clamp(1.3rem, 4.2vw, 1.9rem);
             font-weight: 600;
             color: #ffffff;
             margin-top: 2px;
@@ -419,7 +432,7 @@
         .chat-container {
             display: none;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
             max-width: 840px;
             width: 100%;
             margin: 0 auto;
@@ -428,10 +441,22 @@
 
         .msg-row {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: flex-start;
             width: 100%;
-            animation: fadeIn 0.25s ease;
+            animation: messageSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .msg-row.user {
@@ -444,40 +469,42 @@
         }
 
         .ai-avatar {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             flex-shrink: 0;
             border: 1px solid rgba(0, 242, 254, 0.4);
-            box-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
             background: #06081a;
             margin-top: 2px;
         }
 
         .msg-bubble {
-            padding: 12px 18px;
+            padding: 11px 16px;
             border-radius: 18px;
             font-size: 0.94rem;
-            line-height: 1.6;
-            max-width: 88%;
+            line-height: 1.55;
+            max-width: 86%;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
         }
 
         .msg-row.ai .msg-bubble {
             background: transparent;
             border: none;
             color: #f1f5f9;
-            padding: 6px 4px;
-            max-width: calc(100% - 46px);
+            padding: 4px 2px;
+            max-width: calc(100% - 44px);
+            box-shadow: none;
         }
 
         .msg-row.user .msg-bubble {
-            background: #2f2f32;
-            /* User side grey bubble */
+            background: #2a2a2e;
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 18px 18px 4px 18px;
+        }
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
         }
 
@@ -731,13 +758,14 @@
             }
         }
 
-        /* Bottom Fixed Bar */
+        /* Bottom Fixed Bar - Mobile Keyboard Optimization */
         .bottom-bar {
             width: 100%;
             max-width: 820px;
             margin: 0 auto;
-            padding: 8px 12px 14px;
+            padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
             flex-shrink: 0;
+            will-change: transform;
         }
 
         .chat-box-wrapper {
@@ -746,12 +774,12 @@
             /* Chat Box Grey Color */
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 999px;
-            padding: 6px 8px 6px 20px;
+            padding: 5px 6px 5px 18px;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65);
-            transition: border-color 0.25s, box-shadow 0.25s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .chat-box-wrapper:focus-within {
@@ -767,8 +795,9 @@
             border: none;
             outline: none;
             color: #ffffff;
-            font-size: 0.96rem;
+            font-size: 1rem;
             padding: 8px 0;
+            line-height: 1.4;
         }
 
         .chat-input::placeholder {
@@ -788,7 +817,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.2s;
+            transition: color 0.15s ease, background 0.15s ease;
+            touch-action: manipulation;
         }
 
         .mic-btn:hover,
@@ -811,26 +841,18 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-            transition: all 0.2s ease;
+            transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1), background 0.15s ease;
+            touch-action: manipulation;
+            will-change: transform;
         }
 
         .send-btn:hover {
             background: #27d7ff;
-            transform: scale(1.05);
-        }
-
-        color: #ffffff;
-        font-size: 1.05rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 12px rgba(139, 92, 246, 0.45);
-        transition: transform 0.2s ease;
+            transform: scale(1.04);
         }
 
         .send-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
 
         @keyframes fadeIn {
@@ -1008,6 +1030,15 @@
             return t.trim();
         }
 
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                mainContent.scrollTo({
+                    top: mainContent.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
@@ -1049,7 +1080,7 @@
                 </div>
             `;
             chatContainer.appendChild(aiRow);
-            mainContent.scrollTop = mainContent.scrollHeight;
+            scrollToBottom();
 
             try {
                 // Send messages array with full context window & system prompt
@@ -1086,7 +1117,7 @@
                 aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network'}.</span>`;
             }
 
-            mainContent.scrollTop = mainContent.scrollHeight;
+            scrollToBottom();
         }
 
         function appendUserMessage(message) {
@@ -1095,7 +1126,7 @@
             row.innerHTML = `<div class="msg-bubble"></div>`;
             row.querySelector('.msg-bubble').textContent = message;
             chatContainer.appendChild(row);
-            mainContent.scrollTop = mainContent.scrollHeight;
+            scrollToBottom();
         }
 
         function startNewChat() {
