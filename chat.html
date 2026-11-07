@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -990,6 +990,24 @@
             sendMessage();
         }
 
+                function cleanTeluguOutput(text) {
+            if (!text || typeof text !== "string") return text;
+            let t = text;
+            t = t.replace(/\b(nee|neev?u?)\s+bagundh?[ao]\??/gi, "nuvvu ela unnav?");
+            t = t.replace(/\bnee\s+bagundi\??/gi, "nuvvela unnav?");
+            t = t.replace(/\bnee\s+bagundho\??/gi, "nuvvu ela unnav?");
+            t = t.replace(/\bbagunav[!.]*/gi, "bagunnanu!");
+            t = t.replace(/\bNenu bagundhi\b/gi, "Nenu bagunnanu");
+            t = t.replace(/\bneeku\s+em\s+vundi\??/gi, "nuvvem chesthunnav?");
+            t = t.replace(/\bneeku\s+em\??/gi, "nuvvem chesthunnav?");
+            t = t.replace(/\bneev?u\s+vuntava\??/gi, "nuvvu thinnava?");
+            t = t.replace(/\bcoffee\s+thintunna\w*/gi, "coffee taaguthunna");
+            t = t.replace(/\btea\s+thintunna\w*/gi, "tea taaguthunna");
+            t = t.replace(/\bvellipoyi\s+matladam\b/gi, "matladukundam");
+            t = t.replace(/\bthintamu\b/gi, "thindam");
+            return t.trim();
+        }
+
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
@@ -1053,7 +1071,7 @@
                 }
 
                 const data = await response.json();
-                const aiReply = data.response || data.reply || data.choices?.[0]?.message?.content || "Em matladuthunnav bava, malli cheppu!";
+                const aiReply = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || "Em matladuthunnav bava, malli cheppu!";
 
                 // Add AI reply to history for continuous memory
                 conversationHistory.push({ role: "assistant", content: aiReply });
