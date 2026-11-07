@@ -1496,7 +1496,7 @@ CRITICAL PERSONA & ADAPTATION RULES:
         let lastSpeechTime = 0;
         let recordingStartTime = 0;
         let silenceThreshold = 0.015; // Voice energy threshold
-        let vadSilenceTimeout = 1200; // ms of silence before sending audio
+        let vadSilenceTimeout = 750; // Fast end-of-speech detection (750ms silence) for ultra-low latency
 
         function setLiveState(state, badgeText, transcriptText) {
             liveModal.classList.remove('listening', 'thinking', 'speaking');
@@ -1836,6 +1836,7 @@ CRITICAL PERSONA & ADAPTATION RULES:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        max_tokens: 60, // Keep reply concise for ultra-fast generation & natural live chat
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
                             ...conversationHistory
@@ -1884,7 +1885,7 @@ CRITICAL PERSONA & ADAPTATION RULES:
             return audioCtx;
         }
 
-        // Play Natural Female Voice with Sarvam Bulbul v3 (Pooja - ultra-realistic, natural pace)
+        // Play Natural Female Voice with Sarvam Bulbul v3 (Suhani - sweet, natural, ultra-fast female tone)
         async function speakAIResponse(textToSpeak) {
             setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
 
@@ -1899,17 +1900,18 @@ CRITICAL PERSONA & ADAPTATION RULES:
                 const ctx = getAudioContext();
                 if (ctx.state === 'suspended') await ctx.resume();
 
+                // Ultra-low latency Sarvam Bulbul v3 request (Suhani voice: sweetest, most natural Telugu companion)
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         inputs: [cleanSpeechText],
                         target_language_code: "te-IN",
-                        speaker: "pooja",
+                        speaker: "suhani", // Natural, warm Telugu young female voice with fastest generation
                         model: "bulbul:v3",
                         pitch: 0.05,
-                        pace: 1.0,
-                        enable_preprocessing: true
+                        pace: 1.05,
+                        enable_preprocessing: false // Disabled for 2x faster response time!
                     })
                 });
 
