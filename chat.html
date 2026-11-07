@@ -1478,7 +1478,9 @@
         let isLiveActive = false;
         let liveRecognition = null;
         let currentAudio = null;
+        let currentAudioSource = null; // AudioContext source node
         let isAITalking = false;
+        let liveRestartTimer = null; // Prevent rapid restart loops
 
         function setLiveState(state, badgeText, transcriptText) {
             liveModal.classList.remove('listening', 'thinking', 'speaking');
@@ -1487,10 +1489,30 @@
             if (transcriptText) liveTranscript.textContent = transcriptText;
         }
 
+        // Unlock audio on first user tap — crucial for iOS/Android browsers
+        let audioUnlocked = false;
+        function unlockAudioForMobile() {
+            if (audioUnlocked) return;
+            const ctx = getAudioContext();
+            // Play a tiny silent buffer to unlock audio playback
+            const silentBuf = ctx.createBuffer(1, 1, 22050);
+            const src = ctx.createBufferSource();
+            src.buffer = silentBuf;
+            src.connect(ctx.destination);
+            src.start(0);
+            // Also unlock HTML5 Audio
+            const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+            silentAudio.volume = 0;
+            silentAudio.play().then(() => silentAudio.pause()).catch(() => {});
+            audioUnlocked = true;
+        }
+
         function openLiveMode() {
-            // Unlock AudioContext immediately on user click (Crucial for mobile audio)
+            // Unlock AudioContext + HTML5 Audio immediately on user click
+            unlockAudioForMobile();
             getAudioContext();
             isLiveActive = true;
+            isAITalking = false;
             liveModal.classList.add('active');
             setLiveState('listening', 'LISTENING...', 'Hey bava, matladu! Nenu vintunna...');
             startLiveListening();
@@ -1498,128 +1520,153 @@
 
         function closeLiveMode() {
             isLiveActive = false;
+            clearTimeout(liveRestartTimer);
             liveModal.classList.remove('active');
             stopAudioPlayback();
+            stopLiveRecognition();
+        }
+
+        function stopLiveRecognition() {
             if (liveRecognition) {
-                try { liveRecognition.stop(); } catch(e) {}
+                try { liveRecognition.abort(); } catch(e) {}
+                liveRecognition = null; // Destroy so it's freshly created next time
             }
         }
 
         function interruptAI() {
-            // Immediate interruption when user clicks or starts talking
             if (isAITalking) {
                 stopAudioPlayback();
                 setLiveState('listening', 'INTERRUPTED', 'Cheppu bava, vintunna...');
-                startLiveListening();
+                scheduleListeningRestart(300);
             }
         }
 
         function stopAudioPlayback() {
+            // Stop AudioContext source if playing
+            if (currentAudioSource) {
+                try { currentAudioSource.stop(); } catch(e) {}
+                currentAudioSource = null;
+            }
+            // Stop HTML5 Audio if playing
             if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
+                try {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                } catch(e) {}
                 currentAudio = null;
+            }
+            // Stop browser speech synthesis
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
             }
             isAITalking = false;
         }
 
-        // Real-time Speech to Text with Auto-interruption
+        // Schedule mic restart with debounce to avoid rapid start/stop beeps
+        function scheduleListeningRestart(delayMs) {
+            clearTimeout(liveRestartTimer);
+            liveRestartTimer = setTimeout(() => {
+                if (isLiveActive && !isAITalking) {
+                    startLiveListening();
+                }
+            }, delayMs || 800);
+        }
+
+        // Speech Recognition — single-shot mode to avoid Chrome beep on restart
         function startLiveListening() {
+            if (!isLiveActive || isAITalking) return;
             if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
                 alert("Live Voice Mode works best in Google Chrome!");
                 return;
             }
 
+            // Stop any existing recognition first
+            stopLiveRecognition();
+
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!liveRecognition) {
-                liveRecognition = new SpeechRec();
-                liveRecognition.continuous = true; // Continuous listening to avoid repeated start/stop beep sounds!
-                liveRecognition.interimResults = true;
-                liveRecognition.lang = 'te-IN'; // Native Telugu + English mixed recognition
+            liveRecognition = new SpeechRec();
+            liveRecognition.continuous = false; // Single-shot: no Chrome beep on auto-restart
+            liveRecognition.interimResults = true;
+            liveRecognition.lang = 'te-IN';
+            liveRecognition.maxAlternatives = 1;
 
-                liveRecognition.onstart = function() {
-                    if (!isAITalking) {
-                        setLiveState('listening', 'LISTENING...', 'Cheppu bava, vintunna...');
+            let gotFinalResult = false;
+
+            liveRecognition.onstart = function() {
+                if (!isAITalking && isLiveActive) {
+                    setLiveState('listening', 'LISTENING...', 'Cheppu bava, vintunna...');
+                }
+            };
+
+            liveRecognition.onresult = function(event) {
+                if (!isLiveActive) return;
+
+                let interimText = '';
+                let finalText = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalText += event.results[i][0].transcript;
+                    } else {
+                        interimText += event.results[i][0].transcript;
                     }
-                };
+                }
 
-                liveRecognition.onspeechstart = function() {
-                    // Auto-interrupt AI speech instantly when user begins talking
-                    if (isAITalking) {
-                        stopAudioPlayback();
-                        setLiveState('listening', 'LISTENING...', 'Vintunna bava, cheppu...');
+                // If user is speaking while AI is talking, interrupt AI immediately
+                if ((interimText || finalText) && isAITalking) {
+                    stopAudioPlayback();
+                }
+
+                if (interimText && isLiveActive && !isAITalking) {
+                    setLiveState('listening', 'LISTENING...', `"${interimText}"`);
+                }
+
+                if (finalText && isLiveActive) {
+                    const captured = finalText.trim();
+                    if (captured.length > 1) {
+                        gotFinalResult = true;
+                        processLiveUserVoice(captured);
                     }
-                };
+                }
+            };
 
-                let speechDebounceTimer = null;
-
-                liveRecognition.onresult = function(event) {
-                    if (!isLiveActive) return;
-
-                    let interimText = '';
-                    let finalText = '';
-
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        if (event.results[i].isFinal) {
-                            finalText += event.results[i][0].transcript;
-                        } else {
-                            interimText += event.results[i][0].transcript;
-                        }
-                    }
-
-                    // If user is speaking, interrupt AI voice immediately
-                    if ((interimText || finalText) && isAITalking) {
-                        stopAudioPlayback();
-                    }
-
-                    if (interimText && isLiveActive && !isAITalking) {
-                        setLiveState('listening', 'LISTENING...', `"${interimText}"`);
-                    }
-
-                    if (finalText && isLiveActive) {
-                        const captured = finalText.trim();
-                        if (captured.length > 1) {
-                            // Debounce slightly to allow full phrase
-                            clearTimeout(speechDebounceTimer);
-                            speechDebounceTimer = setTimeout(() => {
-                                if (isLiveActive) {
-                                    processLiveUserVoice(captured);
-                                }
-                            }, 500);
-                        }
-                    }
-                };
-
-                liveRecognition.onerror = function(err) {
-                    // Ignore benign 'no-speech' or 'aborted' errors without beep
-                    if (err.error === 'no-speech') return;
+            liveRecognition.onerror = function(err) {
+                // Ignore harmless errors silently — no beep
+                if (err.error === 'no-speech' || err.error === 'aborted') {
+                    // No speech detected — quietly restart after a pause
                     if (isLiveActive && !isAITalking) {
-                        setTimeout(() => {
-                            try { liveRecognition.start(); } catch(e) {}
-                        }, 600);
+                        scheduleListeningRestart(1000);
                     }
-                };
+                    return;
+                }
+                console.warn("Speech recognition error:", err.error);
+                if (isLiveActive && !isAITalking) {
+                    scheduleListeningRestart(1500);
+                }
+            };
 
-                liveRecognition.onend = function() {
-                    // Restart automatically without sound if still in live mode and AI not talking
-                    if (isLiveActive && !isAITalking) {
-                        try {
-                            liveRecognition.start();
-                        } catch(e) {}
-                    }
-                };
-            }
+            liveRecognition.onend = function() {
+                // Only restart if we didn't get a final result (user didn't speak)
+                // and we're still in live mode and AI isn't talking
+                if (!gotFinalResult && isLiveActive && !isAITalking) {
+                    scheduleListeningRestart(600);
+                }
+            };
 
             try {
                 liveRecognition.start();
             } catch(e) {
-                // already active
+                console.warn("Recognition start failed:", e);
+                scheduleListeningRestart(1000);
             }
         }
 
         // Send Voice to Groq -> Get Text -> Convert to Sarvam Female Voice Audio
         async function processLiveUserVoice(userVoiceText) {
             if (!userVoiceText) return;
+
+            // Stop mic while processing to prevent feedback/beeps
+            stopLiveRecognition();
 
             setLiveState('thinking', 'THINKING...', `"${userVoiceText}"`);
 
@@ -1628,6 +1675,9 @@
             if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
 
             // Also mirror user message in main chat container
+            document.body.classList.add('chat-active');
+            homeScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
             appendUserMessage(userVoiceText);
 
             try {
@@ -1659,19 +1709,17 @@
                 chatContainer.appendChild(aiRow);
                 scrollToBottom();
 
-                // Convert AI Text to Natural Female Voice (Sarvam Bulbul v3 - Kavitha)
+                // Convert AI Text to Natural Female Voice (Sarvam Bulbul v3)
                 await speakAIResponse(aiText);
 
             } catch (err) {
                 console.error("Live voice error:", err);
                 setLiveState('listening', 'TRY AGAIN', "Connection drop aindi bava, malli cheppu!");
-                setTimeout(() => {
-                    if (isLiveActive) startLiveListening();
-                }, 1500);
+                scheduleListeningRestart(1500);
             }
         }
 
-        // Web Audio Context for zero-delay, unlock-free playback on mobile browsers
+        // Web Audio Context for reliable playback on mobile browsers
         let audioCtx = null;
         function getAudioContext() {
             if (!audioCtx) {
@@ -1688,11 +1736,15 @@
             setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
 
             // Clean text for TTS (remove emojis or markdown asterisks)
-            let cleanSpeechText = textToSpeak.replace(/[\*\_#`~]/g, '').trim();
+            let cleanSpeechText = textToSpeak.replace(/[\*\_#`~]/g, '').replace(/\s+/g, ' ').trim();
+            if (!cleanSpeechText) {
+                scheduleListeningRestart(500);
+                return;
+            }
 
             try {
-                // Ensure audio context is ready on user gesture
-                getAudioContext();
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') await ctx.resume();
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
@@ -1700,7 +1752,7 @@
                     body: JSON.stringify({
                         inputs: [cleanSpeechText],
                         target_language_code: "te-IN",
-                        speaker: "pooja", // Ultra natural, expressive young Telugu female voice
+                        speaker: "pooja",
                         model: "bulbul:v3",
                         pitch: 0.15,
                         pace: 1.05,
@@ -1717,8 +1769,9 @@
                 const ttsData = await ttsResponse.json();
                 if (ttsData.audios && ttsData.audios.length > 0) {
                     const audioBase64 = ttsData.audios[0];
-                    playAudioBlob(audioBase64, textToSpeak);
+                    await playAudioFromBase64(audioBase64, textToSpeak);
                 } else {
+                    console.warn("No audio in TTS response");
                     fallbackBrowserSpeech(cleanSpeechText);
                 }
             } catch (ttsErr) {
@@ -1727,12 +1780,46 @@
             }
         }
 
-        function playAudioBlob(base64Audio, displayText) {
+        // PRIMARY: HTML5 Audio playback (most reliable for WAV base64)
+        // FALLBACK: AudioContext decodeAudioData
+        async function playAudioFromBase64(base64Audio, displayText) {
             stopAudioPlayback();
             isAITalking = true;
             setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
 
-            // Convert Base64 to ArrayBuffer -> AudioContext for crystal clear playback without beep or mobile block
+            // Method 1: HTML5 Audio with data URI — simplest and most reliable for WAV
+            try {
+                const audioElement = new Audio("data:audio/wav;base64," + base64Audio);
+                audioElement.volume = 1.0;
+                currentAudio = audioElement;
+
+                audioElement.onended = function() {
+                    isAITalking = false;
+                    currentAudio = null;
+                    if (isLiveActive) {
+                        setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
+                        scheduleListeningRestart(500);
+                    }
+                };
+
+                audioElement.onerror = function(e) {
+                    console.warn("HTML5 Audio error, trying AudioContext decode:", e);
+                    playViaAudioContext(base64Audio, displayText);
+                };
+
+                await audioElement.play();
+                console.log("✅ Audio playing via HTML5 Audio");
+                return; // Success!
+            } catch(playErr) {
+                console.warn("HTML5 Audio play() failed:", playErr);
+                // Fall through to AudioContext method
+            }
+
+            // Method 2: AudioContext decodeAudioData (fallback for autoplay-blocked browsers)
+            playViaAudioContext(base64Audio, displayText);
+        }
+
+        function playViaAudioContext(base64Audio, displayText) {
             try {
                 const binaryString = window.atob(base64Audio);
                 const len = binaryString.length;
@@ -1743,50 +1830,34 @@
 
                 const ctx = getAudioContext();
                 ctx.decodeAudioData(bytes.buffer.slice(0), function(buffer) {
-                    if (!isLiveActive || !isAITalking) return;
+                    if (!isLiveActive) { isAITalking = false; return; }
                     
                     const source = ctx.createBufferSource();
                     source.buffer = buffer;
                     source.connect(ctx.destination);
-
-                    currentAudio = {
-                        pause: function() {
-                            try { source.stop(); } catch(e) {}
-                        },
-                        currentTime: 0
-                    };
+                    currentAudioSource = source;
 
                     source.onended = function() {
                         isAITalking = false;
+                        currentAudioSource = null;
                         if (isLiveActive) {
                             setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
-                            startLiveListening();
+                            scheduleListeningRestart(500);
                         }
                     };
 
                     source.start(0);
+                    console.log("✅ Audio playing via AudioContext");
                 }, function(decodeErr) {
-                    console.warn("Decode audio error, trying HTML5 Audio fallback:", decodeErr);
-                    playHTML5AudioFallback(base64Audio);
+                    console.error("AudioContext decode failed:", decodeErr);
+                    isAITalking = false;
+                    fallbackBrowserSpeech(displayText);
                 });
             } catch(e) {
-                playHTML5AudioFallback(base64Audio);
+                console.error("AudioContext playback error:", e);
+                isAITalking = false;
+                fallbackBrowserSpeech(displayText);
             }
-        }
-
-        function playHTML5AudioFallback(base64Audio) {
-            currentAudio = new Audio("data:audio/wav;base64," + base64Audio);
-            currentAudio.onended = function() {
-                isAITalking = false;
-                if (isLiveActive) {
-                    setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
-                    startLiveListening();
-                }
-            };
-            currentAudio.play().catch(e => {
-                isAITalking = false;
-                if (isLiveActive) startLiveListening();
-            });
         }
 
         // Browser speech fallback if network drops
@@ -1796,7 +1867,7 @@
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'te-IN';
                 utterance.rate = 1.05;
-                utterance.pitch = 1.15; // sweet female tone
+                utterance.pitch = 1.15;
 
                 isAITalking = true;
                 setLiveState('speaking', 'SPEAKING', `"${text}"`);
@@ -1805,14 +1876,15 @@
                     isAITalking = false;
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
-                        startLiveListening();
+                        scheduleListeningRestart(500);
                     }
                 };
 
                 window.speechSynthesis.speak(utterance);
             } else {
+                isAITalking = false;
                 setLiveState('listening', 'LISTENING...', 'Malli cheppu bava...');
-                startLiveListening();
+                scheduleListeningRestart(500);
             }
         }
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -1863,4 +1935,3 @@
 </body>
 
 </html>
-==
