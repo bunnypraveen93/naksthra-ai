@@ -1838,20 +1838,29 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
             appendUserMessage(userVoiceText);
 
             try {
+                // Determine whether user spoke in English or Telugu/Tenglish for optimal vocal emotion
+                const isEnglishInput = /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(userVoiceText.trim()) && 
+                    !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(userVoiceText);
+
+                // Dedicated high-emotion live voice prompt: Telugu output generates pure Telugu script (తెలుగు) so Sarvam Bulbul v3 pronounces with 100% human realism and emotion!
+                const LIVE_PROMPT = isEnglishInput 
+                    ? `You are Nakshatra on a live voice call with user. User spoke in English. Reply in 1-2 short, warm, natural, human conversational English sentences.`
+                    : `You are Nakshatra on a live voice call with user. User spoke in Telugu. You MUST reply strictly in authentic, natural, spoken Telugu script (తెలుగు లిపి, e.g. "హా తిన్నాను! నువ్వు తిన్నావా?", "హే! నేను చాలా బాగున్నాను, నువ్వు ఎలా ఉన్నావు?"). This allows the Telugu neural voice engine to pronounce words with 100% realistic human emotions. Keep it to 1-2 short, conversational lines. NEVER output robotic filler phrases.`;
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         max_tokens: 60, // Keep reply concise for ultra-fast generation & natural live chat
                         messages: [
-                            { role: "system", content: SYSTEM_PROMPT },
+                            { role: "system", content: LIVE_PROMPT },
                             ...conversationHistory
                         ]
                     })
                 });
 
                 const data = await response.json();
-                let aiText = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || "Em matladuthunnav, malli cheppu!";
+                let aiText = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || (isEnglishInput ? "Could you say that again?" : "ఏం మాట్లాడుతున్నావు, మళ్లీ చెప్పు!");
                 
                 // Add to history
                 conversationHistory.push({ role: "assistant", content: aiText });
@@ -1902,6 +1911,13 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
                 return;
             }
 
+            // Detect language code: if text contains Telugu script or is mostly Telugu, use te-IN, otherwise en-IN
+            const hasTeluguScript = /[\u0C00-\u0C7F]/.test(cleanSpeechText);
+            const isPureEnglish = /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText) && 
+                !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText);
+            
+            const targetLang = (hasTeluguScript || !isPureEnglish) ? "te-IN" : "en-IN";
+
             try {
                 const ctx = getAudioContext();
                 if (ctx.state === 'suspended') await ctx.resume();
@@ -1912,11 +1928,11 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         inputs: [cleanSpeechText],
-                        target_language_code: "te-IN",
+                        target_language_code: targetLang,
                         speaker: "suhani", // Natural, warm Telugu young female voice with fastest generation
                         model: "bulbul:v3",
                         pitch: 0.05,
-                        pace: 1.05,
+                        pace: 1.02,
                         enable_preprocessing: false // Disabled for 2x faster response time!
                     })
                 });
