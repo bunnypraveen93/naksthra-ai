@@ -505,9 +505,7 @@
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 18px 18px 4px 18px;
-        }
-
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
         }
 
         /* ===== Clean Markdown Styling ===== */
@@ -1512,6 +1510,7 @@ COGNITIVE ARCHITECTURE & REASONING:
 
             appendUserMessage(text);
             chatInput.value = '';
+            handleInputChange();
 
             // Add user message to history
             conversationHistory.push({ role: "user", content: text });
@@ -1597,12 +1596,12 @@ COGNITIVE ARCHITECTURE & REASONING:
             chatContainer.innerHTML = '';
             chatContainer.style.display = 'none';
             homeScreen.style.display = 'flex';
-            chatInput.value = '';[]; // Reset memory for fresh chat
+            chatInput.value = '';
+            conversationHistory = []; // Reset memory for fresh chat
             if (sidebar.classList.contains('open')) {
                 toggleMenu();
             }
         }
-        conversationHistory =
 
         const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
         const SARVAM_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam-stt";
