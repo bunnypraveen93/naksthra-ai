@@ -1728,7 +1728,7 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
                 const formData = new FormData();
                 formData.append('file', wavBlob, 'recording.wav');
                 formData.append('language_code', 'te-IN');
-                formData.append('model', 'saarika:v2.5');
+                formData.append('model', 'saaras:v3'); // Fastest and most accurate Telugu speech model
 
                 const sttResponse = await fetch(SARVAM_STT_URL, {
                     method: 'POST',
