@@ -1932,7 +1932,7 @@ ${isEnglishInput
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        max_tokens: 75, // Optimal length for complete 1-2 sentence expressive vocal replies without cutoffs
+                        max_tokens: 220, // Allows full reasoning (~120 tokens) + complete expressive 1-2 sentence response without truncation (~300ms)
                         messages: [
                             { role: "system", content: LIVE_PROMPT },
                             ...conversationHistory
