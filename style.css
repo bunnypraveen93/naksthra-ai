@@ -1,62 +1,60 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-body{
-    background:#050B2A;
-    color:white;
-    overflow-x:hidden;
-    width:100%;
+body {
+    background: #050B2A;
+    color: white;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 /* Background Image */
-body::before{
-    content:'';
-    position:fixed;
-    inset:0;
-    background:url("images/nakshatra_bg.png");
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    opacity:.65;
-    z-index:-2;
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("images/nakshatra_bg.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: .65;
+    z-index: -2;
 }
 
-body::after{
-    content:'';
-    position:fixed;
-    inset:0;
-    background:linear-gradient(
-        rgba(5,11,42,.4),
-        rgba(5,11,42,.92)
-    );
-    z-index:-1;
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(rgba(5, 11, 42, .4),
+            rgba(5, 11, 42, .92));
+    z-index: -1;
 }
 
-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 6%;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 6%;
 }
 
-.logo{
-    display:flex;
-    align-items:center;
-    gap:12px;
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.logo img{
-    width:45px;
-    height:auto;
+.logo img {
+    width: 45px;
+    height: auto;
 }
 
-.logo span{
-    font-size:22px;
-    font-weight:700;
+.logo span {
+    font-size: 22px;
+    font-weight: 700;
 }
 
 /* AI Text Color */
@@ -65,150 +63,155 @@ header{
     font-style: italic;
 }
 
-nav{
-    display:flex;
-    gap:25px;
+nav {
+    display: flex;
+    gap: 25px;
 }
 
-nav a{
-    color:white;
-    text-decoration:none;
+nav a {
+    color: white;
+    text-decoration: none;
 }
 
 /* Hero Section - Side by Side Layout */
-.hero{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:100px 6% 80px 6%; 
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 100px 6% 80px 6%;
     gap: 40px;
     position: relative;
     z-index: 1;
 }
 
-.hero-content{
-    max-width:600px;
+.hero-content {
+    max-width: 600px;
 }
 
-.badge{
-    display:inline-block;
-    padding:8px 16px;
-    border-radius:50px;
-    background:rgba(255,255,255,.08);
-    margin-bottom:20px;
-    font-size:14px;
+.badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, .08);
+    margin-bottom: 20px;
+    font-size: 14px;
 }
 
-.hero h1{
-    font-size:56px;
-    line-height:1.2;
-    word-wrap:break-word;
-    overflow-wrap:break-word;
+.hero h1 {
+    font-size: 56px;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
-.hero h1 span{
-    background:linear-gradient(90deg, #27D7FF, #DF4FFF);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
+.hero h1 span {
+    background: linear-gradient(90deg, #27D7FF, #DF4FFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.hero p{
-    margin-top:18px;
-    color:#D0D8FF;
-    line-height:1.6;
-    font-size:16px;
+.hero p {
+    margin-top: 18px;
+    color: #D0D8FF;
+    line-height: 1.6;
+    font-size: 16px;
 }
 
-.buttons{
-    margin-top:30px;
-    display:flex;
-    gap:15px;
-    flex-wrap:wrap;
+.buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.btn-primary{
-    text-decoration:none;
-    color:white;
-    padding:14px 28px;
-    border-radius:12px;
-    font-weight:600;
-    background:linear-gradient(90deg, #27D7FF, #DF4FFF);
+.btn-primary {
+    text-decoration: none;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #27D7FF, #DF4FFF);
 }
 
-.btn-secondary{
-    text-decoration:none;
-    color:white;
-    padding:14px 28px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.2);
+.btn-secondary {
+    text-decoration: none;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .2);
 }
 
 /* App Image right side lo premium ga kanipinchela */
 .hero-image {
     position: relative;
     z-index: 2;
-    flex-shrink: 0; /* Text peddaga unna image size thaggakunda */
+    flex-shrink: 0;
+    /* Text peddaga unna image size thaggakunda */
 }
 
 .hero-image img {
-    width: 320px; /* Reference image ki thaggatlu correct size */
+    width: 320px;
+    /* Reference image ki thaggatlu correct size */
     max-width: 100%;
     height: auto;
-    border-radius: 28px; 
-    border: 2px solid rgba(255, 255, 255, 0.1); 
-    
+    border-radius: 28px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+
     /* 3D Floating Effect */
     transform: perspective(1000px) rotateY(-25deg) rotateX(15deg) rotateZ(3deg);
     transition: transform 0.5s ease, box-shadow 0.5s ease;
-    
-    box-shadow: 
-        -20px 20px 50px rgba(39, 215, 255, 0.15), 
+
+    box-shadow:
+        -20px 20px 50px rgba(39, 215, 255, 0.15),
         20px -20px 50px rgba(223, 79, 255, 0.15);
 }
 
 .hero-image img:hover {
     transform: perspective(1000px) rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.05);
-    box-shadow: 
-        0 20px 60px rgba(39, 215, 255, 0.3), 
+    box-shadow:
+        0 20px 60px rgba(39, 215, 255, 0.3),
         0 -20px 60px rgba(223, 79, 255, 0.3);
 }
 
 /* Features Section */
-.features{
-    padding:80px 6%;
+.features {
+    padding: 80px 6%;
 }
 
-.features h2{
-    text-align:center;
-    margin-bottom:40px;
-    font-size:36px;
+.features h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 36px;
 }
 
-.feature-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-    gap:20px;
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
 }
 
-.card{
-    background:rgba(255,255,255,.05);
-    border-radius:18px;
-    padding:25px;
-    backdrop-filter:blur(20px);
+.card {
+    background: rgba(255, 255, 255, .05);
+    border-radius: 18px;
+    padding: 25px;
+    backdrop-filter: blur(20px);
 }
 
 /* Privacy & Install Sections */
-.privacy, .install-guide {
+.privacy,
+.install-guide {
     padding: 60px 6%;
 }
 
-.privacy h2, .install-guide h2 {
+.privacy h2,
+.install-guide h2 {
     text-align: center;
     margin-bottom: 30px;
     font-size: 36px;
 }
 
-.privacy-content, .install-content {
+.privacy-content,
+.install-content {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 18px;
     padding: 30px;
@@ -258,26 +261,26 @@ nav a{
     text-align: center;
 }
 
-.download{
-    text-align:center;
-    padding:60px 6% 100px 6%;
+.download {
+    text-align: center;
+    padding: 60px 6% 100px 6%;
 }
 
-.download-btn{
-    display:inline-block;
-    margin-top:25px;
-    text-decoration:none;
-    color:white;
-    padding:16px 36px;
-    border-radius:12px;
-    font-weight:600;
-    background:linear-gradient(90deg, #27D7FF, #DF4FFF);
+.download-btn {
+    display: inline-block;
+    margin-top: 25px;
+    text-decoration: none;
+    color: white;
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #27D7FF, #DF4FFF);
 }
 
-footer{
-    text-align:center;
-    padding:30px;
-    font-size:14px;
+footer {
+    text-align: center;
+    padding: 30px;
+    font-size: 14px;
     background: rgba(0, 0, 0, 0.2);
 }
 
@@ -296,47 +299,48 @@ footer{
 }
 
 /* Mobile & Tablet Responsive View */
-@media (max-width: 900px){
-    header{
-        padding:20px 5%;
+@media (max-width: 900px) {
+    header {
+        padding: 20px 5%;
     }
 
-    nav{
-        display:none;
+    nav {
+        display: none;
     }
 
-    .hero{
-        flex-direction:column;
-        text-align:center;
-        justify-content:center;
-        padding:60px 5%; 
-        gap:50px;
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+        padding: 60px 5%;
+        gap: 50px;
     }
 
-    .hero-content{
-        width:100%;
+    .hero-content {
+        width: 100%;
     }
 
-    .hero h1{
-        font-size:34px;
-        line-height:1.25;
+    .hero h1 {
+        font-size: 34px;
+        line-height: 1.25;
     }
 
-    .hero p{
-        font-size:15px;
-        line-height:1.6;
-        padding:0 5px;
+    .hero p {
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 0 5px;
     }
 
-    .buttons{
-        justify-content:center;
-        gap:12px;
+    .buttons {
+        justify-content: center;
+        gap: 12px;
     }
 
-    .btn-primary, .btn-secondary{
-        width:100%;
-        max-width:280px;
-        text-align:center;
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        max-width: 280px;
+        text-align: center;
     }
 
     .btn-meet-nakshatra {
@@ -346,12 +350,14 @@ footer{
         justify-content: center;
     }
 
-    .hero-image img{
+    - .hero-image img {
         width: 260px;
-        transform: perspective(1000px) rotateY(0deg) rotateX(0deg) rotateZ(0deg); /* Mobile lo straight ga */
+        transform: perspective(1000px) rotateY(0deg) rotateX(0deg) rotateZ(0deg);
+        /* Mobile lo straight ga */
     }
 
-    .privacy h2, .install-guide h2 {
+    .privacy h2,
+    .install-guide h2 {
         font-size: 28px;
     }
 }
@@ -446,7 +452,8 @@ footer{
     max-width: 860px;
     height: 86vh;
     max-height: 850px;
-    background-color: #0d0d0d; /* Pure sleek black */
+    background-color: #0d0d0d;
+    /* Pure sleek black */
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 45px rgba(39, 215, 255, 0.08);
@@ -546,13 +553,15 @@ footer{
     display: flex;
     flex-direction: column;
     gap: 18px;
-    background: #000000; /* Deep black body */
+    background: #000000;
+    /* Deep black body */
     scroll-behavior: smooth;
 }
 
 .chat-modal-body::-webkit-scrollbar {
     width: 6px;
 }
+
 .chat-modal-body::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
@@ -637,8 +646,15 @@ footer{
 }
 
 @keyframes msgFadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* User Message: Right Aligned, Grey Bubble */
@@ -647,7 +663,8 @@ footer{
 }
 
 .chat-msg-row.user-msg .msg-bubble {
-    background: #2a2a2e; /* User side grey color bubble */
+    background: #2a2a2e;
+    /* User side grey color bubble */
     color: #f3f4f6;
     border-radius: 20px 20px 4px 20px;
     padding: 12px 18px;
@@ -675,7 +692,8 @@ footer{
 }
 
 .chat-msg-row.ai-msg .msg-bubble {
-    background: transparent; /* AI side normal */
+    background: transparent;
+    /* AI side normal */
     color: #e5e7eb;
     border-radius: 0;
     padding: 4px 6px;
@@ -690,9 +708,11 @@ footer{
 .chat-msg-row.ai-msg .msg-bubble p {
     margin-bottom: 8px;
 }
+
 .chat-msg-row.ai-msg .msg-bubble p:last-child {
     margin-bottom: 0;
 }
+
 .chat-msg-row.ai-msg .msg-bubble code {
     background: #1e1e24;
     padding: 2px 6px;
@@ -700,6 +720,7 @@ footer{
     color: #27d7ff;
     font-size: 0.88rem;
 }
+
 .chat-msg-row.ai-msg .msg-bubble pre {
     background: #121216;
     border: 1px solid #282832;
@@ -708,10 +729,13 @@ footer{
     overflow-x: auto;
     margin: 10px 0;
 }
-.chat-msg-row.ai-msg .msg-bubble ul, .chat-msg-row.ai-msg .msg-bubble ol {
+
+.chat-msg-row.ai-msg .msg-bubble ul,
+.chat-msg-row.ai-msg .msg-bubble ol {
     margin-left: 20px;
     margin-bottom: 8px;
 }
+
 .chat-msg-row.ai-msg .msg-bubble strong {
     color: #ffffff;
     font-weight: 600;
@@ -724,6 +748,7 @@ footer{
     gap: 5px;
     padding: 6px 4px;
 }
+
 .typing-dots span {
     width: 7px;
     height: 7px;
@@ -731,12 +756,27 @@ footer{
     border-radius: 50%;
     animation: typingPulse 1.2s infinite ease-in-out;
 }
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes typingPulse {
-    0%, 100% { opacity: 0.3; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1.15); }
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
 }
 
 /* Chat Input Bar (ChatGPT Style) */
@@ -822,6 +862,7 @@ footer{
     .chat-modal-overlay {
         padding: 0;
     }
+
     .chat-modal-container {
         height: 100%;
         height: 100dvh;
@@ -829,15 +870,19 @@ footer{
         border-radius: 0;
         border: none;
     }
+
     .chat-modal-header {
         padding: 12px 14px;
     }
+
     .chat-modal-body {
         padding: 16px 14px;
     }
+
     .chat-modal-footer {
         padding: 10px 12px 14px;
     }
+
     .chat-msg-row.user-msg .msg-bubble {
         max-width: 88%;
     }
