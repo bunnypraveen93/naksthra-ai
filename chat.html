@@ -1502,7 +1502,7 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
         let lastSpeechTime = 0;
         let recordingStartTime = 0;
         let silenceThreshold = 0.012; // Sensitive voice energy threshold
-        let vadSilenceTimeout = 550; // Ultra-fast end-of-speech detection (550ms silence) for near-instant response
+        let vadSilenceTimeout = 400; // Snappy 400ms end-of-speech detection for instant turn-taking
 
         function setLiveState(state, badgeText, transcriptText) {
             liveModal.classList.remove('listening', 'thinking', 'speaking');
@@ -1842,16 +1842,19 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
                 const isEnglishInput = /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(userVoiceText.trim()) && 
                     !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(userVoiceText);
 
-                // Dedicated high-emotion live voice prompt: Telugu output generates pure Telugu script (తెలుగు) so Sarvam Bulbul v3 pronounces with 100% human realism and emotion!
+                // Dedicated high-emotion live voice prompt: Telugu output generates ultra-natural spoken local Telugu (సహజమైన వాడుక భాష)
                 const LIVE_PROMPT = isEnglishInput 
-                    ? `You are Nakshatra on a live voice call with user. User spoke in English. Reply in 1-2 short, warm, natural, human conversational English sentences.`
-                    : `You are Nakshatra on a live voice call with user. User spoke in Telugu. You MUST reply strictly in authentic, natural, spoken Telugu script (తెలుగు లిపి, e.g. "హా తిన్నాను! నువ్వు తిన్నావా?", "హే! నేను చాలా బాగున్నాను, నువ్వు ఎలా ఉన్నావు?"). This allows the Telugu neural voice engine to pronounce words with 100% realistic human emotions. Keep it to 1-2 short, conversational lines. NEVER output robotic filler phrases.`;
+                    ? `You are Nakshatra on a phone voice call. Speak in 1 short, lively, empathetic, natural English sentence. Talk like an energetic, affectionate, real female companion.`
+                    : `You are Nakshatra on a live phone voice call with the user. The user is speaking in Telugu.
+You MUST reply strictly in 1 or 2 SHORT, warm, ultra-natural spoken Telugu sentences in Telugu script (తెలుగు లిపి).
+Speak in authentic, colloquial, friendly local dialect (e.g. "హేయ్! బాగున్నాను రా, నువ్వెలా ఉన్నావ్?", "హా, ఇప్పుడే తినేశా! నువ్వు తిన్నావా మరి?", "అవునా! నిజమా? చెప్పు ఏమైందో!").
+NEVER use stiff textbook Telugu or artificial polite robot words. Sound 100% human, lively, and warm.`;
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        max_tokens: 60, // Keep reply concise for ultra-fast generation & natural live chat
+                        max_tokens: 45, // Super-short for near-instant 1s generation and seamless natural voice flow
                         messages: [
                             { role: "system", content: LIVE_PROMPT },
                             ...conversationHistory
