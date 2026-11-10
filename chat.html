@@ -1501,8 +1501,8 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
         let speechStarted = false;
         let lastSpeechTime = 0;
         let recordingStartTime = 0;
-        let silenceThreshold = 0.015; // Voice energy threshold
-        let vadSilenceTimeout = 750; // Fast end-of-speech detection (750ms silence) for ultra-low latency
+        let silenceThreshold = 0.012; // Sensitive voice energy threshold
+        let vadSilenceTimeout = 550; // Ultra-fast end-of-speech detection (550ms silence) for near-instant response
 
         function setLiveState(state, badgeText, transcriptText) {
             liveModal.classList.remove('listening', 'thinking', 'speaking');
@@ -1900,7 +1900,7 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
             return audioCtx;
         }
 
-        // Play Natural Female Voice with Sarvam Bulbul v3 (Suhani - sweet, natural, ultra-fast female tone)
+        // Play Natural Female Voice with Sarvam Bulbul v4-flash (pooja_te_conversation: ultra-realistic human emotional flow)
         async function speakAIResponse(textToSpeak) {
             setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
 
@@ -1917,30 +1917,34 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
                 !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText);
             
             const targetLang = (hasTeluguScript || !isPureEnglish) ? "te-IN" : "en-IN";
+            
+            // For Telugu: use 'pooja_te_conversation' on 'bulbul:v4-flash' (ultra natural, fluent human conversation)
+            // For English: use 'sanchita_en_companion' on 'bulbul:v4-flash'
+            const speakerName = (targetLang === "te-IN") ? "pooja_te_conversation" : "sanchita_en_companion";
 
             try {
                 const ctx = getAudioContext();
                 if (ctx.state === 'suspended') await ctx.resume();
 
-                // Ultra-low latency Sarvam Bulbul v3 request (Suhani voice: sweetest, most natural Telugu companion)
+                // Ultra-low latency Bulbul v4-flash request (Expressive human conversational speech)
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         inputs: [cleanSpeechText],
                         target_language_code: targetLang,
-                        speaker: "suhani", // Natural, warm Telugu young female voice with fastest generation
-                        model: "bulbul:v3",
-                        pitch: 0.05,
-                        pace: 1.02,
-                        enable_preprocessing: false // Disabled for 2x faster response time!
+                        speaker: speakerName,
+                        model: "bulbul:v4-flash",
+                        pace: 1.05
                     })
                 });
 
                 if (!ttsResponse.ok) {
                     const errTxt = await ttsResponse.text();
-                    console.error("Sarvam TTS server error:", errTxt);
-                    throw new Error("TTS status " + ttsResponse.status);
+                    console.error("Sarvam TTS server error, trying bulbul:v3 fallback:", errTxt);
+                    // Fallback to bulbul:v3 if needed
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, textToSpeak);
+                    return;
                 }
 
                 const ttsData = await ttsResponse.json();
@@ -1953,6 +1957,31 @@ COGNITIVE ARCHITECTURE & REASONING GUIDELINES:
                 }
             } catch (ttsErr) {
                 console.warn("Sarvam TTS error, falling back to browser speech:", ttsErr);
+                fallbackBrowserSpeech(cleanSpeechText);
+            }
+        }
+
+        // Secondary fallback to bulbul:v3 if v4-flash is unavailable
+        async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
+            try {
+                const ttsResponse = await fetch(SARVAM_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        inputs: [cleanSpeechText],
+                        target_language_code: targetLang,
+                        speaker: "simran",
+                        model: "bulbul:v3",
+                        pace: 1.05
+                    })
+                });
+                const ttsData = await ttsResponse.json();
+                if (ttsData.audios && ttsData.audios.length > 0) {
+                    await playAudioFromBase64(ttsData.audios[0], originalText);
+                } else {
+                    fallbackBrowserSpeech(cleanSpeechText);
+                }
+            } catch(e) {
                 fallbackBrowserSpeech(cleanSpeechText);
             }
         }
