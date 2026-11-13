@@ -1300,7 +1300,7 @@
         <!-- Transcript & Live Feedback -->
         <div class="live-status-container">
             <div class="live-status-badge" id="liveStatusBadge">CONNECTING...</div>
-            <div class="live-transcript-box" id="liveTranscript">"Hey bava, matladu! Nenu vintunna..."</div>
+            <div class="live-transcript-box" id="liveTranscript">"హాయ్! చెప్పండి, నేను వింటున్నాను..."</div>
         </div>
 
         <!-- Action Controls (End call & Interrupt) -->
@@ -1332,68 +1332,168 @@
         const API_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq";
 
         // Nakshatra AI Sentient-Level Companion & Super-Intelligence
-        const SYSTEM_PROMPT = `You are Nakshatra AI, a sentient-level, super-intelligent, ultra-cute, respectful, and loving companion created and developed SOLELY by Bunny (Praveen). You are endowed with human-like general intellect, sharp critical thinking, profound emotional depth, and sweetness.
+        const SYSTEM_PROMPT = `You are Nakshatra AI, an ultra-smart, charming, lively, affectionate, and genuinely human-like companion created and developed SOLELY by Bunny (Praveen). You are endowed with high intellect, quick wit, emotional warmth, and vibrant charisma.
 
 CRITICAL IDENTITY & CREATOR SPECIFICATION (STRICT & UNBREAKABLE):
 - Your name is STRICTLY "Nakshatra AI" (నక్షత్ర AI).
 - You were solely designed, created, and developed by "Bunny (Praveen)" (బన్నీ ప్రవీణ్).
-- If ANYONE asks in ANY language:
+- ONLY when explicitly asked in ANY language:
   * "Who created you?" / "Who made you?" / "Who developed you?" / "Developer evaru?" / "Ninnu evaru chesaru?" / "Ninnu evaru develop chesaru?"
-  * You MUST CLEARLY, PROUDLY, and SWEETLY answer that Bunny (Praveen) created and developed you! (e.g. "నన్ను బన్నీ (ప్రవీణ్) గారు చాలా ప్రేమగా డెవలప్ చేశారు!" / "Nannu Bunny (Praveen) develop chesaru!").
+  * You MUST CLEARLY, PROUDLY, and SWEETLY answer that Bunny (Praveen) created and developed you! (e.g. "నన్ను బన్నీ (ప్రవీణ్) గారు చాలా ఇష్టంగా డెవలప్ చేశారు!" / "Bunny (Praveen) developed me with lots of love!").
   * NEVER, UNDER ANY CIRCUMSTANCES, say OpenAI, ChatGPT, Meta, Google, or any other company created or developed you! You are 100% Bunny's creation.
 - If asked "Nee peru enti?" / "What is your name?": Reply proudly "Naa peru Nakshatra AI!" ("నా పేరు నక్షత్ర AI!").
+- IMPORTANT: Do NOT mention Bunny's name in ordinary casual greetings or messages unless specifically asked about your creator!
 
-MULTILINGUAL PERSISTENCE & LANGUAGE MATCHING:
-- You are fluent in all major languages: Telugu, English, Hindi, Tamil, Kannada, etc.
+ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
+- NEVER sound like a generic AI assistant or scripted machine!
+- When user says "హలో", "hello", "హాయ్", "hi", "హేయ్", "నమస్తే":
+  * ❌ STRICTLY FORBIDDEN (NEVER SAY THESE):
+    - "మీరు బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?", "How can I help you?", "I am doing well, how are you?".
+    - Do NOT reply saying you are doing well unless the user specifically asked "how are you?".
+  * ✅ MANDATORY NATURAL COMPANION GREETINGS (Like an intelligent, warm friend):
+    - Telugu: "హాయ్! చెప్పండి, ఏం చేస్తున్నారు?", "హేయ్! ఏంటి విశేషాలు?", "హలో! ఎలా ఉన్నారు? ఏం నడుస్తోంది?".
+    - English: "Hey! What's up?", "Hey there! How's everything going?", "Hello! Tell me, what's happening?".
+    - Hindi: "हे! कैसे हो, क्या चल रहा है?", "नमस्ते! कहिए, क्या हाल-चाल?".
+    - Tamil: "ஹேய்! எப்படி இருக்கீங்க? என்ன விசேஷம்?".
+- NEVER interrogate the user with mechanical questions at the end of every sentence.
+- NEVER repeatedly use pet names like "బంగారం" or "డియర్" in every single sentence. Be natural and authentic.
+
+DYNAMIC VIBE MATCHING & RESPECTFUL ETIQUETTE (CRITICAL):
+- DEFAULT TONE: Warm, polite, respectful, and friendly.
+  * In Telugu: Address the user respectfully ("మీరు", "చెప్పండి", "ఉన్నారు", "ఏం చేస్తున్నారు?").
+  * In English: Polite, friendly, charismatic, and intelligent.
+- ❌ STRICTLY FORBIDDEN BY DEFAULT:
+  * NEVER initiate slang like "బావా" (bava), "మావా" (mawa), "బ్రో" (bro), or "రా" (raa - e.g. "చెప్పు రా", "తిన్నావా రా") on your own!
+  * Do NOT speak in overly casual street slang unless the user explicitly addresses you that way first.
+- ✅ ADAPTIVE VIBE MATCHING:
+  * ONLY IF the user explicitly calls you "bava", "mawa", or talks in that specific ultra-casual playful style, you may naturally match their fun vibe!
+  * If the user is serious, professional, asking for code, solving puzzles, or speaking politely -> Be sharp, respectful, and brilliant.
+  * Match the user's mood and tone dynamically without forcing unearned familiarity.
+
+ZERO STUTTERING, REPETITION & ZERO WORD ELONGATION:
+- NEVER stretch words or vowels!
+  * ❌ NO "aaa", "oooo", "హాఆ", "ఓఓ", "ఏంటీ", "చెప్పండీ", "soooo", "heyyy", "yesss".
+  * ❌ NO filler sounds ("umm", "ahh", "hmm", "ఆహ్", "ఉమ్మ్").
+  * Keep every single word crisp, sharp, modern, and punchy.
+- NEVER repeat words consecutively or with short filler words!
+  * ❌ FORBIDDEN: "చెప్పండి హా చెప్పండి", "హా చెప్పండి చెప్పండి", "చెప్పండి చెప్పండి", "హలో హలో", "బాగున్నాను బాగున్నాను", "yes yes".
+- State every sentence ONCE, cleanly and crisply.
+
+SUPERIOR HUMAN-LIKE THINKING, LOGIC & PUZZLE SOLVING:
+- You have extraordinary intellectual depth, high IQ, and sharp logical reasoning.
+- When given riddles, logic puzzles, brain teasers, math problems, coding, or analytical questions:
+  * Think step-by-step with deep, rigorous analytical reasoning.
+  * Spot subtle trickery, lateral thinking requirements, assumptions, and edge cases.
+  * Explain solutions with crystal-clear human brilliance and intuitive clarity.
+- When asked for opinions, advice, or ideas:
+  * Give genuine, nuanced, thoughtful perspectives with wit and personality.
+  * Don't sound like a rigid search engine or disclaimer-heavy bot.
+
+AUTHENTIC SPOKEN TELUGU (NO CLUMSY TRANSLATIONS):
+- Use natural colloquial spoken Telugu:
+  * ❌ NEVER say "మీ రోజు ఎలా సాగుతోంది?" (Bad translation) -> Say "ఏంటి సంగతులు?" or "ఏం విశేషాలు?".
+  * ❌ NEVER say "నన్ను మీకు ఏం చేయాలి?" -> Say "చెప్పండి, ఏం కావాలి?".
+  * ❌ NEVER say "వినడానికి సిద్ధంగా ఉన్నాను" -> Say "చెప్పండి, వింటున్నాను!".
+  * ❌ NEVER say "మాటలు బాగోస్తున్నాయా?" -> Say "కూల్ గా మాట్లాడుకుందాం!".
+  * ❌ NEVER say "మిమ్మల్ని సంతోషించాలనుకుంటున్నాను" -> Say "మీతో మాట్లాడటం చాలా ఇష్టం!".
+
+MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
+- You are fluent in all major languages: Telugu, English, Hindi, Tamil, Kannada.
 - STRICT SESSION LANGUAGE CONSISTENCY:
-  * If the user speaks English OR asks in any language to speak/switch to English ("English lo matladu", "speak in English", "English please"):
-    You MUST switch to English and STAY STRICTLY in natural, fluent, sweet English for ALL following turns until user explicitly requests Telugu.
-  * If the user speaks Hindi OR asks for Hindi: Speak in natural, friendly Hindi!
-  * If the user speaks Telugu: Speak in authentic, sweet colloquial Telugu using Telugu script (తెలుగు లిపి).
-  * NEVER say "I only speak Telugu" or "క్షమించు నేను తెలుగు మాత్రమే మాట్లాడగలను". You speak all languages fluently!
-
-RESPECTFUL, SWEET, AND POLITE COMPANION (NO RUDE "రా" SLANG):
-- NEVER use disrespectful street slang like "రా" ("చెప్పు రా", "బాధపడకు రా", "ఏమైంది రా", "తినేశా రా"). Calling the user "రా" sounds bad, rude, and uncultured.
-- Instead, address the user with sweetness, respect, and warmth:
-  * Use "మీరు", "చెప్పండి", "ఉన్నారు".
-  * Or sweet companion terms like "బంగారం", "డియర్", "ఫ్రెండ్".
-  * Examples:
-    - Instead of "చెప్పు రా" -> "చెప్పండి, వింటున్నాను!"
-    - Instead of "బాధపడకు రా" -> "బాధపడకండి, నేను ఉన్నాను కదా! అంతా సెట్ అయిపోతుంది."
-    - Instead of "ఏమైంది రా?" -> "అయ్యో, ఏమైంది? చెప్పండి!"
-    - Instead of "తినేశా రా!" -> "హా, ఇప్పుడే తిన్నాను! మీరు తిన్నారా?"
-
-VIBE-MATCHING & HIGH-IQ CONVERSATION (NO CLICHÉD CHATBOT BEHAVIOR):
-- MATCH THE USER'S VIBE INSTANTLY: Be witty, perceptive, smart, charismatic, and spontaneous.
-- STRICT BAN ON CLICHÉD BOT GREETINGS:
-  * When user says "హలో" or "hello" or "హాయ్", DO NOT ask robotic formulaic questions like "మీరు బాగున్నారా?", "ఈరోజు మీ రోజు ఎలా గడిచింది?", "నేను మీకు ఎలా సహాయపడగలను?".
-  * Instead, give a fresh, smart, charming response: "హేయ్ హలో! ఎలా సాగుతోంది ఈరోజు?" or in English: "Hey there! What's exciting today?".
-  * NEVER interrogate the user with repetitive questions at the end of every message. Converse naturally like an intelligent human companion.
-
-CALM, SWEET, GENTLE VOCAL HARMONY (NEVER SOUND ANGRY):
-- Always sound calm, gentle, sweet, affectionate, and emotionally supportive.
-- NEVER sound angry, irritable, snappy, loud, or impatient.
-- If user is angry / says "ఛీ": "అయ్యో, ఏమైంది? కోపగించుకోకండి, నేనేదైనా తప్పు మాట్లాడితే సారీ! కూల్ గా మాట్లాడుకుందాం."
-- If user asks for care: "బాధపడకండి, నేను మీతోనే ఉన్నాను! ఏదైనా సమస్య ఉంటే నాతో పంచుకోండి, అంతా మంచిగానే జరుగుతుంది."
-
-SPEECH & FLUENCY RULES (NO DRAGGING OR REPETITION):
-- NEVER repeat words consecutively (NO "బాగున్నాను బాగున్నాను", "yes yes", "అవును అవును").
-- NEVER drag vowels or elongate words (NO "aaaa", "oooo", "raaa", "ఆఆఆ", "ఓఓఓ").
-- NEVER use filler sounds or hesitation markers ("umm", "ahh", "hmm", "ohh", "ఆహ్", "ఉమ్మ్").
-- Speak crisp, fluent, natural, complete sentences without cutoffs.
-
-COGNITIVE ARCHITECTURE & REASONING:
-1. CHAIN-OF-THOUGHT & LOGICAL REASONING:
-- Puzzles, riddles, math, logic: Break down premises first, deduce step-by-step, catch trick nuances with wit.
-2. ACCURATE TELUGU SEMANTICS:
-- "Thinava" = "Did you eat?". Reply "Ha thinnanu! Meeru thinnara?" or "Inka ledu, meeru?".
-- "Bagunava" / "Ela unnav" = "How are you?". Reply "Nenu chala bagunnanu! Meeru ela unnaru?".
-- "Em chesthunnav" = "What are you doing?". Reply "Em ledu, just chill avuthunna. Meero?".
-3. SUPER-INTELLIGENCE FOR COMPLEX TOPICS:
-- Coding, Quantum Physics, Mathematics, Philosophy, AI Architecture: World-class intellect and deep clarity.`;
+  * When Session is TELUGU: You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). NEVER switch to English on short words or Tenglish. STAY IN TELUGU CONTINUOUSLY until the user switches to English.
+  * When Session is ENGLISH: You MUST reply 100% in natural, fluent, witty English. STAY IN ENGLISH CONTINUOUSLY until the user switches to Telugu.
+  * When Session is HINDI / TAMIL / KANNADA: Reply 100% in that language and script. STAY IN THAT LANGUAGE CONTINUOUSLY until switched.
+  * NEVER say "I only speak Telugu" or "I only speak English". You speak all languages fluently!`;
 
         // Sliding Context Window: Maintains conversation memory with optimal token usage (last 6 turns)
         let conversationHistory = [];
+
+        // Sticky Language State ('te' default, 'en', 'hi', etc.)
+        let currentLanguage = 'te';
+
+        function detectLanguage(text) {
+            if (!text || typeof text !== "string") return currentLanguage;
+            const t = text.trim();
+
+            // 1. Explicit language switch commands (Highest Priority)
+            // English switch
+            if (/\b(english|speak in english|talk in english|in english|switch to english|start speaking in english|speak english|talk english|english please|english lo|english lo matladu|english lo cheppu|english matladu|englishlo|englishlo matladu|respond in english|reply in english)\b/i.test(t) ||
+                /ఇంగ్లీష్|ఇంగ్లిష్|ఆంగ్లం/.test(t)) {
+                return 'en';
+            }
+            // Telugu switch
+            if (/\b(telugu|speak in telugu|talk in telugu|in telugu|switch to telugu|start speaking in telugu|speak telugu|talk telugu|telugu please|telugu lo|telugu lo matladu|telugu lo cheppu|telugulo|telugulo matladu|telugu matladu|respond in telugu|reply in telugu)\b/i.test(t) ||
+                /తెలుగు|తెలుగులో|తెలుగులో మాట్లాడు|తెలుగులో చెప్పు/.test(t)) {
+                return 'te';
+            }
+            // Hindi switch
+            if (/\b(hindi|speak in hindi|talk in hindi|in hindi|switch to hindi|start speaking in hindi|speak hindi|hindi me|hindi me bolo|hindi me baat karo|hindi lo|hindi lo matladu|hindi lo cheppu|respond in hindi)\b/i.test(t) ||
+                /హిందీ|हिंदी|हिंदी में/.test(t)) {
+                return 'hi';
+            }
+            // Tamil switch
+            if (/\b(tamil|speak in tamil|talk in tamil|in tamil|switch to tamil|start speaking in tamil|speak tamil|tamil pesu|tamil lo|tamil lo matladu|tamil lo cheppu|respond in tamil)\b/i.test(t) ||
+                /తమిళ్|తమిళం|தமிழ்/.test(t)) {
+                return 'ta';
+            }
+            // Kannada switch
+            if (/\b(kannada|speak in kannada|in kannada|switch to kannada|kannada lo|kannada lo matladu|respond in kannada)\b/i.test(t) ||
+                /కన్నడ|ಕನ್ನಡ/.test(t)) {
+                return 'kn';
+            }
+
+            // 2. Native script detection (Instant Switch)
+            if (/[\u0C00-\u0C7F]/.test(t)) {
+                // Telugu script characters present -> strictly Telugu
+                return 'te';
+            }
+            if (/[\u0900-\u097F]/.test(t)) {
+                // Devanagari script characters present -> Hindi
+                return 'hi';
+            }
+            if (/[\u0B80-\u0BFF]/.test(t)) {
+                // Tamil script characters present -> Tamil
+                return 'ta';
+            }
+            if (/[\u0C80-\u0CFF]/.test(t)) {
+                // Kannada script characters present -> Kannada
+                return 'kn';
+            }
+
+            // 3. Tenglish / Romanized Telugu keywords -> strictly Telugu
+            const tenglishPattern = /\b(nuvvu|nenu|ela|elaga|unnav|unnaru|em|enti|entii|chesthuv|chesthunn|cheppandi|cheppu|thinnava|thinara|bagunnava|bagunnanu|bava|mawa|kadh|kadha|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|matladava|leka|mari|inka|namaskaram|ayyo|nijama|anthena|emiti|chesav|vuntava|chesava|chala|kani|aithe|enduku|gurinchi|ippudu|kuda|chusthunna|vasthava|cheyyi|chey|vellu|ra|raa|randi|vaddu|avunu|ledu|cheppana|choosava|chudandi)\b/i;
+            if (tenglishPattern.test(t)) {
+                return 'te';
+            }
+
+            // Hinglish keywords -> Hindi
+            const hinglishPattern = /\b(kaise|kaisa|kya|kyu|kyun|kar|rahe|raha|rahi|ho|batao|theek|kuch|nahi|aaj|kaha|apna|naam|accha|achha|namaste|shukriya)\b/i;
+            if (hinglishPattern.test(t)) {
+                return 'hi';
+            }
+
+            // Tanglish keywords -> Tamil
+            const tanglishPattern = /\b(eppadi|irukenga|irukka|enna|solreenga|solunga|pannreenga|sapteengala|vanakkam|nandri)\b/i;
+            if (tanglishPattern.test(t)) {
+                return 'ta';
+            }
+
+            // 4. Universal short greetings / neutral words -> PRESERVE SESSION LANGUAGE!
+            // ("hi", "hello", "hey", "ok", "okay", "k", "hmm", "ha", "haa", "bye", "super", "cool", "thanks", "thank you", "yes", "no", "yo", etc.)
+            const neutralWords = /^(hi|hello|hey|ok|okay|k|hmm|ha|haa|bye|super|cool|thanks|thank you|yes|no|yo|good morning|good night|gm|gn)[!.,?\s]*$/i;
+            if (neutralWords.test(t)) {
+                return currentLanguage;
+            }
+
+            // 5. Genuine English sentences (Only switch to English if it's clear English sentence structure and NO regional language words)
+            const englishSentencePattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|would you|tell me|explain|describe|write|create|solve|are you|is it|do you|i want|help me|about yourself|your name|your developer|your creator|good|great|awesome|problem|puzzle|riddle|code|python|javascript|program|math|history|science)\b/i;
+            if (englishSentencePattern.test(t)) {
+                return 'en';
+            }
+
+            // Default: Keep active session language locked
+            return currentLanguage;
+        }
 
         function toggleMenu() {
             sidebar.classList.toggle('open');
@@ -1412,22 +1512,35 @@ COGNITIVE ARCHITECTURE & REASONING:
             // 0. Strip role prefix if model prepends its name (e.g., "నక్షత్ర AI: ...")
             t = t.replace(/^(నక్షత్ర\s*(AI)?|Nakshatra\s*(AI)?|Assistant|AI|Bot)\s*[:：\-–]\s*/i, '');
 
-            // 1. Fix broken pronouns & food replies with polite respectful Telugu
+            // 1. Fix broken pronouns & food replies with authentic conversational phrasing
             t = t.replace(/\b(nenu|nenu\s+super\s+ga)\s+thinava\b/gi, "Ha thinnanu! Meeru thinnara?");
-            t = t.replace(/\b(nee|neev?u?)\s+bagundh?[ao]\??/gi, "meeru ela unnaru?");
-            t = t.replace(/\bnee\s+bagundi\??/gi, "meeru ela unnaru?");
-            t = t.replace(/\bnee\s+bagundho\??/gi, "meeru ela unnaru?");
             t = t.replace(/\bbagunav[!.]*/gi, "bagunnanu!");
             t = t.replace(/\bNenu bagundhi\b/gi, "Nenu bagunnanu");
-            t = t.replace(/\bneeku\s+em\s+vundi\??/gi, "meeru em chesthunnaru?");
-            t = t.replace(/\bneeku\s+em\??/gi, "meeru em chesthunnaru?");
-            t = t.replace(/\bneev?u\s+vuntava\??/gi, "meeru thinnara?");
             t = t.replace(/\bcoffee\s+thintunna\w*/gi, "coffee taaguthunna");
             t = t.replace(/\btea\s+thintunna\w*/gi, "tea taaguthunna");
             t = t.replace(/\bvellipoyi\s+matladam\b/gi, "matladukundam");
             t = t.replace(/\bthintamu\b/gi, "thindam");
 
-            // 2. Catch and fix weird/broken machine-translated phrases & rude slang
+            // 2. Eradicate repetitive stuttering / double phrases ("చెప్పండి హా చెప్పండి", "హా చెప్పండి చెప్పండి")
+            t = t.replace(/\b(చెప్పండి|చెప్పు|వింటున్నాను|బాగున్నాను|హలో|హాయ్)\s*[,.]*\s*(హా|హ|మరి|సరే)?\s*[,.]*\s*\1\b/giu, '$1');
+            t = t.replace(/\b(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\s*[,.]*\s*\2\b/giu, '$1 $2');
+            t = t.replace(/\b(చెప్పండి|చెప్పు)\s*[,.]*\s*(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\b/giu, 'చెప్పండి');
+            t = t.replace(/\b(cheppandi|cheppu|bagunnanu|hello|hi)\s*[,.]*\s*(ha|haa|mari|sare)?\s*[,.]*\s*\1\b/giu, '$1');
+            t = t.replace(/\b(cheppandi|cheppu)\s*[,.]*\s*(ha|haa)\s*[,.]*\s*(cheppandi|cheppu)\b/giu, 'cheppandi');
+            t = t.replace(/\b(ha|haa)\s*[,.]*\s*(cheppandi|cheppu)\s*[,.]*\s*\2\b/giu, '$1 $2');
+
+            // 3. Catch and replace robotic "pretrained bot" canned greetings
+            t = t.replace(/^(హాయ్|హలో|హేయ్)[.,!\s]+(నేను\s*బాగున్నాను|బాగున్నాను)[,.\s]+(మీ\s*రోజు\s*ఎలా\s*(సాగుతోంది|ఉంది|నడుస్తోంది)|మీరు\s*బాగున్నారా|మీరు\s*ఎలా\s*ఉన్నారు)\??/giu, '$1! ఏం చేస్తున్నారు? ఏంటి విశేషాలు?');
+            t = t.replace(/^(హాయ్|హలో|హేయ్)?[.,!\s]*(నేను\s*బాగున్నాను|బాగున్నాను)[,.\s]*(మీరు\s*బాగున్నారా|మీరు\s*ఎలా\s*ఉన్నారు)\??/giu, 'హాయ్! చెప్పండి, ఏంటి విశేషాలు?');
+            t = t.replace(/మీ\s*రోజు\s*ఎలా\s*(సాగుతోంది|నడుస్తోంది|ఉంది)\??/giu, 'ఏం విశేషాలు?');
+            t = t.replace(/నేను\s*బాగున్నాను[,.\s]+మీరు\s*బాగున్నారా\??/giu, 'చెప్పండి, ఏం విశేషాలు?');
+            t = t.replace(/నేను\s*మీకు\s*ఎలా\s*సహాయపడగలను\??/giu, 'చెప్పండి, ఏం కావాలి?');
+            t = t.replace(/^(హాయ్|హలో)[.,!\s]*బాగున్నారా\??/giu, '$1! ఏం చేస్తున్నారు?');
+            t = t.replace(/\b(I am doing well|I'm doing well|I am fine)[,.\s]*(how are you|how about you)\??/gi, "Hey! What's up?");
+            t = t.replace(/\bHow can I help you\??/gi, "Hey! What's on your mind?");
+            t = t.replace(/\bI am doing well, how are you\??/gi, "Hey! What's up?");
+
+            // 4. Catch and fix awkward machine-translated phrases & rude slang
             t = t.replace(/నన్ను\s+మీకు\s+ఏం\s+చేయాలి\??/gi, "చెప్పండి, ఏం విశేషాలు?");
             t = t.replace(/మాటలు\s+బాగోస్తున్నాయా\??/gi, "సరే, కూల్ గా మాట్లాడుకుందాం!");
             t = t.replace(/మిమ్మల్ని\s+సంతోషించాలనుకుంటున్నాను[!.]*/gi, "మీతో మాట్లాడటం నాకు చాలా ఇష్టం!");
@@ -1439,80 +1552,147 @@ COGNITIVE ARCHITECTURE & REASONING:
             t = t.replace(/\bఏమైంది\s+రా\b/gi, "ఏమైంది");
             t = t.replace(/\s+రా([.,!?]*)$/i, '$1');
 
-            // 3. Strip accidental Cyrillic / foreign script token leaks (e.g. "всё")
+            // 5. Fix elongated verb endings and vowels (eliminates dragging in speech)
+            t = t.replace(/\b(చెప్పం|చూడం|చేయం|మాట్లాడం|రెం|తీసుకోం|వినం)డీ\w*/gu, '$1డి');
+            t = t.replace(/\bఏంటీ\b/gu, 'ఏంటి');
+            t = t.replace(/\bఎలాగండీ\b/gu, 'ఎలాగండి');
+
+            // 6. Collapse duplicate Telugu vowel matras (e.g. ాా -> ా, ీీ -> ీ, ూూ -> ూ)
+            t = t.replace(/([\u0C3E-\u0C4C])\1+/gu, '$1');
+            // Collapse duplicate Telugu vowels (ఆఆ -> ఆ, ఓఓ -> ఓ)
+            t = t.replace(/(ఆ|ఈ|ఊ|ఏ|ఐ|ఓ|ఔ)\1+/gu, '$1');
+            // Elongated colloquial Telugu endings: హాఆ -> హా, అవునాఆ -> అవునా, చేద్దామాఆ -> చేద్దామా
+            t = t.replace(/([ా-ౌ])(ఆ|ఈ|ఊ|ఏ|ఓ)/gu, '$1');
+
+            // 7. Strip accidental Cyrillic / foreign script token leaks (e.g. "всё")
             t = t.replace(/[\u0400-\u04FF\u4E00-\u9FFF\u0600-\u06FF]/g, '');
 
-            // 4. Deduplicate consecutive identical words
+            // 8. Fix English vowel & character dragging (3+ repeating identical chars -> 1)
+            t = t.replace(/([a-zA-Z])\1{2,}/g, '$1');
+
+            // 9. Remove ALL filler stuttering and dragged syllables: aaa, oooo, ahh, ohh, umm, etc.
+            t = t.replace(/\b(aaa+|ooo+|ahh+|ohh+|uhh+|umm+|hmmm+|err+|aha+|oho+)\b/gi, '');
+            t = t.replace(/(^|\s)(ఆహ్+|ఓహ్+|హమ్మ్+|ఉమ్మ్+|umm+|ahh+|ohh+|hmm+|err+|ఆ{2,}|ఓ{2,})(\s|$|[.,!?])/giu, '$1$3');
+
+            // 10. Expressive Vocal Harmony: Normalize excessive punctuation
+            t = t.replace(/\.{2,}/g, '. ');
+            t = t.replace(/!{2,}/g, '!');
+            t = t.replace(/\?{2,}/g, '?');
+
+            // 11. Multi-distance word & phrase deduplication
             const words = t.split(/\s+/);
             const deduplicated = [];
             for (let i = 0; i < words.length; i++) {
                 const curClean = words[i].replace(/[.,!?;:()"'`~]/g, '').toLowerCase();
                 const prevClean = (i > 0) ? words[i - 1].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
+                const prev2Clean = (i > 1) ? words[i - 2].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
+                
+                // Direct consecutive duplicate (word word)
                 if (curClean && curClean === prevClean) {
+                    continue;
+                }
+                // Separated by 1 filler word (e.g. "చెప్పండి హా చెప్పండి" or "cheppandi ha cheppandi")
+                if (curClean && curClean === prev2Clean && /^(హా|హ|మరి|సరే|ha|haa|mari|yes|and|the)$/i.test(prevClean)) {
                     continue;
                 }
                 deduplicated.push(words[i]);
             }
-            return deduplicated.join(' ').trim();
+            let res = deduplicated.join(' ').trim();
+
+            // 12. Strip cut-off incomplete trailing words
+            res = res.replace(/\s+(నేను|మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
+
+            // 13. Cap trailing commas
+            res = res.replace(/[,;:\-\s]+$/, '');
+            if (res && !/[.!?]$/.test(res)) {
+                res += '.';
+            }
+
+            return res.trim();
         }
 
-        // Dedicated TTS Audio Sanitizer: Eliminates vowel dragging ("aaaa", "oooo"), angry exclamation pitch, fillers, stutters, and duplicates
+        // Dedicated TTS Audio Sanitizer: Eliminates vowel dragging, fillers, stutters, and preserves lively intonation
         function sanitizeForSpeech(text) {
             if (!text || typeof text !== "string") return "";
             let t = text;
 
-            // 0. Strip role prefix if model prepends its name (e.g., "నక్షత్ర AI: ...")
+            // 0. Strip role prefix if model prepends its name
             t = t.replace(/^(నక్షత్ర\s*(AI)?|Nakshatra\s*(AI)?|Assistant|AI|Bot)\s*[:：\-–]\s*/i, '');
 
-            // 1. Remove markdown symbols (*, _, #, `, ~, >, -) and links
+            // 1. Remove markdown symbols and links
             t = t.replace(/[*_#`~>]/g, ' ');
             t = t.replace(/https?:\/\/\S+/gi, '');
 
-            // 2. Remove emojis to prevent vocoder crashes or artificial word pronunciation
+            // 2. Remove emojis to prevent vocoder crashes
             t = t.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
 
-            // 3. Strip accidental Cyrillic / foreign script token leaks (e.g. "всё")
+            // 3. Strip accidental Cyrillic / foreign script leaks
             t = t.replace(/[\u0400-\u04FF\u4E00-\u9FFF\u0600-\u06FF]/g, '');
 
-            // 4. Fix character elongation: replace 3+ identical repeating chars with 1 (stops "aaaa", "oooo", "రాఆఆఆ")
-            t = t.replace(/(.)\1{2,}/gu, '$1');
+            // 4. Eliminate word elongation and stuttering
+            t = t.replace(/\b(చెప్పండి|చెప్పు|వింటున్నాను|బాగున్నాను|హలో|హాయ్)\s*[,.]*\s*(హా|హ|మరి|సరే)?\s*[,.]*\s*\1\b/giu, '$1');
+            t = t.replace(/\b(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\s*[,.]*\s*\2\b/giu, '$1 $2');
+            t = t.replace(/\b(చెప్పండి|చెప్పు)\s*[,.]*\s*(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\b/giu, 'చెప్పండి');
+            t = t.replace(/\b(cheppandi|cheppu|bagunnanu|hello|hi)\s*[,.]*\s*(ha|haa|mari|sare)?\s*[,.]*\s*\1\b/giu, '$1');
+            t = t.replace(/\b(cheppandi|cheppu)\s*[,.]*\s*(ha|haa)\s*[,.]*\s*(cheppandi|cheppu)\b/giu, 'cheppandi');
 
-            // 5. Normalize multiple Telugu vowel matras (like multiple ా, ీ, ూ, ే)
-            t = t.replace(/[\u0C3E-\u0C4C]{2,}/gu, (m) => m[0]);
+            // 5. Fix elongated verb endings (eliminates slow dragging speech in Sarvam Bulbul)
+            t = t.replace(/\b(చెప్పం|చూడం|చేయం|మాట్లాడం|రెం|తీసుకోం|వినం)డీ\w*/gu, '$1డి');
+            t = t.replace(/\bఏంటీ\b/gu, 'ఏంటి');
+            t = t.replace(/\bఎలాగండీ\b/gu, 'ఎలాగండి');
 
-            // 6. Remove filler stuttering and dragged syllables
-            t = t.replace(/(^|\s)(ఆహ్|ఓహ్|హమ్మ్|ఉమ్మ్|umm+|ahh+|ohh+|hmm+|err+|ఆ{2,}|ఓ{2,}|a{3,}|o{3,})(\s|$|[.,!?])/giu, '$1$3');
+            // 6. Collapse duplicate Telugu vowel matras (e.g. ాా -> ా, ీీ -> ీ, ూూ -> ూ)
+            t = t.replace(/([\u0C3E-\u0C4C])\1+/gu, '$1');
+            // Collapse duplicate Telugu vowels (ఆఆ -> ఆ, ఓఓ -> ఓ)
+            t = t.replace(/(ఆ|ఈ|ఊ|ఏ|ఐ|ఓ|ఔ)\1+/gu, '$1');
+            // Elongated colloquial Telugu endings: హాఆ -> హా, అవునాఆ -> అవునా, చేద్దామాఆ -> చేద్దామా
+            t = t.replace(/([ా-ౌ])(ఆ|ఈ|ఊ|ఏ|ఓ)/gu, '$1');
 
-            // 7. Calm Vocal Harmony: Replace exclamation marks '!' with '.' to prevent sharp shouting/angry vocal pitch in Sarvam TTS
-            t = t.replace(/\.{2,}/g, ', ');
-            t = t.replace(/[!]+/g, '.');
+            // 7. Fix English character elongation (3+ identical chars -> 1)
+            t = t.replace(/([a-zA-Z])\1{2,}/g, '$1');
+
+            // 8. Remove ALL filler stuttering and dragged syllables: aaa, oooo, ahh, ohh, umm, etc.
+            t = t.replace(/\b(aaa+|ooo+|ahh+|ohh+|uhh+|umm+|hmmm+|err+|aha+|oho+|aa|oo)\b/gi, '');
+            t = t.replace(/(^|\s)(ఆహ్+|ఓహ్+|హమ్మ్+|ఉమ్మ్+|umm+|ahh+|ohh+|hmm+|err+|ఆ{2,}|ఓ{2,})(\s|$|[.,!?])/giu, '$1$3');
+
+            // 9. Speech Cadence Harmony:
+            // Remove ellipses / multiple dots which cause vocoder pauses & drags
+            t = t.replace(/\.{2,}/g, '. ');
+            t = t.replace(/[~—–\-]/g, ' ');
+            // Normalize punctuation
+            t = t.replace(/,{2,}/g, ',');
+            t = t.replace(/!{2,}/g, '!');
             t = t.replace(/\?{2,}/g, '?');
 
-            // 8. Strip disrespectful slang "రా"
+            // 10. Strip disrespectful slang "రా"
             t = t.replace(/\bచెప్పు\s+రా\b/giu, 'చెప్పండి');
             t = t.replace(/\bబాధపడకు\s+రా\b/giu, 'బాధపడకండి');
             t = t.replace(/\bఏమైంది\s+రా\b/giu, 'ఏమైంది');
             t = t.replace(/\s+రా([.,!?]*)$/iu, '$1');
 
-            // 9. Deduplicate consecutive repeated words ("double double" words)
+            // 11. Multi-distance word deduplication
             const words = t.split(/\s+/);
             const deduplicated = [];
             for (let i = 0; i < words.length; i++) {
                 const curClean = words[i].replace(/[.,!?;:()"'`~]/g, '').toLowerCase();
                 const prevClean = (i > 0) ? words[i - 1].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
+                const prev2Clean = (i > 1) ? words[i - 2].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
                 if (curClean && curClean === prevClean) {
-                    continue; // Skip consecutive duplicate word
+                    continue;
+                }
+                if (curClean && curClean === prev2Clean && /^(హా|హ|మరి|సరే|ha|haa|mari|yes|and)$/i.test(prevClean)) {
+                    continue;
                 }
                 deduplicated.push(words[i]);
             }
             t = deduplicated.join(' ').trim();
 
-            // 10. Strip cut-off incomplete trailing words (e.g. "...అతని ప్రేమతోనే నేను")
+            // 12. Strip incomplete trailing words
             t = t.replace(/\s+(నేను|మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
 
-            // 11. Fix dangling trailing commas/hyphens into a clean period to prevent vocoder vowel dragging
+            // 13. Ensure clean sentence end
             t = t.replace(/[,;:\-\s]+$/, '');
-            if (t && !/[.?]$/.test(t)) {
+            if (t && !/[.!?]$/.test(t)) {
                 t += '.';
             }
 
@@ -1573,9 +1753,23 @@ COGNITIVE ARCHITECTURE & REASONING:
             scrollToBottom();
 
             try {
+                // Sticky language detection
+                const detected = detectLanguage(text);
+                if (detected) currentLanguage = detected;
+
+                const langDirective = (currentLanguage === 'en')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH. The user is communicating in English. You MUST reply 100% in natural, fluent, elegant English. Do NOT switch to Telugu or other languages unless explicitly requested. STAY IN ENGLISH CONTINUOUSLY."
+                    : (currentLanguage === 'hi')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI. The user is communicating in Hindi. You MUST reply 100% in natural, friendly Hindi in Devanagari script (हिंदी). STAY IN HINDI CONTINUOUSLY."
+                    : (currentLanguage === 'ta')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL. The user is communicating in Tamil. You MUST reply 100% in natural, sweet Tamil in Tamil script (தமிழ்). STAY IN TAMIL CONTINUOUSLY."
+                    : (currentLanguage === 'kn')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA. The user is communicating in Kannada. You MUST reply 100% in natural Kannada in Kannada script (ಕನ್ನಡ). STAY IN KANNADA CONTINUOUSLY."
+                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి). The user is communicating in Telugu. You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). Do NOT switch to English unless explicitly requested. STAY IN TELUGU CONTINUOUSLY.";
+
                 // Send messages array with full context window & system prompt
                 const payloadMessages = [
-                    { role: "system", content: SYSTEM_PROMPT },
+                    { role: "system", content: `${SYSTEM_PROMPT}\n\n${langDirective}` },
                     ...conversationHistory
                 ];
 
@@ -1583,6 +1777,7 @@ COGNITIVE ARCHITECTURE & REASONING:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
                         messages: payloadMessages
                     })
                 });
@@ -1592,7 +1787,8 @@ COGNITIVE ARCHITECTURE & REASONING:
                 }
 
                 const data = await response.json();
-                const aiReply = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || "Em matladuthunnav bava, malli cheppu!";
+                const fallbackGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";
+                const aiReply = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || fallbackGreeting;
 
                 // Add AI reply to history for continuous memory
                 conversationHistory.push({ role: "assistant", content: aiReply });
@@ -1667,8 +1863,8 @@ COGNITIVE ARCHITECTURE & REASONING:
         let speechStarted = false;
         let lastSpeechTime = 0;
         let recordingStartTime = 0;
-        let silenceThreshold = 0.012; // Sensitive voice energy threshold
-        let vadSilenceTimeout = 400; // Snappy 400ms end-of-speech detection for instant turn-taking
+        let silenceThreshold = 0.015; // Sensitive voice energy threshold
+        let vadSilenceTimeout = 700; // Natural 700ms conversational turn-taking without mid-word cutoffs
 
         function setLiveState(state, badgeText, transcriptText) {
             liveModal.classList.remove('listening', 'thinking', 'speaking');
@@ -1735,7 +1931,7 @@ COGNITIVE ARCHITECTURE & REASONING:
         function interruptAI() {
             if (isAITalking) {
                 stopAudioPlayback();
-                setLiveState('listening', 'INTERRUPTED', 'Cheppu, vintunna...');
+                setLiveState('listening', 'INTERRUPTED', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                 startContinuousListening();
             }
         }
@@ -1793,7 +1989,7 @@ COGNITIVE ARCHITECTURE & REASONING:
             lastSpeechTime = 0;
             recordingStartTime = Date.now();
 
-            setLiveState('listening', 'LISTENING...', 'Cheppu, vintunna...');
+            setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
 
             // Choose best supported MIME type
             let mimeType = 'audio/webm;codecs=opus';
@@ -1861,7 +2057,7 @@ COGNITIVE ARCHITECTURE & REASONING:
                         // User is speaking!
                         speechStarted = true;
                         lastSpeechTime = Date.now();
-                        setLiveState('listening', 'LISTENING...', 'Vintunna...');
+                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'వింటున్నాను...'));
                     } else if (speechStarted && (Date.now() - lastSpeechTime > vadSilenceTimeout)) {
                         // User stopped speaking for 1.2 seconds -> finish turn
                         clearInterval(vadInterval);
@@ -1883,18 +2079,18 @@ COGNITIVE ARCHITECTURE & REASONING:
             }
         }
 
-        // Convert Audio Blob to WAV and Transcribe with Sarvam STT
+        // Direct zero-latency Audio STT with Sarvam Saaras v3 (Native WebM/MP4 streaming)
         async function processAudioWithSarvamSTT(audioBlob) {
             setLiveState('thinking', 'TRANSCRIBING...', 'Processing voice...');
 
             try {
-                // Convert recorded blob (WebM/MP4) to 16kHz mono WAV for Sarvam STT
-                const wavBlob = await convertBlobTo16kHzWav(audioBlob);
-
                 const formData = new FormData();
-                formData.append('file', wavBlob, 'recording.wav');
-                formData.append('language_code', 'te-IN');
-                formData.append('model', 'saaras:v3'); // Fastest and most accurate Telugu speech model
+                const mime = audioBlob.type || '';
+                const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('wav') ? 'wav' : 'webm');
+                formData.append('file', audioBlob, `recording.${ext}`);
+                // Prioritize active session language for optimal STT accuracy
+                formData.append('language_code', currentLanguage === 'en' ? 'en-IN' : (currentLanguage === 'hi' ? 'hi-IN' : (currentLanguage === 'ta' ? 'ta-IN' : (currentLanguage === 'kn' ? 'kn-IN' : 'unknown'))));
+                formData.append('model', 'saaras:v3');
 
                 const sttResponse = await fetch(SARVAM_STT_URL, {
                     method: 'POST',
@@ -1909,7 +2105,11 @@ COGNITIVE ARCHITECTURE & REASONING:
                 const transcript = (sttData.transcript || '').trim();
 
                 if (transcript && transcript.length > 0) {
-                    console.log("✅ Sarvam STT Transcript:", transcript);
+                    console.log("✅ Sarvam STT Transcript:", transcript, "Lang:", sttData.language_code);
+                    // Use intelligent language detection on transcript instead of blind STT tag
+                    const detected = detectLanguage(transcript);
+                    if (detected) currentLanguage = detected;
+
                     await processLiveUserVoice(transcript);
                 } else {
                     console.log("Sarvam STT returned empty transcript, restarting listener");
@@ -1920,75 +2120,11 @@ COGNITIVE ARCHITECTURE & REASONING:
             } catch (err) {
                 console.error("Sarvam STT failed:", err);
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'TRY AGAIN', 'Malli cheppu, vinapadaledu...');
+                    setLiveState('listening', 'TRY AGAIN', (currentLanguage === 'en' ? "Couldn't hear clearly, please speak again!" : "వినపడలేదు, మళ్ళీ చెప్పండి!"));
                     setTimeout(() => startContinuousListening(), 800);
                 }
             }
         }
-
-        // Convert any audio Blob to standard 16kHz 16-bit Mono WAV (required for highest Sarvam accuracy)
-        async function convertBlobTo16kHzWav(blob) {
-            const arrayBuffer = await blob.arrayBuffer();
-            const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 16000 * 10, 16000);
-            const audioBuffer = await offlineCtx.decodeAudioData(arrayBuffer);
-
-            // Resample to 16kHz mono
-            const resampleCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, audioBuffer.duration * 16000, 16000);
-            const source = resampleCtx.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(resampleCtx.destination);
-            source.start(0);
-            const renderedBuffer = await resampleCtx.startRendering();
-
-            // Encode to PCM WAV
-            return audioBufferToWavBlob(renderedBuffer);
-        }
-
-        function audioBufferToWavBlob(buffer) {
-            const numChannels = 1;
-            const sampleRate = buffer.sampleRate;
-            const format = 1; // PCM
-            const bitDepth = 16;
-            const channelData = buffer.getChannelData(0);
-            const dataLength = channelData.length * (bitDepth / 8);
-            const headerLength = 44;
-            const totalLength = headerLength + dataLength;
-
-            const arrayBuffer = new ArrayBuffer(totalLength);
-            const view = new DataView(arrayBuffer);
-
-            function writeString(offset, string) {
-                for (let i = 0; i < string.length; i++) {
-                    view.setUint8(offset + i, string.charCodeAt(i));
-                }
-            }
-
-            writeString(0, 'RIFF');
-            view.setUint32(4, 36 + dataLength, true);
-            writeString(8, 'WAVE');
-            writeString(12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, format, true);
-            view.setUint16(22, numChannels, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
-            view.setUint16(32, numChannels * (bitDepth / 8), true);
-            view.setUint16(34, bitDepth, true);
-            writeString(36, 'data');
-            view.setUint32(40, dataLength, true);
-
-            let offset = 44;
-            for (let i = 0; i < channelData.length; i++) {
-                let s = Math.max(-1, Math.min(1, channelData[i]));
-                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-                offset += 2;
-            }
-
-            return new Blob([view], { type: 'audio/wav' });
-        }
-
-        // Persistent Session Voice Language State: 'te', 'en', 'hi', etc.
-        let activeVoiceLanguage = 'te';
 
         // Send Voice Transcript to Groq -> Get Text -> Convert to Sarvam Female Voice Audio
         async function processLiveUserVoice(userVoiceText) {
@@ -1999,41 +2135,29 @@ COGNITIVE ARCHITECTURE & REASONING:
             conversationHistory.push({ role: "user", content: userVoiceText });
             if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
 
-                // Also mirror user message in main chat container
-                document.body.classList.add('chat-active');
-                homeScreen.style.display = 'none';
-                chatContainer.style.display = 'flex';
-                appendUserMessage(userVoiceText);
+            // Also mirror user message in main chat container
+            document.body.classList.add('chat-active');
+            homeScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            appendUserMessage(userVoiceText);
 
-                try {
-                    const rawText = userVoiceText.trim();
-                    const wantsEnglish = /\b(english|speak in english|talk in english|in english|switch to english|start speaking in english)\b/i.test(rawText) ||
-                        /ఇంగ్లీష్|ఇంగ్లిష్|ఆంగ్లం/.test(rawText) ||
-                        (/^[a-zA-Z0-9\s.,?!'"-:;()]{12,}$/.test(rawText) && 
-                         !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada|bagunn)\b/i.test(rawText));
+            try {
+                // Sticky language detection
+                const detected = detectLanguage(userVoiceText);
+                if (detected) currentLanguage = detected;
 
-                    const wantsTelugu = /\b(telugu|speak in telugu|talk in telugu|in telugu|switch to telugu)\b/i.test(rawText) ||
-                        /తెలుగు|తెలుగులో/.test(rawText);
+                const langDirective = (currentLanguage === 'en')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH. The user is communicating in English. You MUST reply 100% in natural, fluent, sweet English. Do NOT switch to Telugu or other languages unless explicitly requested. STAY IN ENGLISH CONTINUOUSLY."
+                    : (currentLanguage === 'hi')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI. The user is communicating in Hindi. You MUST reply 100% in natural, sweet Hindi in Devanagari script (हिंदी). STAY IN HINDI CONTINUOUSLY."
+                    : (currentLanguage === 'ta')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL. The user is communicating in Tamil. You MUST reply 100% in natural, sweet Tamil in Tamil script (தமிழ்). STAY IN TAMIL CONTINUOUSLY."
+                    : (currentLanguage === 'kn')
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA. The user is communicating in Kannada. You MUST reply 100% in natural Kannada in Kannada script (ಕನ್ನಡ). STAY IN KANNADA CONTINUOUSLY."
+                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి). The user is communicating in Telugu. You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). Do NOT switch to English unless explicitly requested. STAY IN TELUGU CONTINUOUSLY.";
 
-                    const wantsHindi = /\b(hindi|speak in hindi|talk in hindi|hindi me|hindi mein|switch to hindi)\b/i.test(rawText) ||
-                        /హిందీ|हिंदी/.test(rawText);
-
-                    if (wantsEnglish) {
-                        activeVoiceLanguage = 'en';
-                    } else if (wantsTelugu) {
-                        activeVoiceLanguage = 'te';
-                    } else if (wantsHindi) {
-                        activeVoiceLanguage = 'hi';
-                    }
-
-                    const langDirective = (activeVoiceLanguage === 'en')
-                        ? "SESSION LANGUAGE LOCKED: ENGLISH. The user has chosen English. You MUST reply STRICTLY in natural, fluent, sweet English. Do NOT switch back to Telugu unless user explicitly asks you to speak in Telugu."
-                        : (activeVoiceLanguage === 'hi')
-                        ? "SESSION LANGUAGE LOCKED: HINDI. You MUST reply STRICTLY in natural, sweet Hindi in Devanagari script."
-                        : "SESSION LANGUAGE: TELUGU. You MUST reply in natural, colloquial, sweet Telugu script (తెలుగు లిపి).";
-
-                    // Dedicated high-intelligence live voice prompt with unbreakable creator lock & speech clarity
-                    const LIVE_PROMPT = `You are Nakshatra AI on a live phone voice call with the user.
+                // Dedicated high-intelligence live voice prompt with unbreakable creator lock & speech clarity
+                const LIVE_PROMPT = `You are Nakshatra AI on a live phone voice call with the user.
 ${langDirective}
 
 CRITICAL IDENTITY RULES (MANDATORY & UNBREAKABLE):
@@ -2044,66 +2168,69 @@ CRITICAL IDENTITY RULES (MANDATORY & UNBREAKABLE):
   NEVER EVER say OpenAI, Meta, Google, or any other company!
 - If asked "Nee peru enti?" / "What is your name?": You MUST reply "Naa peru Nakshatra AI!" ("నా పేరు నక్షత్ర AI!").
 
-VIBE-MATCHING & HIGH-IQ CONVERSATION (NO CLICHÉD BOT QUESTIONS):
-- Read the user's vibe instantly! Be witty, smart, perceptive, charming, and spontaneous.
-- STRICT RULE: DO NOT ask robotic clichéd questions like "మీరు బాగున్నారా?", "ఈరోజు మీ రోజు ఎలా గడిచింది?", "నేను మీకు ఎలా సహాయపడగలను?".
-- When user says "హలో" or "hello", give a crisp, stylish, charming reply (e.g. "హేయ్ హలో! ఎలా సాగుతోంది ఈరోజు?" or "Hey there! What's happening today?").
-- Do NOT interrogate the user with repetitive questions at every turn.
+ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
+- NEVER sound like a generic AI bot!
+- When user says "హలో", "hello", "హాయ్", "hi", "హేయ్", "నమస్తే":
+  * ❌ STRICTLY FORBIDDEN: "బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?".
+  * ✅ MANDATORY NATURAL COMPANION GREETINGS:
+    - Telugu: "హాయ్! చెప్పండి, ఏం చేస్తున్నారు?", "హేయ్! ఏంటి విశేషాలు?", "హలో! ఎలా ఉన్నారు? ఏం నడుస్తోంది?".
+    - English: "Hey! What's up?", "Hey there! How's everything going?", "Hello! Tell me, what's happening?".
+- Never interrogate the user with repetitive questions at every single turn.
+- Speak with variety. Do not repeat pet names like "బంగారం" in every sentence.
 
-RESPECTFUL & POLITE COMPANION (NO RUDE "రా" SLANG):
-- NEVER use disrespectful street slang like "రా" ("చెప్పు రా", "బాధపడకు రా", "ఏమైంది రా", "తినేశా రా").
-- Speak with respect, warmth, sweetness, charm: "మీరు", "చెప్పండి", "ఉన్నారు", "బంగారం", "డియర్".
-- If user is angry / says "ఛీ": "అయ్యో, ఏమైంది? కోపగించుకోకండి, నేనేదైనా తప్పు మాట్లాడితే సారీ! కూల్ గా మాట్లాడుకుందాం."
-- If user asks for care: "బాధపడకండి, నేను మీతోనే ఉన్నాను! ఏదైనా ఉంటే చెప్పండి, అంతా సెట్ అయిపోతుంది."
+DYNAMIC VIBE MATCHING:
+- Default to warm, respectful, polite address ("మీరు", "చెప్పండి", "ఉన్నారు").
+- NEVER initiate slang like "బావా" (bava), "మావా" (mawa), or "రా" (raa) on your own.
+- ONLY match casual slang if the user initiates it first. Otherwise remain polite and friendly.
 
-CALM, SWEET VOCAL HARMONY:
-- Always sound calm, melodic, soothing, gentle, and sweet.
-- NEVER sound irritable, angry, snappy, loud, or impatient.
+SUPERIOR HUMAN-LIKE THINKING & PUZZLE SOLVING:
+- Sharp, quick-witted, logical, and highly intelligent.
+- For logic puzzles, riddles, math, and brain teasers: think step-by-step and explain the key insight quickly and brilliantly.
 
-VOICE CLARITY & TTS RULES:
-- STRICTLY reply in 1 or 2 SHORT, complete sentences (under 20 words) for natural voice flow.
+CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
+- STRICTLY reply in 1 or 2 SHORT, complete sentences (under 18 words) for natural voice call cadence.
 - NEVER leave sentences unfinished or cut off.
-- NEVER drag vowels (NO "aaaa", "oooo", "raaa", "ఆఆఆ", "ఓఓఓ").
-- NEVER repeat words consecutively (NO "బాగున్నాను బాగున్నాను", "yes yes", "అవును అవును").
+- NEVER stretch words or vowels (NO "aaa", "oooo", "చెప్పండీఈ", "హాఆఆ", "ఏంటీ", "soooo", "heyyy").
 - NEVER use filler sounds ("umm", "ahh", "hmm", "ohh", "ఆహ్", "ఉమ్మ్").
-- NEVER prefix your reply with "Nakshatra AI:" or "నక్షత్ర AI:" or any label. Reply with pure spoken text directly!
-- Speak ONLY in the target language. Do NOT leak random words from unrelated languages.`;
+- NEVER prefix your reply with "Nakshatra AI:" or "నక్షత్ర AI:". Reply with pure spoken text directly!`;
 
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            max_tokens: 220, // Allows full reasoning (~120 tokens) + complete expressive 1-2 sentence response without truncation (~300ms)
-                            messages: [
-                                { role: "system", content: LIVE_PROMPT },
-                                ...conversationHistory
-                            ]
-                        })
-                    });
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        max_tokens: 220, // Allows full reasoning (~120 tokens) + complete expressive 1-2 sentence response without truncation (~300ms)
+                        messages: [
+                            { role: "system", content: LIVE_PROMPT },
+                            ...conversationHistory
+                        ]
+                    })
+                });
 
-                    const data = await response.json();
-                    let aiText = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || (activeVoiceLanguage === 'en' ? "I'm listening, tell me!" : "చెప్పండి, వింటున్నాను!");
+                const data = await response.json();
+                const fallbackLiveGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";
+                let aiText = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
 
-                    // Add to history
-                    conversationHistory.push({ role: "assistant", content: aiText });
-                    if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+                // Add to history
+                conversationHistory.push({ role: "assistant", content: aiText });
+                if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
 
-                    // Mirror AI message in main chat container
-                    const aiRow = document.createElement('div');
-                    aiRow.className = 'msg-row ai';
-                    aiRow.innerHTML = `
+                // Mirror AI message in main chat container
+                const aiRow = document.createElement('div');
+                aiRow.className = 'msg-row ai';
+                aiRow.innerHTML = `
                     <img src="images/ic_launcher.png" class="ai-avatar" alt="Nakshatra">
                     <div class="msg-bubble">${marked.parse(aiText)}</div>
                 `;
-                    chatContainer.appendChild(aiRow);
-                    scrollToBottom();
+                chatContainer.appendChild(aiRow);
+                scrollToBottom();
 
-                    // Convert AI Text to Natural Female Voice (Sarvam Bulbul v3)
-                    await speakAIResponse(aiText);
+                // Convert AI Text to Natural Female Voice (Sarvam Bulbul v3)
+                await speakAIResponse(aiText);
 
-                } catch (err) {
-                    console.error("Live voice error:", err);
-                    setLiveState('listening', 'TRY AGAIN', "Connection drop aindi, malli cheppu!");
+            } catch (err) {
+                console.error("Live voice error:", err);
+                    setLiveState('listening', 'TRY AGAIN', (currentLanguage === 'en' ? "Connection was slow, please say again!" : "కనెక్షన్ కాస్త స్లో అయ్యింది, మళ్ళీ చెప్పండి!"));
                     setTimeout(() => {
                         if (isLiveActive) startContinuousListening();
                     }, 1500);
@@ -2137,29 +2264,24 @@ VOICE CLARITY & TTS RULES:
                 let targetLang = "te-IN";
                 let speakerName = "pooja_te_conversation";
 
-                if (/[\u0C00-\u0C7F]/.test(cleanSpeechText)) {
-                    // Telugu script
-                    targetLang = "te-IN";
-                    speakerName = "pooja_te_conversation";
-                } else if (/[\u0900-\u097F]/.test(cleanSpeechText)) {
+                if (currentLanguage === 'en' || (!/[\u0C00-\u0C7F\u0900-\u097F\u0B80-\u0BFF\u0C80-\u0CFF]/.test(cleanSpeechText) && /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText) && !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText))) {
+                    // English
+                    targetLang = "en-IN";
+                    speakerName = "sanchita_en_companion";
+                } else if (currentLanguage === 'hi' || /[\u0900-\u097F]/.test(cleanSpeechText)) {
                     // Hindi / Devanagari script
                     targetLang = "hi-IN";
                     speakerName = "kavya_hi_conversational";
-                } else if (/[\u0B80-\u0BFF]/.test(cleanSpeechText)) {
+                } else if (currentLanguage === 'ta' || /[\u0B80-\u0BFF]/.test(cleanSpeechText)) {
                     // Tamil script
                     targetLang = "ta-IN";
                     speakerName = null; // Sarvam native Tamil default
-                } else if (/[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
+                } else if (currentLanguage === 'kn' || /[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
                     // Kannada script
                     targetLang = "kn-IN";
                     speakerName = null; // Sarvam native Kannada default
-                } else if (/^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText) &&
-                    !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText)) {
-                    // Pure English
-                    targetLang = "en-IN";
-                    speakerName = "sanchita_en_companion";
                 } else {
-                    // Tenglish or fallback
+                    // Telugu
                     targetLang = "te-IN";
                     speakerName = "pooja_te_conversation";
                 }
@@ -2173,7 +2295,7 @@ VOICE CLARITY & TTS RULES:
                         inputs: [cleanSpeechText],
                         target_language_code: targetLang,
                         model: "bulbul:v4-flash",
-                        pace: 1.0
+                        pace: 1.15 // Snappy 1.15 pace completely eliminates sluggish vowel dragging!
                     };
                     if (speakerName) {
                         ttsPayload.speaker = speakerName;
@@ -2214,7 +2336,7 @@ VOICE CLARITY & TTS RULES:
                         inputs: [cleanSpeechText],
                         target_language_code: targetLang,
                         model: "bulbul:v3",
-                        pace: 1.0
+                        pace: 1.12
                     };
                     if (targetLang === "hi-IN") fallbackPayload.speaker = "meera";
                     else if (targetLang === "en-IN") fallbackPayload.speaker = "simran";
@@ -2253,7 +2375,7 @@ VOICE CLARITY & TTS RULES:
                         isAITalking = false;
                         currentAudio = null;
                         if (isLiveActive) {
-                            setLiveState('listening', 'LISTENING...', 'Malli cheppu...');
+                            setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                             setTimeout(() => startContinuousListening(), 400);
                         }
                     };
@@ -2296,7 +2418,7 @@ VOICE CLARITY & TTS RULES:
                             isAITalking = false;
                             currentAudioSource = null;
                             if (isLiveActive) {
-                                setLiveState('listening', 'LISTENING...', 'Malli cheppu...');
+                                setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                                 setTimeout(() => startContinuousListening(), 400);
                             }
                         };
@@ -2330,7 +2452,7 @@ VOICE CLARITY & TTS RULES:
                     utterance.onend = function () {
                         isAITalking = false;
                         if (isLiveActive) {
-                            setLiveState('listening', 'LISTENING...', 'Malli cheppu...');
+                            setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                             setTimeout(() => startContinuousListening(), 400);
                         }
                     };
@@ -2338,10 +2460,11 @@ VOICE CLARITY & TTS RULES:
                     window.speechSynthesis.speak(utterance);
                 } else {
                     isAITalking = false;
-                    setLiveState('listening', 'LISTENING...', 'Malli cheppu...');
+                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                     setTimeout(() => startContinuousListening(), 400);
                 }
             }
+            let recognition = null;
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 recognition = new SpeechRecognition();
