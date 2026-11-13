@@ -1777,7 +1777,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
+                        model: "openai/gpt-oss-120b",
                         messages: payloadMessages
                     })
                 });
@@ -2089,7 +2089,8 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('wav') ? 'wav' : 'webm');
                 formData.append('file', audioBlob, `recording.${ext}`);
                 // Prioritize active session language for optimal STT accuracy
-                formData.append('language_code', currentLanguage === 'en' ? 'en-IN' : (currentLanguage === 'hi' ? 'hi-IN' : (currentLanguage === 'ta' ? 'ta-IN' : (currentLanguage === 'kn' ? 'kn-IN' : 'unknown'))));
+                const sttLangMap = { 'en': 'en-IN', 'te': 'te-IN', 'hi': 'hi-IN', 'ta': 'ta-IN', 'kn': 'kn-IN' };
+                formData.append('language_code', sttLangMap[currentLanguage] || 'te-IN');
                 formData.append('model', 'saaras:v3');
 
                 const sttResponse = await fetch(SARVAM_STT_URL, {
@@ -2198,7 +2199,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
+                        model: "openai/gpt-oss-120b",
                         max_tokens: 220, // Allows full reasoning (~120 tokens) + complete expressive 1-2 sentence response without truncation (~300ms)
                         messages: [
                             { role: "system", content: LIVE_PROMPT },
@@ -2206,6 +2207,10 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                         ]
                     })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Groq HTTP ${response.status}`);
+                }
 
                 const data = await response.json();
                 const fallbackLiveGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";

@@ -221,14 +221,14 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             msgs.unshift({ role: "system", content: CHAT_PERSONA });
           }
           groqPayload = {
-            model: reqData.model || "llama-3.3-70b-versatile",
+            model: reqData.model || "openai/gpt-oss-120b",
             messages: msgs,
             temperature: 0.7
           };
           groqPayload.max_tokens = reqData.max_tokens || 350;
         } else if (reqData.message) {
           groqPayload = {
-            model: reqData.model || "llama-3.3-70b-versatile",
+            model: reqData.model || "openai/gpt-oss-120b",
             messages: [
               { role: "system", content: CHAT_PERSONA },
               { role: "user", content: reqData.message }
