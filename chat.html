@@ -2235,285 +2235,279 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
             } catch (err) {
                 console.error("Live voice error:", err);
-                    setLiveState('listening', 'TRY AGAIN', (currentLanguage === 'en' ? "Connection was slow, please say again!" : "కనెక్షన్ కాస్త స్లో అయ్యింది, మళ్ళీ చెప్పండి!"));
-                    setTimeout(() => {
-                        if (isLiveActive) startContinuousListening();
-                    }, 1500);
-                }
-            }
-
-            // Web Audio Context for reliable playback on mobile browsers
-            let audioCtx = null;
-            function getAudioContext() {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                return audioCtx;
-            }
-
-            // Play Natural Female Voice with Sarvam Bulbul v4-flash (pooja_te_conversation: ultra-realistic human emotional flow)
-            async function speakAIResponse(textToSpeak) {
-                setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
-
-                // Clean text for TTS (remove emojis, markdown, dragged vowels, fillers, and duplicate words)
-                let cleanSpeechText = sanitizeForSpeech(textToSpeak);
-                if (!cleanSpeechText) {
+                setLiveState('listening', 'TRY AGAIN', (currentLanguage === 'en' ? "Connection was slow, please say again!" : "కనెక్షన్ కాస్త స్లో అయ్యింది, మళ్ళీ చెప్పండి!"));
+                setTimeout(() => {
                     if (isLiveActive) startContinuousListening();
+                }, 1500);
+            }
+        }
+
+        // Web Audio Context for reliable playback on mobile browsers
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Play Natural Female Voice with Sarvam Bulbul v4-flash
+        async function speakAIResponse(textToSpeak) {
+            setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
+
+            // Clean text for TTS
+            let cleanSpeechText = sanitizeForSpeech(textToSpeak);
+            if (!cleanSpeechText) {
+                if (isLiveActive) startContinuousListening();
+                return;
+            }
+
+            // Multilingual Language & Speaker Auto-Selection
+            let targetLang = "te-IN";
+            let speakerName = "pooja_te_conversation";
+
+            if (currentLanguage === 'en' || (!/[\u0C00-\u0C7F\u0900-\u097F\u0B80-\u0BFF\u0C80-\u0CFF]/.test(cleanSpeechText) && /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText) && !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText))) {
+                targetLang = "en-IN";
+                speakerName = "sanchita_en_companion";
+            } else if (currentLanguage === 'hi' || /[\u0900-\u097F]/.test(cleanSpeechText)) {
+                targetLang = "hi-IN";
+                speakerName = "kavya_hi_conversational";
+            } else if (currentLanguage === 'ta' || /[\u0B80-\u0BFF]/.test(cleanSpeechText)) {
+                targetLang = "ta-IN";
+                speakerName = null;
+            } else if (currentLanguage === 'kn' || /[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
+                targetLang = "kn-IN";
+                speakerName = null;
+            } else {
+                targetLang = "te-IN";
+                speakerName = "pooja_te_conversation";
+            }
+
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') await ctx.resume();
+
+                const ttsPayload = {
+                    inputs: [cleanSpeechText],
+                    target_language_code: targetLang,
+                    model: "bulbul:v4-flash",
+                    pace: 1.15
+                };
+                if (speakerName) {
+                    ttsPayload.speaker = speakerName;
+                }
+
+                const ttsResponse = await fetch(SARVAM_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ttsPayload)
+                });
+
+                if (!ttsResponse.ok) {
+                    const errTxt = await ttsResponse.text();
+                    console.error("Sarvam TTS server error, trying bulbul:v3 fallback:", errTxt);
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, textToSpeak);
                     return;
                 }
 
-                // Multilingual Language & Speaker Auto-Selection (Telugu, English, Hindi, Tamil, Kannada)
-                let targetLang = "te-IN";
-                let speakerName = "pooja_te_conversation";
-
-                if (currentLanguage === 'en' || (!/[\u0C00-\u0C7F\u0900-\u097F\u0B80-\u0BFF\u0C80-\u0CFF]/.test(cleanSpeechText) && /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText) && !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText))) {
-                    // English
-                    targetLang = "en-IN";
-                    speakerName = "sanchita_en_companion";
-                } else if (currentLanguage === 'hi' || /[\u0900-\u097F]/.test(cleanSpeechText)) {
-                    // Hindi / Devanagari script
-                    targetLang = "hi-IN";
-                    speakerName = "kavya_hi_conversational";
-                } else if (currentLanguage === 'ta' || /[\u0B80-\u0BFF]/.test(cleanSpeechText)) {
-                    // Tamil script
-                    targetLang = "ta-IN";
-                    speakerName = null; // Sarvam native Tamil default
-                } else if (currentLanguage === 'kn' || /[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
-                    // Kannada script
-                    targetLang = "kn-IN";
-                    speakerName = null; // Sarvam native Kannada default
+                const ttsData = await ttsResponse.json();
+                if (ttsData.audios && ttsData.audios.length > 0) {
+                    const audioBase64 = ttsData.audios[0];
+                    await playAudioFromBase64(audioBase64, textToSpeak);
                 } else {
-                    // Telugu
-                    targetLang = "te-IN";
-                    speakerName = "pooja_te_conversation";
-                }
-
-                try {
-                    const ctx = getAudioContext();
-                    if (ctx.state === 'suspended') await ctx.resume();
-
-                    // Ultra-low latency Bulbul v4-flash request (Expressive human conversational speech)
-                    const ttsPayload = {
-                        inputs: [cleanSpeechText],
-                        target_language_code: targetLang,
-                        model: "bulbul:v4-flash",
-                        pace: 1.15 // Snappy 1.15 pace completely eliminates sluggish vowel dragging!
-                    };
-                    if (speakerName) {
-                        ttsPayload.speaker = speakerName;
-                    }
-
-                    const ttsResponse = await fetch(SARVAM_TTS_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(ttsPayload)
-                    });
-
-                    if (!ttsResponse.ok) {
-                        const errTxt = await ttsResponse.text();
-                        console.error("Sarvam TTS server error, trying bulbul:v3 fallback:", errTxt);
-                        // Fallback to bulbul:v3 if needed
-                        await fallbackTTSBulbulV3(cleanSpeechText, targetLang, textToSpeak);
-                        return;
-                    }
-
-                    const ttsData = await ttsResponse.json();
-                    if (ttsData.audios && ttsData.audios.length > 0) {
-                        const audioBase64 = ttsData.audios[0];
-                        await playAudioFromBase64(audioBase64, textToSpeak);
-                    } else {
-                        console.warn("No audio in TTS response");
-                        fallbackBrowserSpeech(cleanSpeechText);
-                    }
-                } catch (ttsErr) {
-                    console.warn("Sarvam TTS error, falling back to browser speech:", ttsErr);
+                    console.warn("No audio in TTS response");
                     fallbackBrowserSpeech(cleanSpeechText);
                 }
+            } catch (ttsErr) {
+                console.warn("Sarvam TTS error, falling back to browser speech:", ttsErr);
+                fallbackBrowserSpeech(cleanSpeechText);
             }
+        }
 
-            // Secondary fallback to bulbul:v3 if v4-flash is unavailable
-            async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
-                try {
-                    const fallbackPayload = {
-                        inputs: [cleanSpeechText],
-                        target_language_code: targetLang,
-                        model: "bulbul:v3",
-                        pace: 1.12
-                    };
-                    if (targetLang === "hi-IN") fallbackPayload.speaker = "meera";
-                    else if (targetLang === "en-IN") fallbackPayload.speaker = "simran";
-                    else fallbackPayload.speaker = "simran";
+        // Secondary fallback to bulbul:v3 if v4-flash is unavailable
+        async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
+            try {
+                const fallbackPayload = {
+                    inputs: [cleanSpeechText],
+                    target_language_code: targetLang,
+                    model: "bulbul:v3",
+                    pace: 1.12
+                };
+                if (targetLang === "hi-IN") fallbackPayload.speaker = "meera";
+                else if (targetLang === "en-IN") fallbackPayload.speaker = "simran";
+                else fallbackPayload.speaker = "simran";
 
-                    const ttsResponse = await fetch(SARVAM_TTS_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(fallbackPayload)
-                    });
-                    const ttsData = await ttsResponse.json();
-                    if (ttsData.audios && ttsData.audios.length > 0) {
-                        await playAudioFromBase64(ttsData.audios[0], originalText);
-                    } else {
-                        fallbackBrowserSpeech(cleanSpeechText);
-                    }
-                } catch (e) {
+                const ttsResponse = await fetch(SARVAM_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fallbackPayload)
+                });
+                const ttsData = await ttsResponse.json();
+                if (ttsData.audios && ttsData.audios.length > 0) {
+                    await playAudioFromBase64(ttsData.audios[0], originalText);
+                } else {
                     fallbackBrowserSpeech(cleanSpeechText);
                 }
+            } catch (e) {
+                fallbackBrowserSpeech(cleanSpeechText);
+            }
+        }
+
+        // PRIMARY: HTML5 Audio playback (most reliable for WAV base64)
+        // FALLBACK: AudioContext decodeAudioData
+        async function playAudioFromBase64(base64Audio, displayText) {
+            stopAudioPlayback();
+            isAITalking = true;
+            setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
+
+            // Method 1: HTML5 Audio with data URI
+            try {
+                const audioElement = new Audio("data:audio/wav;base64," + base64Audio);
+                audioElement.volume = 1.0;
+                currentAudio = audioElement;
+
+                audioElement.onended = function () {
+                    isAITalking = false;
+                    currentAudio = null;
+                    if (isLiveActive) {
+                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                        setTimeout(() => startContinuousListening(), 400);
+                    }
+                };
+
+                audioElement.onerror = function (e) {
+                    console.warn("HTML5 Audio error, trying AudioContext decode:", e);
+                    playViaAudioContext(base64Audio, displayText);
+                };
+
+                await audioElement.play();
+                console.log("✅ Audio playing via HTML5 Audio");
+                return;
+            } catch (playErr) {
+                console.warn("HTML5 Audio play() failed:", playErr);
             }
 
-            // PRIMARY: HTML5 Audio playback (most reliable for WAV base64)
-            // FALLBACK: AudioContext decodeAudioData
-            async function playAudioFromBase64(base64Audio, displayText) {
-                stopAudioPlayback();
-                isAITalking = true;
-                setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
+            // Method 2: AudioContext decodeAudioData (fallback)
+            playViaAudioContext(base64Audio, displayText);
+        }
 
-                // Method 1: HTML5 Audio with data URI — simplest and most reliable for WAV
-                try {
-                    const audioElement = new Audio("data:audio/wav;base64," + base64Audio);
-                    audioElement.volume = 1.0;
-                    currentAudio = audioElement;
+        function playViaAudioContext(base64Audio, displayText) {
+            try {
+                const binaryString = window.atob(base64Audio);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
 
-                    audioElement.onended = function () {
+                const ctx = getAudioContext();
+                ctx.decodeAudioData(bytes.buffer.slice(0), function (buffer) {
+                    if (!isLiveActive) { isAITalking = false; return; }
+
+                    const source = ctx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(ctx.destination);
+                    currentAudioSource = source;
+
+                    source.onended = function () {
                         isAITalking = false;
-                        currentAudio = null;
+                        currentAudioSource = null;
                         if (isLiveActive) {
                             setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                             setTimeout(() => startContinuousListening(), 400);
                         }
                     };
 
-                    audioElement.onerror = function (e) {
-                        console.warn("HTML5 Audio error, trying AudioContext decode:", e);
-                        playViaAudioContext(base64Audio, displayText);
-                    };
-
-                    await audioElement.play();
-                    console.log("✅ Audio playing via HTML5 Audio");
-                    return; // Success!
-                } catch (playErr) {
-                    console.warn("HTML5 Audio play() failed:", playErr);
-                }
-
-                // Method 2: AudioContext decodeAudioData (fallback for autoplay-blocked browsers)
-                playViaAudioContext(base64Audio, displayText);
-            }
-
-            function playViaAudioContext(base64Audio, displayText) {
-                try {
-                    const binaryString = window.atob(base64Audio);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-
-                    const ctx = getAudioContext();
-                    ctx.decodeAudioData(bytes.buffer.slice(0), function (buffer) {
-                        if (!isLiveActive) { isAITalking = false; return; }
-
-                        const source = ctx.createBufferSource();
-                        source.buffer = buffer;
-                        source.connect(ctx.destination);
-                        currentAudioSource = source;
-
-                        source.onended = function () {
-                            isAITalking = false;
-                            currentAudioSource = null;
-                            if (isLiveActive) {
-                                setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                                setTimeout(() => startContinuousListening(), 400);
-                            }
-                        };
-
-                        source.start(0);
-                        console.log("✅ Audio playing via AudioContext");
-                    }, function (decodeErr) {
-                        console.error("AudioContext decode failed:", decodeErr);
-                        isAITalking = false;
-                        fallbackBrowserSpeech(displayText);
-                    });
-                } catch (e) {
-                    console.error("AudioContext playback error:", e);
+                    source.start(0);
+                    console.log("✅ Audio playing via AudioContext");
+                }, function (decodeErr) {
+                    console.error("AudioContext decode failed:", decodeErr);
                     isAITalking = false;
                     fallbackBrowserSpeech(displayText);
-                }
+                });
+            } catch (e) {
+                console.error("AudioContext playback error:", e);
+                isAITalking = false;
+                fallbackBrowserSpeech(displayText);
             }
+        }
 
-            // Browser speech fallback if network drops
-            function fallbackBrowserSpeech(text) {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'te-IN';
-                    utterance.rate = 1.0;
-                    utterance.pitch = 1.05;
+        // Browser speech fallback if network drops
+        function fallbackBrowserSpeech(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'te-IN';
+                utterance.rate = 1.0;
+                utterance.pitch = 1.05;
 
-                    isAITalking = true;
-                    setLiveState('speaking', 'SPEAKING', `"${text}"`);
+                isAITalking = true;
+                setLiveState('speaking', 'SPEAKING', `"${text}"`);
 
-                    utterance.onend = function () {
-                        isAITalking = false;
-                        if (isLiveActive) {
-                            setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                            setTimeout(() => startContinuousListening(), 400);
-                        }
-                    };
-
-                    window.speechSynthesis.speak(utterance);
-                } else {
+                utterance.onend = function () {
                     isAITalking = false;
-                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                    setTimeout(() => startContinuousListening(), 400);
-                }
-            }
-            let recognition = null;
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'te-IN'; // Telugu / Indian English
-
-                recognition.onstart = function () {
-                    micBtn.classList.add('recording');
-                    chatInput.placeholder = "Listening (speak now)...";
-                };
-
-                recognition.onresult = function (event) {
-                    const transcript = event.results[0][0].transcript;
-                    chatInput.value = transcript;
-                    sendMessage();
-                };
-
-                recognition.onerror = function () {
-                    micBtn.classList.remove('recording');
-                    chatInput.placeholder = "Ask anything";
-                };
-
-                recognition.onend = function () {
-                    micBtn.classList.remove('recording');
-                    chatInput.placeholder = "Ask anything";
-                };
-            }
-
-            function toggleMic() {
-                if (!recognition) {
-                    alert("Voice input works best in Google Chrome!");
-                    return;
-                }
-                if (micBtn.classList.contains('recording')) {
-                    recognition.stop();
-                } else {
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        recognition.stop();
+                    if (isLiveActive) {
+                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                        setTimeout(() => startContinuousListening(), 400);
                     }
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                isAITalking = false;
+                setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                setTimeout(() => startContinuousListening(), 400);
+            }
+        }
+
+        let recognition = null;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'te-IN';
+
+            recognition.onstart = function () {
+                micBtn.classList.add('recording');
+                chatInput.placeholder = "Listening (speak now)...";
+            };
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                chatInput.value = transcript;
+                sendMessage();
+            };
+
+            recognition.onerror = function () {
+                micBtn.classList.remove('recording');
+                chatInput.placeholder = "Ask anything";
+            };
+
+            recognition.onend = function () {
+                micBtn.classList.remove('recording');
+                chatInput.placeholder = "Ask anything";
+            };
+        }
+
+        function toggleMic() {
+            if (!recognition) {
+                alert("Voice input works best in Google Chrome!");
+                return;
+            }
+            if (micBtn.classList.contains('recording')) {
+                recognition.stop();
+            } else {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    recognition.stop();
                 }
             }
+        }
     </script>
 </body>
 
