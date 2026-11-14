@@ -2438,8 +2438,6 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
                 const ttsPayload = {
                     text: cleanSpeechText,
-                    inputs: [cleanSpeechText],
-                    language_code: targetLang,
                     target_language_code: targetLang,
                     model: "bulbul:v4-flash",
                     speaker: speakerName,
@@ -2485,8 +2483,6 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
                 const fallbackPayload = {
                     text: cleanSpeechText,
-                    inputs: [cleanSpeechText],
-                    language_code: targetLang,
                     target_language_code: targetLang,
                     model: "bulbul:v3",
                     speaker: fallbackSpeaker,

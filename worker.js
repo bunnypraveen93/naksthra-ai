@@ -296,7 +296,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         return respond(res);
       }
 
-      // 4. SARVAM TTS (Robust Normalization for both Web and Mobile)
+      // 4. SARVAM TTS (Strictly conforms to Sarvam REST API: requires 'text', rejects duplicate 'inputs')
       if (path === "/sarvam") {
         const bodyText = await request.text();
         let payload = {};
@@ -309,13 +309,19 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
           });
         }
 
-        const speechText = payload.text || (Array.isArray(payload.inputs) ? payload.inputs[0] : payload.inputs) || "";
-        const langCode = payload.language_code || payload.target_language_code || "te-IN";
+        const speechText = (payload.text || (Array.isArray(payload.inputs) ? payload.inputs[0] : payload.inputs) || "").trim();
+        if (!speechText) {
+          return new Response(JSON.stringify({ error: "Text is required for TTS" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        }
 
+        const langCode = payload.target_language_code || payload.language_code || "te-IN";
+
+        // Sarvam REST endpoint strictly expects 'text' and 'target_language_code'. Never send 'inputs' when 'text' is sent!
         const sarvamBody = {
           text: speechText,
-          inputs: [speechText],
-          language_code: langCode,
           target_language_code: langCode,
           model: payload.model || "bulbul:v4-flash",
           speaker: payload.speaker || "pooja_te_conversation",
