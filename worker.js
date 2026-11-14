@@ -296,13 +296,41 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         return respond(res);
       }
 
-      // 4. SARVAM TTS
+      // 4. SARVAM TTS (Robust Normalization for both Web and Mobile)
       if (path === "/sarvam") {
-        const body = await request.text();
+        const bodyText = await request.text();
+        let payload = {};
+        try {
+          payload = JSON.parse(bodyText);
+        } catch (e) {
+          return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        }
+
+        const speechText = payload.text || (Array.isArray(payload.inputs) ? payload.inputs[0] : payload.inputs) || "";
+        const langCode = payload.language_code || payload.target_language_code || "te-IN";
+
+        const sarvamBody = {
+          text: speechText,
+          inputs: [speechText],
+          language_code: langCode,
+          target_language_code: langCode,
+          model: payload.model || "bulbul:v4-flash",
+          speaker: payload.speaker || "pooja_te_conversation",
+          pace: payload.pace || 1.15,
+          speech_sample_rate: payload.speech_sample_rate || 24000,
+          output_audio_codec: payload.output_audio_codec || "wav"
+        };
+
         const res = await fetch("https://api.sarvam.ai/text-to-speech", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "API-Subscription-Key": env.SARVAM_API_KEY },
-          body
+          headers: { 
+            "Content-Type": "application/json", 
+            "API-Subscription-Key": env.SARVAM_API_KEY 
+          },
+          body: JSON.stringify(sarvamBody)
         });
         return respond(res);
       }
