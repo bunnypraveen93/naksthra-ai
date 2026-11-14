@@ -60,7 +60,6 @@
             background-image:
                 linear-gradient(180deg, rgba(2, 3, 18, 0.65) 0%, rgba(3, 4, 22, 0.75) 100%),
                 url('images/nakshatra_bg.png'),
-                url('nakshatra_bg.png'),
                 radial-gradient(circle at 50% 45%, rgba(120, 40, 255, 0.25) 0%, rgba(0, 212, 255, 0.12) 35%, transparent 65%),
                 linear-gradient(180deg, #02010a 0%, #050721 50%, #02010e 100%);
             background-size: cover;
@@ -506,6 +505,47 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 18px 18px 4px 18px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+        }
+
+        .msg-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            margin-left: 44px;
+        }
+
+        .msg-speak-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94a3b8;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .msg-speak-btn:hover {
+            background: rgba(0, 242, 254, 0.15);
+            border-color: rgba(0, 242, 254, 0.4);
+            color: #00f2fe;
+            transform: translateY(-1px);
+        }
+
+        .msg-speak-btn.speaking {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: #050716;
+            border-color: #00f2fe;
+            animation: pulseSpeaking 1s infinite alternate;
+        }
+
+        @keyframes pulseSpeaking {
+            from { box-shadow: 0 0 4px rgba(0, 242, 254, 0.4); }
+            to { box-shadow: 0 0 12px rgba(0, 242, 254, 0.8); }
         }
 
         /* ===== Clean Markdown Styling ===== */
@@ -1807,11 +1847,30 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     conversationHistory = conversationHistory.slice(-6);
                 }
 
-                // Render clean Markdown
+                // Render clean Markdown & attach audio play button
                 aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
+
+                // Add speaker button container
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'msg-actions';
+                actionsDiv.innerHTML = `
+                    <button class="msg-speak-btn" title="Play Voice">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                `;
+                const speakBtn = actionsDiv.querySelector('.msg-speak-btn');
+                speakBtn.onclick = async function () {
+                    document.querySelectorAll('.msg-speak-btn.speaking').forEach(b => b.classList.remove('speaking'));
+                    speakBtn.classList.add('speaking');
+                    unlockAudioForMobile();
+                    prewarmAudio();
+                    await speakAIResponse(aiReply);
+                };
+                aiRow.appendChild(actionsDiv);
 
                 // 🔊 Auto-speak AI reply using Sarvam TTS (voice output for every message)
                 try {
+                    speakBtn.classList.add('speaking');
                     await speakAIResponse(aiReply);
                 } catch (voiceErr) {
                     console.warn("Voice playback failed:", voiceErr);
@@ -1909,6 +1968,14 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             } catch (e) { }
         }
 
+        // Global listener: Pre-unlock and warm audio on the very first touch/click anywhere
+        ['click', 'touchstart', 'touchend', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, () => {
+                unlockAudioForMobile();
+                prewarmAudio();
+            }, { passive: true });
+        });
+
         async function openLiveMode() {
             unlockAudioForMobile();
             getAudioContext();
@@ -1976,6 +2043,9 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         function setupAudioVAD(stream) {
             try {
                 audioContextVAD = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContextVAD.state === 'suspended') {
+                    audioContextVAD.resume().catch(() => {});
+                }
                 const source = audioContextVAD.createMediaStreamSource(stream);
                 vadAnalyser = audioContextVAD.createAnalyser();
                 vadAnalyser.fftSize = 512;
@@ -2071,7 +2141,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                         return;
                     }
 
-                    if (averageVolume > 0.05) {
+                    if (averageVolume > 0.015) {
                         // User is speaking!
                         speechStarted = true;
                         lastSpeechTime = Date.now();
@@ -2264,12 +2334,40 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
         let audioCtx = null;
         function getAudioContext() {
             if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
             }
             return audioCtx;
+        }
+
+        // Global Prewarmed Audio Element pool to defeat mobile autoplay restrictions
+        let prewarmedAudio = null;
+        function prewarmAudio() {
+            try {
+                if (!prewarmedAudio) {
+                    prewarmedAudio = new Audio();
+                }
+                const ctx = getAudioContext();
+                if (ctx && ctx.state === 'suspended') {
+                    ctx.resume().catch(() => {});
+                }
+            } catch (e) {}
+        }
+
+        // Helper: Convert Base64 string to Blob
+        function base64ToBlob(base64, mimeType = 'audio/wav') {
+            const binary = atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new Blob([bytes], { type: mimeType });
         }
 
         // Play Natural Female Voice with Sarvam Bulbul v4-flash
@@ -2377,46 +2475,69 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             }
         }
 
-        // PRIMARY: HTML5 Audio playback (most reliable for WAV base64)
-        // FALLBACK: AudioContext decodeAudioData
+        // PRIMARY: HTML5 Audio playback via Blob URL (universally supported, zero data URI memory limits)
+        // FALLBACK: Web Audio API decodeAudioData with active AudioContext resume
         async function playAudioFromBase64(base64Audio, displayText) {
             stopAudioPlayback();
             isAITalking = true;
             setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
 
-            // Method 1: HTML5 Audio with data URI
-            try {
-                const audioElement = new Audio("data:audio/wav;base64," + base64Audio);
-                audioElement.volume = 1.0;
-                currentAudio = audioElement;
+            // Active AudioContext wake-up
+            const ctx = getAudioContext();
+            if (ctx && ctx.state === 'suspended') {
+                await ctx.resume().catch(() => {});
+            }
 
-                audioElement.onended = function () {
+            // Convert Base64 into Blob URL for 100% reliable HTML5 playback
+            let blobUrl = null;
+            try {
+                const blob = base64ToBlob(base64Audio, 'audio/wav');
+                blobUrl = URL.createObjectURL(blob);
+                const audio = prewarmedAudio || new Audio();
+                audio.src = blobUrl;
+                audio.volume = 1.0;
+                currentAudio = audio;
+
+                audio.onended = function () {
                     isAITalking = false;
                     currentAudio = null;
+                    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+                    document.querySelectorAll('.msg-speak-btn.speaking').forEach(btn => btn.classList.remove('speaking'));
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                         setTimeout(() => startContinuousListening(), 400);
                     }
                 };
 
-                audioElement.onerror = function (e) {
-                    console.warn("HTML5 Audio error, trying AudioContext decode:", e);
-                    playViaAudioContext(base64Audio, displayText);
+                audio.onerror = async function (e) {
+                    console.warn("HTML5 Audio Blob error, falling back to AudioContext decode:", e);
+                    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+                    await playViaAudioContext(base64Audio, displayText);
                 };
 
-                await audioElement.play();
-                console.log("✅ Audio playing via HTML5 Audio");
+                await audio.play();
+                console.log("✅ Audio successfully playing via HTML5 Audio Blob URL");
                 return;
             } catch (playErr) {
-                console.warn("HTML5 Audio play() failed:", playErr);
+                console.warn("HTML5 Audio play() failed (likely autoplay policy), trying AudioContext:", playErr);
+                if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
             }
 
-            // Method 2: AudioContext decodeAudioData (fallback)
-            playViaAudioContext(base64Audio, displayText);
+            // Method 2: AudioContext decodeAudioData
+            await playViaAudioContext(base64Audio, displayText);
         }
 
-        function playViaAudioContext(base64Audio, displayText) {
+        async function playViaAudioContext(base64Audio, displayText) {
             try {
+                const ctx = getAudioContext();
+                if (!ctx) {
+                    fallbackBrowserSpeech(displayText);
+                    return;
+                }
+                if (ctx.state === 'suspended') {
+                    await ctx.resume().catch(() => {});
+                }
+
                 const binaryString = window.atob(base64Audio);
                 const len = binaryString.length;
                 const bytes = new Uint8Array(len);
@@ -2424,9 +2545,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     bytes[i] = binaryString.charCodeAt(i);
                 }
 
-                const ctx = getAudioContext();
                 ctx.decodeAudioData(bytes.buffer.slice(0), function (buffer) {
-
                     const source = ctx.createBufferSource();
                     source.buffer = buffer;
                     source.connect(ctx.destination);
@@ -2435,6 +2554,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     source.onended = function () {
                         isAITalking = false;
                         currentAudioSource = null;
+                        document.querySelectorAll('.msg-speak-btn.speaking').forEach(btn => btn.classList.remove('speaking'));
                         if (isLiveActive) {
                             setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                             setTimeout(() => startContinuousListening(), 400);
@@ -2442,7 +2562,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     };
 
                     source.start(0);
-                    console.log("✅ Audio playing via AudioContext");
+                    console.log("✅ Audio playing via AudioContext decodeAudioData");
                 }, function (decodeErr) {
                     console.error("AudioContext decode failed:", decodeErr);
                     isAITalking = false;
