@@ -1978,7 +1978,16 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
         async function openLiveMode() {
             unlockAudioForMobile();
-            getAudioContext();
+            const ctx = getAudioContext();
+            if (ctx && ctx.state === 'suspended') {
+                await ctx.resume().catch(() => {});
+            }
+            try {
+                const unlockAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+                unlockAudio.volume = 0.01;
+                unlockAudio.play().then(() => { unlockAudio.pause(); }).catch(() => {});
+            } catch (e) {}
+
             isLiveActive = true;
             isAITalking = false;
             liveModal.classList.add('active');
@@ -2318,8 +2327,16 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 chatContainer.appendChild(aiRow);
                 scrollToBottom();
 
-                // Convert AI Text to Natural Female Voice (Sarvam Bulbul v3)
-                await speakAIResponse(aiText);
+                // Convert AI Text to Natural Female Voice (Sarvam Bulbul v4-flash)
+                try {
+                    await speakAIResponse(aiText);
+                } catch (voiceErr) {
+                    console.warn("Live voice playback error:", voiceErr);
+                    if (isLiveActive) {
+                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                        setTimeout(() => startContinuousListening(), 400);
+                    }
+                }
 
             } catch (err) {
                 console.error("Live voice error:", err);
@@ -2359,25 +2376,12 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             } catch (e) {}
         }
 
-        // Helper: Convert Base64 string to Blob
-        function base64ToBlob(base64, mimeType = 'audio/wav') {
-            const binary = atob(base64);
-            const len = binary.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return new Blob([bytes], { type: mimeType });
-        }
-
         // Play Natural Female Voice with Sarvam Bulbul v4-flash
         async function speakAIResponse(textToSpeak) {
-            // Skip voice if user has muted (except in live mode where voice is essential)
             if (!voiceEnabled && !isLiveActive) return;
 
             setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
 
-            // Clean text for TTS
             let cleanSpeechText = sanitizeForSpeech(textToSpeak);
             if (!cleanSpeechText) {
                 if (isLiveActive) startContinuousListening();
@@ -2396,10 +2400,10 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 speakerName = "kavya_hi_conversational";
             } else if (currentLanguage === 'ta' || /[\u0B80-\u0BFF]/.test(cleanSpeechText)) {
                 targetLang = "ta-IN";
-                speakerName = null;
+                speakerName = "gokul_ta_narration";
             } else if (currentLanguage === 'kn' || /[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
                 targetLang = "kn-IN";
-                speakerName = null;
+                speakerName = "chaitra_kn_conversation";
             } else {
                 targetLang = "te-IN";
                 speakerName = "pooja_te_conversation";
@@ -2407,17 +2411,17 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
             try {
                 const ctx = getAudioContext();
-                if (ctx.state === 'suspended') await ctx.resume();
+                if (ctx && ctx.state === 'suspended') {
+                    await ctx.resume().catch(() => {});
+                }
 
                 const ttsPayload = {
                     inputs: [cleanSpeechText],
                     target_language_code: targetLang,
                     model: "bulbul:v4-flash",
+                    speaker: speakerName,
                     pace: 1.15
                 };
-                if (speakerName) {
-                    ttsPayload.speaker = speakerName;
-                }
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
@@ -2437,27 +2441,30 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     const audioBase64 = ttsData.audios[0];
                     await playAudioFromBase64(audioBase64, textToSpeak);
                 } else {
-                    console.warn("No audio in TTS response");
-                    fallbackBrowserSpeech(cleanSpeechText);
+                    console.warn("No audio in TTS response, trying browser speech");
+                    await fallbackBrowserSpeech(cleanSpeechText);
                 }
             } catch (ttsErr) {
                 console.warn("Sarvam TTS error, falling back to browser speech:", ttsErr);
-                fallbackBrowserSpeech(cleanSpeechText);
+                await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
 
         // Secondary fallback to bulbul:v3 if v4-flash is unavailable
         async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
             try {
+                const fallbackSpeaker = targetLang === "te-IN" ? "pooja"
+                    : targetLang === "hi-IN" ? "meera"
+                    : targetLang === "en-IN" ? "simran"
+                    : "simran";
+
                 const fallbackPayload = {
                     inputs: [cleanSpeechText],
                     target_language_code: targetLang,
                     model: "bulbul:v3",
+                    speaker: fallbackSpeaker,
                     pace: 1.12
                 };
-                if (targetLang === "hi-IN") fallbackPayload.speaker = "meera";
-                else if (targetLang === "en-IN") fallbackPayload.speaker = "simran";
-                else fallbackPayload.speaker = "simran";
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
@@ -2468,74 +2475,70 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 if (ttsData.audios && ttsData.audios.length > 0) {
                     await playAudioFromBase64(ttsData.audios[0], originalText);
                 } else {
-                    fallbackBrowserSpeech(cleanSpeechText);
+                    await fallbackBrowserSpeech(cleanSpeechText);
                 }
             } catch (e) {
-                fallbackBrowserSpeech(cleanSpeechText);
+                await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
 
-        // PRIMARY: HTML5 Audio playback via Blob URL (universally supported, zero data URI memory limits)
-        // FALLBACK: Web Audio API decodeAudioData with active AudioContext resume
-        async function playAudioFromBase64(base64Audio, displayText) {
-            stopAudioPlayback();
-            isAITalking = true;
-            setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
+        // 100% Reliable Audio Playback via HTML5 Audio with direct Data URI, backed by Web Audio API decode
+        function playAudioFromBase64(base64Audio, displayText) {
+            return new Promise((resolve) => {
+                stopAudioPlayback();
+                isAITalking = true;
+                setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
 
-            // Active AudioContext wake-up
-            const ctx = getAudioContext();
-            if (ctx && ctx.state === 'suspended') {
-                await ctx.resume().catch(() => {});
-            }
-
-            // Convert Base64 into Blob URL for 100% reliable HTML5 playback
-            let blobUrl = null;
-            try {
-                const blob = base64ToBlob(base64Audio, 'audio/wav');
-                blobUrl = URL.createObjectURL(blob);
-                const audio = prewarmedAudio || new Audio();
-                audio.src = blobUrl;
-                audio.volume = 1.0;
-                currentAudio = audio;
-
-                audio.onended = function () {
+                let finished = false;
+                const finishTurn = () => {
+                    if (finished) return;
+                    finished = true;
                     isAITalking = false;
                     currentAudio = null;
-                    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+                    currentAudioSource = null;
                     document.querySelectorAll('.msg-speak-btn.speaking').forEach(btn => btn.classList.remove('speaking'));
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                         setTimeout(() => startContinuousListening(), 400);
                     }
+                    resolve();
                 };
 
-                audio.onerror = async function (e) {
-                    console.warn("HTML5 Audio Blob error, falling back to AudioContext decode:", e);
-                    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
-                    await playViaAudioContext(base64Audio, displayText);
-                };
+                // Method 1: HTML5 Audio with direct Data URI (fastest, cleanest, hardware accelerated)
+                try {
+                    const audio = new Audio("data:audio/wav;base64," + base64Audio);
+                    audio.volume = 1.0;
+                    currentAudio = audio;
 
-                await audio.play();
-                console.log("✅ Audio successfully playing via HTML5 Audio Blob URL");
-                return;
-            } catch (playErr) {
-                console.warn("HTML5 Audio play() failed (likely autoplay policy), trying AudioContext:", playErr);
-                if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
-            }
+                    audio.onended = finishTurn;
+                    audio.onerror = (e) => {
+                        console.warn("HTML5 Audio error, falling back to Web Audio decode:", e);
+                        playViaWebAudio(base64Audio, displayText, finishTurn);
+                    };
 
-            // Method 2: AudioContext decodeAudioData
-            await playViaAudioContext(base64Audio, displayText);
+                    audio.play().then(() => {
+                        console.log("✅ Audio successfully playing via HTML5 Audio");
+                    }).catch((playErr) => {
+                        console.warn("HTML5 Audio play() blocked, trying Web Audio decode:", playErr);
+                        playViaWebAudio(base64Audio, displayText, finishTurn);
+                    });
+                } catch (err) {
+                    console.warn("HTML5 Audio init failed, trying Web Audio decode:", err);
+                    playViaWebAudio(base64Audio, displayText, finishTurn);
+                }
+            });
         }
 
-        async function playViaAudioContext(base64Audio, displayText) {
+        // Method 2: Web Audio API decodeAudioData
+        function playViaWebAudio(base64Audio, displayText, onDone) {
             try {
                 const ctx = getAudioContext();
                 if (!ctx) {
-                    fallbackBrowserSpeech(displayText);
+                    fallbackBrowserSpeech(displayText, onDone);
                     return;
                 }
                 if (ctx.state === 'suspended') {
-                    await ctx.resume().catch(() => {});
+                    ctx.resume().catch(() => {});
                 }
 
                 const binaryString = window.atob(base64Audio);
@@ -2552,35 +2555,28 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     currentAudioSource = source;
 
                     source.onended = function () {
-                        isAITalking = false;
                         currentAudioSource = null;
-                        document.querySelectorAll('.msg-speak-btn.speaking').forEach(btn => btn.classList.remove('speaking'));
-                        if (isLiveActive) {
-                            setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                            setTimeout(() => startContinuousListening(), 400);
-                        }
+                        if (onDone) onDone();
                     };
 
                     source.start(0);
-                    console.log("✅ Audio playing via AudioContext decodeAudioData");
+                    console.log("✅ Audio playing via Web Audio API decodeAudioData");
                 }, function (decodeErr) {
                     console.error("AudioContext decode failed:", decodeErr);
-                    isAITalking = false;
-                    fallbackBrowserSpeech(displayText);
+                    fallbackBrowserSpeech(displayText, onDone);
                 });
             } catch (e) {
                 console.error("AudioContext playback error:", e);
-                isAITalking = false;
-                fallbackBrowserSpeech(displayText);
+                fallbackBrowserSpeech(displayText, onDone);
             }
         }
 
-        // Browser speech fallback if network drops
-        function fallbackBrowserSpeech(text) {
+        // Method 3: Browser speech synthesis fallback
+        function fallbackBrowserSpeech(text, onDone) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = {en:'en-IN', hi:'hi-IN', ta:'ta-IN', kn:'kn-IN'}[currentLanguage] || 'te-IN';
+                utterance.lang = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', kn: 'kn-IN' }[currentLanguage] || 'te-IN';
                 utterance.rate = 1.0;
                 utterance.pitch = 1.05;
 
@@ -2588,18 +2584,16 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 setLiveState('speaking', 'SPEAKING', `"${text}"`);
 
                 utterance.onend = function () {
-                    isAITalking = false;
-                    if (isLiveActive) {
-                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        setTimeout(() => startContinuousListening(), 400);
-                    }
+                    if (onDone) onDone();
+                };
+                utterance.onerror = function (e) {
+                    console.warn("SpeechSynthesis error:", e);
+                    if (onDone) onDone();
                 };
 
                 window.speechSynthesis.speak(utterance);
             } else {
-                isAITalking = false;
-                setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                setTimeout(() => startContinuousListening(), 400);
+                if (onDone) onDone();
             }
         }
 
