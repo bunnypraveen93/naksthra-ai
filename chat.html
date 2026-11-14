@@ -1264,6 +1264,10 @@
             <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice Input">
                 <i class="fa-solid fa-microphone"></i>
             </button>
+            <!-- Voice output toggle (mute/unmute AI speech) -->
+            <button class="mic-btn" id="voiceToggleBtn" onclick="toggleVoiceOutput()" title="Toggle Voice Output" style="font-size: 14px;">
+                <i class="fa-solid fa-volume-high" id="voiceToggleIcon"></i>
+            </button>
             <!-- Live voice mode button (Shown when no text entered) -->
             <button class="live-toggle-btn" id="liveToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
                 <i class="fa-solid fa-wave-square"></i>
@@ -1327,6 +1331,9 @@
         const mainContent = document.getElementById('mainContent');
         const recentList = document.getElementById('recentList');
         const micBtn = document.getElementById('micBtn');
+
+        // Voice output toggle (user can mute/unmute AI voice)
+        let voiceEnabled = true;
 
         // Cloudflare Worker Live Endpoint
         const API_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq";
@@ -1712,6 +1719,10 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             const text = chatInput.value.trim();
             if (!text) return;
 
+            // Unlock audio on first user interaction (crucial for iOS/Android)
+            unlockAudioForMobile();
+            getAudioContext();
+
             // Chat start ayyaka background black ga marali
             document.body.classList.add('chat-active');
             homeScreen.style.display = 'none';
@@ -1798,6 +1809,13 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
                 // Render clean Markdown
                 aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
+
+                // 🔊 Auto-speak AI reply using Sarvam TTS (voice output for every message)
+                try {
+                    await speakAIResponse(aiReply);
+                } catch (voiceErr) {
+                    console.warn("Voice playback failed:", voiceErr);
+                }
             } catch (error) {
                 console.error("Chat error details:", error);
                 aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network'}.</span>`;
@@ -2256,6 +2274,9 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
         // Play Natural Female Voice with Sarvam Bulbul v4-flash
         async function speakAIResponse(textToSpeak) {
+            // Skip voice if user has muted (except in live mode where voice is essential)
+            if (!voiceEnabled && !isLiveActive) return;
+
             setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
 
             // Clean text for TTS
@@ -2405,7 +2426,6 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
                 const ctx = getAudioContext();
                 ctx.decodeAudioData(bytes.buffer.slice(0), function (buffer) {
-                    if (!isLiveActive) { isAITalking = false; return; }
 
                     const source = ctx.createBufferSource();
                     source.buffer = buffer;
@@ -2440,7 +2460,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'te-IN';
+                utterance.lang = {en:'en-IN', hi:'hi-IN', ta:'ta-IN', kn:'kn-IN'}[currentLanguage] || 'te-IN';
                 utterance.rate = 1.0;
                 utterance.pitch = 1.05;
 
@@ -2506,6 +2526,21 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 } catch (e) {
                     recognition.stop();
                 }
+            }
+        }
+
+        // Toggle voice output on/off
+        function toggleVoiceOutput() {
+            voiceEnabled = !voiceEnabled;
+            const icon = document.getElementById('voiceToggleIcon');
+            if (voiceEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                document.getElementById('voiceToggleBtn').title = 'Voice On (Click to Mute)';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                document.getElementById('voiceToggleBtn').title = 'Voice Off (Click to Unmute)';
+                // Stop any currently playing audio
+                stopAudioPlayback();
             }
         }
     </script>
