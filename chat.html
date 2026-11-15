@@ -1950,35 +1950,23 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             if (transcriptText) liveTranscript.textContent = transcriptText;
         }
 
-        // Persistent Audio Player to prevent mobile browser autoplay blocks
-        const persistentAudioPlayer = new Audio();
         let audioUnlocked = false;
 
         // Unlock audio on first user tap — crucial for iOS/Android browsers
         function unlockAudioForMobile() {
+            if (audioUnlocked) return;
             try {
                 const ctx = getAudioContext();
                 if (ctx && ctx.state === 'suspended') {
                     ctx.resume().catch(() => {});
                 }
-                if (!audioUnlocked) {
-                    const silentBuf = ctx.createBuffer(1, 1, 22050);
-                    const src = ctx.createBufferSource();
-                    src.buffer = silentBuf;
-                    src.connect(ctx.destination);
-                    src.start(0);
-
-                    // Crucial: Pre-warm the EXACT persistentAudioPlayer instance used for AI speech
-                    persistentAudioPlayer.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
-                    persistentAudioPlayer.volume = 0.01;
-                    persistentAudioPlayer.play().then(() => {
-                        persistentAudioPlayer.pause();
-                        persistentAudioPlayer.currentTime = 0;
-                        persistentAudioPlayer.volume = 1.0;
-                        audioUnlocked = true;
-                        console.log("✅ Persistent audio player unlocked for mobile session");
-                    }).catch(() => { });
-                }
+                const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+                silentAudio.volume = 0;
+                silentAudio.play().then(() => {
+                    silentAudio.pause();
+                    audioUnlocked = true;
+                    console.log("✅ Audio playback unlocked for mobile session");
+                }).catch(() => {});
             } catch (e) { }
         }
 
@@ -2049,20 +2037,13 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 try { currentAudioSource.stop(); } catch (e) { }
                 currentAudioSource = null;
             }
-            if (persistentAudioPlayer) {
-                try {
-                    persistentAudioPlayer.pause();
-                    persistentAudioPlayer.currentTime = 0;
-                    persistentAudioPlayer.src = "";
-                } catch (e) { }
-            }
-            if (currentAudio && currentAudio !== persistentAudioPlayer) {
+            if (currentAudio) {
                 try {
                     currentAudio.pause();
                     currentAudio.currentTime = 0;
                 } catch (e) { }
+                currentAudio = null;
             }
-            currentAudio = null;
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
             }
@@ -2165,13 +2146,12 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     }
                     const averageVolume = sum / bufferLength / 255; // 0.0 to 1.0
 
-                    // Interrupt AI if talking and user speaks
-                    if (averageVolume > 0.08 && isAITalking) {
-                        interruptAI();
+                    // Ignore speaker audio while AI is talking (prevent self-interruption)
+                    if (isAITalking) {
                         return;
                     }
 
-                    if (averageVolume > 0.015) {
+                    if (averageVolume > 0.04) {
                         // User is speaking!
                         speechStarted = true;
                         lastSpeechTime = Date.now();
@@ -2512,30 +2492,8 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             }
         }
 
-        // Helper: Convert large Base64 string to Blob URL for fast hardware-accelerated playback
-        function base64ToBlobUrl(base64Data, mimeType = 'audio/wav') {
-            try {
-                const cleanBase64 = base64Data.replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
-                const byteCharacters = window.atob(cleanBase64);
-                const sliceSize = 1024;
-                const byteArrays = [];
-                for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-                    const slice = byteCharacters.slice(offset, offset + sliceSize);
-                    const byteNumbers = new Array(slice.length);
-                    for (let i = 0; i < slice.length; i++) {
-                        byteNumbers[i] = slice.charCodeAt(i);
-                    }
-                    byteArrays.push(new Uint8Array(byteNumbers));
-                }
-                const blob = new Blob(byteArrays, { type: mimeType });
-                return URL.createObjectURL(blob);
-            } catch (err) {
-                console.error("Base64 to Blob URL conversion failed:", err);
-                return null;
-            }
-        }
-
-        // 100% Reliable Audio Playback via Persistent HTML5 Audio with Blob URL, backed by Web Audio API decode
+        // PRIMARY: HTML5 Audio with Data URI (fastest & most reliable for WAV base64)
+        // FALLBACK: AudioContext decodeAudioData
         function playAudioFromBase64(base64Audio, displayText) {
             return new Promise((resolve) => {
                 stopAudioPlayback();
@@ -2543,15 +2501,9 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
 
                 let finished = false;
-                let activeBlobUrl = null;
-
                 const finishTurn = () => {
                     if (finished) return;
                     finished = true;
-                    if (activeBlobUrl) {
-                        try { URL.revokeObjectURL(activeBlobUrl); } catch (e) { }
-                        activeBlobUrl = null;
-                    }
                     isAITalking = false;
                     currentAudio = null;
                     currentAudioSource = null;
@@ -2563,35 +2515,32 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     resolve();
                 };
 
-                // Method 1: Persistent HTML5 Audio with Blob URL (bypasses mobile autoplay restrictions)
+                const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
+
+                // Method 1: HTML5 Audio with data URI — simplest and most reliable for WAV
                 try {
-                    activeBlobUrl = base64ToBlobUrl(base64Audio, 'audio/wav');
-                    if (!activeBlobUrl) {
-                        throw new Error("Blob URL creation returned null");
-                    }
+                    const audioElement = new Audio("data:audio/wav;base64," + cleanBase64);
+                    audioElement.volume = 1.0;
+                    currentAudio = audioElement;
 
-                    persistentAudioPlayer.src = activeBlobUrl;
-                    persistentAudioPlayer.volume = 1.0;
-                    currentAudio = persistentAudioPlayer;
-
-                    persistentAudioPlayer.onended = finishTurn;
-                    persistentAudioPlayer.onerror = (e) => {
-                        console.warn("Persistent Audio Blob error, falling back to Web Audio decode:", e);
-                        playViaWebAudio(base64Audio, displayText, finishTurn);
+                    audioElement.onended = finishTurn;
+                    audioElement.onerror = (e) => {
+                        console.warn("HTML5 Audio error, trying Web Audio decode:", e);
+                        playViaWebAudio(cleanBase64, displayText, finishTurn);
                     };
 
-                    const playPromise = persistentAudioPlayer.play();
+                    const playPromise = audioElement.play();
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
-                            console.log("✅ Audio successfully playing via Persistent HTML5 Audio (Blob URL)");
+                            console.log("✅ Audio successfully playing via HTML5 Audio");
                         }).catch((playErr) => {
-                            console.warn("Persistent Audio play() blocked, trying Web Audio decode:", playErr);
-                            playViaWebAudio(base64Audio, displayText, finishTurn);
+                            console.warn("HTML5 Audio play() blocked, trying Web Audio decode:", playErr);
+                            playViaWebAudio(cleanBase64, displayText, finishTurn);
                         });
                     }
-                } catch (err) {
-                    console.warn("Persistent Audio init failed, trying Web Audio decode:", err);
-                    playViaWebAudio(base64Audio, displayText, finishTurn);
+                } catch (playErr) {
+                    console.warn("HTML5 Audio init failed, trying Web Audio decode:", playErr);
+                    playViaWebAudio(cleanBase64, displayText, finishTurn);
                 }
             });
         }
