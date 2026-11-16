@@ -1918,38 +1918,58 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             if (transcriptText) liveTranscript.textContent = transcriptText;
         }
 
-        let audioUnlocked = false;
+        let playbackAudioCtx = null;
+        let keepAliveOsc = null;
+        let keepAliveGain = null;
+        let vadAudioCtx = null;
 
-        // Unlock audio on first user tap — crucial for iOS/Android browsers
-        function unlockAudioForMobile() {
-            if (audioUnlocked) return;
-            try {
-                const ctx = getAudioContext();
-                if (ctx && ctx.state === 'suspended') {
-                    ctx.resume().catch(() => {});
+        function getPlaybackAudioContext() {
+            if (!playbackAudioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    playbackAudioCtx = new AudioContextClass();
                 }
-                const silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
-                silentAudio.volume = 0;
-                silentAudio.play().then(() => {
-                    silentAudio.pause();
-                    audioUnlocked = true;
-                    console.log("✅ Audio playback unlocked for mobile session");
-                }).catch(() => {});
-            } catch (e) { }
+            }
+            return playbackAudioCtx;
         }
 
-        // Global listener: Pre-unlock and warm audio on the very first touch/click anywhere
+        function getAudioContext() {
+            return getPlaybackAudioContext();
+        }
+
+        // Permanently unlock & keep playback AudioContext running with inaudible keep-alive
+        function ensurePlaybackUnlocked() {
+            try {
+                const ctx = getPlaybackAudioContext();
+                if (!ctx) return;
+                if (ctx.state === 'suspended') {
+                    ctx.resume().catch(() => {});
+                }
+                if (!keepAliveOsc) {
+                    keepAliveOsc = ctx.createOscillator();
+                    keepAliveGain = ctx.createGain();
+                    keepAliveGain.gain.value = 0.00001; // Silent keep-alive to prevent mobile auto-suspend
+                    keepAliveOsc.connect(keepAliveGain);
+                    keepAliveGain.connect(ctx.destination);
+                    keepAliveOsc.start();
+                    console.log("✅ Playback AudioContext unlocked with active keep-alive");
+                }
+            } catch (e) {
+                console.warn("Audio unlock err:", e);
+            }
+        }
+
+        // Global listener: Pre-unlock on very first touch/click
         ['click', 'touchstart', 'touchend', 'keydown', 'pointerdown'].forEach(evt => {
             window.addEventListener(evt, () => {
-                unlockAudioForMobile();
-                prewarmAudio();
+                ensurePlaybackUnlocked();
             }, { passive: true });
         });
 
         async function openLiveMode() {
-            unlockAudioForMobile();
+            ensurePlaybackUnlocked();
 
-            // Unlock & prime dedicated DOM live audio player on this user gesture
+            // Prime dedicated DOM live audio player on this user gesture
             const livePlayer = document.getElementById('liveAudioPlayer');
             if (livePlayer) {
                 try {
@@ -1961,32 +1981,12 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 } catch (e) {}
             }
 
-            const ctx = getAudioContext();
-            if (ctx && ctx.state === 'suspended') {
-                await ctx.resume().catch(() => {});
-            }
-
             isLiveActive = true;
             isAITalking = false;
             liveModal.classList.add('active');
             setLiveState('listening', 'CONNECTING...', (currentLanguage === 'en' ? 'Connecting live call...' : 'కాల్ కనెక్ట్ అవుతోంది...'));
 
-            try {
-                // Request mic stream once — completely silent, ZERO Chrome beep!
-                mediaStream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    }
-                });
-
-                setupAudioVAD(mediaStream);
-                startContinuousListening();
-            } catch (err) {
-                console.error("Mic permission denied:", err);
-                setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyండి!');
-            }
+            await startContinuousListening();
         }
 
         function closeLiveMode() {
@@ -1995,8 +1995,15 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             stopAudioPlayback();
             stopRecordingAndVAD();
             if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
+                try {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                } catch (e) {}
                 mediaStream = null;
+            }
+            if (keepAliveOsc) {
+                try { keepAliveOsc.stop(); } catch (e) {}
+                keepAliveOsc = null;
+                keepAliveGain = null;
             }
         }
 
@@ -2031,20 +2038,20 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 window.speechSynthesis.cancel();
             }
             isAITalking = false;
-            if (mediaStream) {
-                mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
-            }
         }
 
-        // Voice Activity Detection (VAD) using unified AudioContext
+        // Voice Activity Detection (VAD) using dedicated input vadAudioCtx
         function setupAudioVAD(stream) {
             try {
-                const ctx = getAudioContext();
-                if (ctx && ctx.state === 'suspended') {
-                    ctx.resume().catch(() => {});
+                if (!vadAudioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    vadAudioCtx = new AudioContextClass();
                 }
-                const source = ctx.createMediaStreamSource(stream);
-                vadAnalyser = ctx.createAnalyser();
+                if (vadAudioCtx.state === 'suspended') {
+                    vadAudioCtx.resume().catch(() => {});
+                }
+                const source = vadAudioCtx.createMediaStreamSource(stream);
+                vadAnalyser = vadAudioCtx.createAnalyser();
                 vadAnalyser.fftSize = 512;
                 vadAnalyser.smoothingTimeConstant = 0.3;
                 source.connect(vadAnalyser);
@@ -2065,13 +2072,28 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         }
 
         // Silent continuous recording loop with energy-based silence detection
-        function startContinuousListening() {
-            if (!isLiveActive || isAITalking || !mediaStream) return;
+        async function startContinuousListening() {
+            if (!isLiveActive || isAITalking) return;
 
             stopRecordingAndVAD();
 
-            // Always un-mute microphone tracks for listening
-            if (mediaStream) {
+            // Re-acquire microphone stream if stopped or not yet opened
+            if (!mediaStream || mediaStream.getTracks().every(t => t.readyState === 'ended')) {
+                try {
+                    mediaStream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+                    setupAudioVAD(mediaStream);
+                } catch (err) {
+                    console.error("Mic access failed:", err);
+                    setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyండి!');
+                    return;
+                }
+            } else {
                 mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
             }
 
@@ -2138,7 +2160,6 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     }
                     const averageVolume = sum / bufferLength / 255; // 0.0 to 1.0
 
-                    // Ignore speaker audio while AI is talking (prevent self-interruption)
                     if (isAITalking) {
                         return;
                     }
@@ -2149,7 +2170,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                         lastSpeechTime = Date.now();
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'వింటున్నాను...'));
                     } else if (speechStarted && (Date.now() - lastSpeechTime > vadSilenceTimeout)) {
-                        // User stopped speaking for 1.2 seconds -> finish turn
+                        // User stopped speaking -> finish turn
                         clearInterval(vadInterval);
                         vadInterval = null;
                         if (mediaRecorder && mediaRecorder.state === 'recording') {
@@ -2291,7 +2312,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: "openai/gpt-oss-120b",
-                        max_tokens: 220, // Allows full reasoning (~120 tokens) + complete expressive 1-2 sentence response without truncation (~300ms)
+                        max_tokens: 220,
                         messages: [
                             { role: "system", content: LIVE_PROMPT },
                             ...conversationHistory
@@ -2305,7 +2326,8 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
                 const data = await response.json();
                 const fallbackLiveGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";
-                let aiText = cleanTeluguOutput(data.response) || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
+                let rawReply = data.response || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
+                let aiText = cleanTeluguOutput(rawReply);
 
                 // Add to history
                 conversationHistory.push({ role: "assistant", content: aiText });
@@ -2343,40 +2365,14 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             }
         }
 
-        // Web Audio Context for reliable playback on mobile browsers
-        let audioCtx = null;
-        function getAudioContext() {
-            if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    audioCtx = new AudioContextClass();
-                }
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(() => {});
-            }
-            return audioCtx;
-        }
-
-        // Global Prewarmed Audio Element pool to defeat mobile autoplay restrictions
-        let prewarmedAudio = null;
-        function prewarmAudio() {
-            try {
-                if (!prewarmedAudio) {
-                    prewarmedAudio = new Audio();
-                }
-                const ctx = getAudioContext();
-                if (ctx && ctx.state === 'suspended') {
-                    ctx.resume().catch(() => {});
-                }
-            } catch (e) {}
-        }
-
         // Play Natural Female Voice with Sarvam Bulbul v4-flash (Exclusively in Live Mode)
         async function speakAIResponse(textToSpeak) {
             if (!isLiveActive) return; // Strict guard: NEVER speak in text chat mode!
 
             let cleanSpeechText = sanitizeForSpeech(textToSpeak);
+            if (!cleanSpeechText) {
+                cleanSpeechText = textToSpeak;
+            }
             if (!cleanSpeechText) {
                 if (isLiveActive) startContinuousListening();
                 return;
@@ -2384,18 +2380,13 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
             setLiveState('thinking', 'VOICING...', `"${cleanSpeechText}"`);
 
-            // Mute microphone immediately so mobile audio hardware routes directly to media loudspeaker
-            if (mediaStream) {
-                mediaStream.getAudioTracks().forEach(track => { track.enabled = false; });
-            }
-
             // Multilingual Language & Speaker Auto-Selection
             let targetLang = "te-IN";
             let speakerName = "pooja_te_conversation";
 
             if (currentLanguage === 'en' || (!/[\u0C00-\u0C7F\u0900-\u097F\u0B80-\u0BFF\u0C80-\u0CFF]/.test(cleanSpeechText) && /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText) && !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText))) {
                 targetLang = "en-IN";
-                speakerName = "sanchita_en_companion";
+                speakerName = "simran_en_conversation";
             } else if (currentLanguage === 'hi' || /[\u0900-\u097F]/.test(cleanSpeechText)) {
                 targetLang = "hi-IN";
                 speakerName = "kavya_hi_conversational";
@@ -2411,10 +2402,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             }
 
             try {
-                const ctx = getAudioContext();
-                if (ctx && ctx.state === 'suspended') {
-                    await ctx.resume().catch(() => {});
-                }
+                ensurePlaybackUnlocked();
 
                 const ttsPayload = {
                     text: cleanSpeechText,
@@ -2457,10 +2445,10 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
         async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
             if (!isLiveActive) return;
             try {
-                const fallbackSpeaker = targetLang === "te-IN" ? "pooja"
-                    : targetLang === "hi-IN" ? "meera"
-                    : targetLang === "en-IN" ? "simran"
-                    : "simran";
+                const fallbackSpeaker = targetLang === "te-IN" ? "pooja_te_conversation"
+                    : targetLang === "hi-IN" ? "kavya_hi_conversational"
+                    : targetLang === "en-IN" ? "simran_en_conversation"
+                    : "pooja_te_conversation";
 
                 const fallbackPayload = {
                     text: cleanSpeechText,
@@ -2493,18 +2481,23 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             }
         }
 
-        // PRIMARY: Dedicated DOM Audio Element (pre-unlocked during user gesture)
-        // FALLBACK: AudioContext decodeAudioData
+        // PRIMARY: Web Audio API (decodeAudioData) on unlocked running playbackAudioCtx
+        // FALLBACK: HTML5 Audio with Blob URL
         function playAudioFromBase64(base64Audio, displayText) {
             return new Promise((resolve) => {
                 stopAudioPlayback();
                 isAITalking = true;
                 setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
 
-                // MUTE MICROPHONE: Essential to switch mobile hardware to media loudspeaker & prevent acoustic feedback
+                // 1. Immediately close microphone hardware during AI speech!
+                // This releases the phone's hardware routing from phone-call/earpiece mode to LOUDSPEAKER!
                 if (mediaStream) {
-                    mediaStream.getAudioTracks().forEach(track => { track.enabled = false; });
+                    try {
+                        mediaStream.getTracks().forEach(t => t.stop());
+                    } catch (e) {}
+                    mediaStream = null;
                 }
+                stopRecordingAndVAD();
 
                 let finished = false;
                 const finishTurn = () => {
@@ -2514,65 +2507,20 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     currentAudio = null;
                     currentAudioSource = null;
 
-                    // UN-MUTE MICROPHONE so user can speak immediately
-                    if (mediaStream) {
-                        mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
-                    }
-
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        setTimeout(() => startContinuousListening(), 300);
+                        setTimeout(() => {
+                            if (isLiveActive && !isAITalking) {
+                                startContinuousListening();
+                            }
+                        }, 300);
                     }
                     resolve();
                 };
 
                 const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
 
-                const livePlayer = document.getElementById('liveAudioPlayer');
-                if (livePlayer) {
-                    try {
-                        livePlayer.src = "data:audio/wav;base64," + cleanBase64;
-                        livePlayer.volume = 1.0;
-                        currentAudio = livePlayer;
-
-                        livePlayer.onended = finishTurn;
-                        livePlayer.onerror = (e) => {
-                            console.warn("liveAudioPlayer playback error, trying Web Audio API:", e);
-                            playViaWebAudio(cleanBase64, displayText, finishTurn);
-                        };
-
-                        const playPromise = livePlayer.play();
-                        if (playPromise !== undefined) {
-                            playPromise.then(() => {
-                                console.log("✅ Live audio playing successfully via liveAudioPlayer");
-                            }).catch((playErr) => {
-                                console.warn("liveAudioPlayer play() rejected, trying Web Audio API:", playErr);
-                                playViaWebAudio(cleanBase64, displayText, finishTurn);
-                            });
-                        }
-                        return;
-                    } catch (err) {
-                        console.warn("liveAudioPlayer setup failed, using Web Audio API:", err);
-                    }
-                }
-
-                playViaWebAudio(cleanBase64, displayText, finishTurn);
-            });
-        }
-
-        // Method 2: Web Audio API decodeAudioData
-        function playViaWebAudio(base64Audio, displayText, onDone) {
-            try {
-                const ctx = getAudioContext();
-                if (!ctx) {
-                    fallbackBrowserSpeech(displayText).then(onDone);
-                    return;
-                }
-                if (ctx.state === 'suspended') {
-                    ctx.resume().catch(() => {});
-                }
-
-                const cleanBase64 = base64Audio.replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
+                // Convert base64 to binary bytes
                 const binaryString = window.atob(cleanBase64);
                 const len = binaryString.length;
                 const bytes = new Uint8Array(len);
@@ -2580,26 +2528,75 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     bytes[i] = binaryString.charCodeAt(i);
                 }
 
-                ctx.decodeAudioData(bytes.buffer.slice(0), function (buffer) {
-                    const source = ctx.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(ctx.destination);
-                    currentAudioSource = source;
+                // Play via Web Audio API decodeAudioData
+                const ctx = getPlaybackAudioContext();
+                if (ctx) {
+                    if (ctx.state === 'suspended') {
+                        ctx.resume().catch(() => {});
+                    }
 
-                    source.onended = function () {
-                        currentAudioSource = null;
-                        if (onDone) onDone();
-                    };
+                    ctx.decodeAudioData(bytes.buffer.slice(0), function (buffer) {
+                        try {
+                            const source = ctx.createBufferSource();
+                            source.buffer = buffer;
+                            source.connect(ctx.destination);
+                            currentAudioSource = source;
 
-                    source.start(0);
-                    console.log("✅ Audio playing via Web Audio API decodeAudioData");
-                }, function (decodeErr) {
-                    console.error("AudioContext decode failed:", decodeErr);
-                    fallbackBrowserSpeech(displayText).then(onDone);
-                });
+                            source.onended = function () {
+                                currentAudioSource = null;
+                                finishTurn();
+                            };
+
+                            source.start(0);
+                            console.log("🔊 AI voice playing via Web Audio API decodeAudioData");
+                        } catch (err) {
+                            console.warn("source.start failed, falling back to Blob URL:", err);
+                            playViaBlobAudio(bytes, finishTurn);
+                        }
+                    }, function (decodeErr) {
+                        console.warn("decodeAudioData failed, falling back to Blob URL:", decodeErr);
+                        playViaBlobAudio(bytes, finishTurn);
+                    });
+                } else {
+                    playViaBlobAudio(bytes, finishTurn);
+                }
+            });
+        }
+
+        // Secondary fallback: HTML5 Audio with Blob URL
+        function playViaBlobAudio(bytes, onDone) {
+            try {
+                const blob = new Blob([bytes], { type: 'audio/wav' });
+                const blobUrl = URL.createObjectURL(blob);
+                const audio = new Audio(blobUrl);
+                audio.volume = 1.0;
+                currentAudio = audio;
+
+                audio.onended = () => {
+                    URL.revokeObjectURL(blobUrl);
+                    currentAudio = null;
+                    onDone();
+                };
+
+                audio.onerror = (e) => {
+                    console.error("Blob audio playback error:", e);
+                    URL.revokeObjectURL(blobUrl);
+                    currentAudio = null;
+                    onDone();
+                };
+
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log("🔊 AI voice playing via Blob URL");
+                    }).catch(e => {
+                        console.error("Blob audio play rejected:", e);
+                        onDone();
+                    });
+                }
             } catch (e) {
-                console.error("AudioContext playback error:", e);
-                fallbackBrowserSpeech(displayText).then(onDone);
+                console.error("playViaBlobAudio exception:", e);
+                onDone();
             }
         }
 
@@ -2608,12 +2605,11 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             return new Promise((resolve) => {
                 const cleanup = () => {
                     isAITalking = false;
-                    if (mediaStream) {
-                        mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
-                    }
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        setTimeout(() => startContinuousListening(), 300);
+                        setTimeout(() => {
+                            if (isLiveActive && !isAITalking) startContinuousListening();
+                        }, 300);
                     }
                     resolve();
                 };
