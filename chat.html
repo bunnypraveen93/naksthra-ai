@@ -1296,18 +1296,14 @@
         <div class="chat-container" id="chatContainer"></div>
     </main>
 
-    <!-- Bottom Input Container -->
+    <!-- Dedicated persistent live audio player for live call voice playback -->
+    <audio id="liveAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
+
+    <!-- Bottom Input Container (Gemini Chat style: Pure text input + Live Mode button) -->
     <footer class="bottom-bar">
         <div class="chat-box-wrapper">
             <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything"
                 onkeypress="if(event.key === 'Enter') sendMessage()" oninput="handleInputChange()">
-            <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice Input">
-                <i class="fa-solid fa-microphone"></i>
-            </button>
-            <!-- Voice output toggle (mute/unmute AI speech) -->
-            <button class="mic-btn" id="voiceToggleBtn" onclick="toggleVoiceOutput()" title="Toggle Voice Output" style="font-size: 14px;">
-                <i class="fa-solid fa-volume-high" id="voiceToggleIcon"></i>
-            </button>
             <!-- Live voice mode button (Shown when no text entered) -->
             <button class="live-toggle-btn" id="liveToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
                 <i class="fa-solid fa-wave-square"></i>
@@ -1370,10 +1366,8 @@
         const chatInput = document.getElementById('chatInput');
         const mainContent = document.getElementById('mainContent');
         const recentList = document.getElementById('recentList');
-        const micBtn = document.getElementById('micBtn');
-
-        // Voice output toggle (user can mute/unmute AI voice)
-        let voiceEnabled = true;
+        const micBtn = null; // Removed in Gemini chat mode
+        let voiceEnabled = false; // Chat mode is 100% text only
 
         // Cloudflare Worker Live Endpoint
         const API_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq";
@@ -1847,34 +1841,8 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     conversationHistory = conversationHistory.slice(-6);
                 }
 
-                // Render clean Markdown & attach audio play button
+                // Render clean Markdown (Pure text chat - Gemini Chat mode)
                 aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
-
-                // Add speaker button container
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'msg-actions';
-                actionsDiv.innerHTML = `
-                    <button class="msg-speak-btn" title="Play Voice">
-                        <i class="fa-solid fa-volume-high"></i> Listen
-                    </button>
-                `;
-                const speakBtn = actionsDiv.querySelector('.msg-speak-btn');
-                speakBtn.onclick = async function () {
-                    document.querySelectorAll('.msg-speak-btn.speaking').forEach(b => b.classList.remove('speaking'));
-                    speakBtn.classList.add('speaking');
-                    unlockAudioForMobile();
-                    prewarmAudio();
-                    await speakAIResponse(aiReply);
-                };
-                aiRow.appendChild(actionsDiv);
-
-                // 🔊 Auto-speak AI reply using Sarvam TTS (voice output for every message)
-                try {
-                    speakBtn.classList.add('speaking');
-                    await speakAIResponse(aiReply);
-                } catch (voiceErr) {
-                    console.warn("Voice playback failed:", voiceErr);
-                }
             } catch (error) {
                 console.error("Chat error details:", error);
                 aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network'}.</span>`;
@@ -1980,20 +1948,28 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
         async function openLiveMode() {
             unlockAudioForMobile();
+
+            // Unlock & prime dedicated DOM live audio player on this user gesture
+            const livePlayer = document.getElementById('liveAudioPlayer');
+            if (livePlayer) {
+                try {
+                    livePlayer.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+                    const p = livePlayer.play();
+                    if (p !== undefined) {
+                        p.then(() => { livePlayer.pause(); }).catch(() => {});
+                    }
+                } catch (e) {}
+            }
+
             const ctx = getAudioContext();
             if (ctx && ctx.state === 'suspended') {
                 await ctx.resume().catch(() => {});
             }
-            try {
-                const unlockAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
-                unlockAudio.volume = 0.01;
-                unlockAudio.play().then(() => { unlockAudio.pause(); }).catch(() => {});
-            } catch (e) {}
 
             isLiveActive = true;
             isAITalking = false;
             liveModal.classList.add('active');
-            setLiveState('listening', 'CONNECTING MIC...', 'Microphone access chesthunna...');
+            setLiveState('listening', 'CONNECTING...', (currentLanguage === 'en' ? 'Connecting live call...' : 'కాల్ కనెక్ట్ అవుతోంది...'));
 
             try {
                 // Request mic stream once — completely silent, ZERO Chrome beep!
@@ -2009,7 +1985,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 startContinuousListening();
             } catch (err) {
                 console.error("Mic permission denied:", err);
-                setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyi browser lo!');
+                setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyండి!');
             }
         }
 
@@ -2027,7 +2003,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         function interruptAI() {
             if (isAITalking) {
                 stopAudioPlayback();
-                setLiveState('listening', 'INTERRUPTED', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                 startContinuousListening();
             }
         }
@@ -2036,6 +2012,13 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             if (currentAudioSource) {
                 try { currentAudioSource.stop(); } catch (e) { }
                 currentAudioSource = null;
+            }
+            const livePlayer = document.getElementById('liveAudioPlayer');
+            if (livePlayer) {
+                try {
+                    livePlayer.pause();
+                    livePlayer.currentTime = 0;
+                } catch (e) { }
             }
             if (currentAudio) {
                 try {
@@ -2048,17 +2031,20 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 window.speechSynthesis.cancel();
             }
             isAITalking = false;
+            if (mediaStream) {
+                mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
+            }
         }
 
-        // Voice Activity Detection (VAD) using Web Audio Analyser — detects user voice energy smoothly
+        // Voice Activity Detection (VAD) using unified AudioContext
         function setupAudioVAD(stream) {
             try {
-                audioContextVAD = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioContextVAD.state === 'suspended') {
-                    audioContextVAD.resume().catch(() => {});
+                const ctx = getAudioContext();
+                if (ctx && ctx.state === 'suspended') {
+                    ctx.resume().catch(() => {});
                 }
-                const source = audioContextVAD.createMediaStreamSource(stream);
-                vadAnalyser = audioContextVAD.createAnalyser();
+                const source = ctx.createMediaStreamSource(stream);
+                vadAnalyser = ctx.createAnalyser();
                 vadAnalyser.fftSize = 512;
                 vadAnalyser.smoothingTimeConstant = 0.3;
                 source.connect(vadAnalyser);
@@ -2083,6 +2069,12 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             if (!isLiveActive || isAITalking || !mediaStream) return;
 
             stopRecordingAndVAD();
+
+            // Always un-mute microphone tracks for listening
+            if (mediaStream) {
+                mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
+            }
+
             audioChunks = [];
             speechStarted = false;
             lastSpeechTime = 0;
@@ -2179,7 +2171,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
         // Direct zero-latency Audio STT with Sarvam Saaras v3 (Native WebM/MP4 streaming)
         async function processAudioWithSarvamSTT(audioBlob) {
-            setLiveState('thinking', 'TRANSCRIBING...', 'Processing voice...');
+            setLiveState('thinking', 'TRANSCRIBING...', (currentLanguage === 'en' ? 'Processing voice...' : 'మాటలు ప్రాసెస్ చేస్తున్నాను...'));
 
             try {
                 const formData = new FormData();
@@ -2213,14 +2205,15 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 } else {
                     console.log("Sarvam STT returned empty transcript, restarting listener");
                     if (isLiveActive && !isAITalking) {
+                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                         startContinuousListening();
                     }
                 }
             } catch (err) {
                 console.error("Sarvam STT failed:", err);
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'TRY AGAIN', (currentLanguage === 'en' ? "Couldn't hear clearly, please speak again!" : "వినపడలేదు, మళ్ళీ చెప్పండి!"));
-                    setTimeout(() => startContinuousListening(), 800);
+                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                    setTimeout(() => startContinuousListening(), 400);
                 }
             }
         }
@@ -2341,10 +2334,12 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
             } catch (err) {
                 console.error("Live voice error:", err);
-                setLiveState('listening', 'TRY AGAIN', (currentLanguage === 'en' ? "Connection was slow, please say again!" : "కనెక్షన్ కాస్త స్లో అయ్యింది, మళ్ళీ చెప్పండి!"));
-                setTimeout(() => {
-                    if (isLiveActive) startContinuousListening();
-                }, 1500);
+                if (isLiveActive && !isAITalking) {
+                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                    setTimeout(() => {
+                        if (isLiveActive) startContinuousListening();
+                    }, 500);
+                }
             }
         }
 
@@ -2377,16 +2372,21 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             } catch (e) {}
         }
 
-        // Play Natural Female Voice with Sarvam Bulbul v4-flash
+        // Play Natural Female Voice with Sarvam Bulbul v4-flash (Exclusively in Live Mode)
         async function speakAIResponse(textToSpeak) {
-            if (!voiceEnabled && !isLiveActive) return;
-
-            setLiveState('thinking', 'VOICING...', `"${textToSpeak}"`);
+            if (!isLiveActive) return; // Strict guard: NEVER speak in text chat mode!
 
             let cleanSpeechText = sanitizeForSpeech(textToSpeak);
             if (!cleanSpeechText) {
                 if (isLiveActive) startContinuousListening();
                 return;
+            }
+
+            setLiveState('thinking', 'VOICING...', `"${cleanSpeechText}"`);
+
+            // Mute microphone immediately so mobile audio hardware routes directly to media loudspeaker
+            if (mediaStream) {
+                mediaStream.getAudioTracks().forEach(track => { track.enabled = false; });
             }
 
             // Multilingual Language & Speaker Auto-Selection
@@ -2435,17 +2435,17 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 if (!ttsResponse.ok) {
                     const errTxt = await ttsResponse.text();
                     console.error("Sarvam TTS server error, trying bulbul:v3 fallback:", errTxt);
-                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, textToSpeak);
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                     return;
                 }
 
                 const ttsData = await ttsResponse.json();
                 if (ttsData.audios && ttsData.audios.length > 0) {
                     const audioBase64 = ttsData.audios[0];
-                    await playAudioFromBase64(audioBase64, textToSpeak);
+                    await playAudioFromBase64(audioBase64, cleanSpeechText);
                 } else {
                     console.warn("No audio in TTS response, trying fallback");
-                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, textToSpeak);
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                 }
             } catch (ttsErr) {
                 console.warn("Sarvam TTS error, falling back to browser speech:", ttsErr);
@@ -2455,6 +2455,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
         // Secondary fallback to bulbul:v3 if v4-flash is unavailable
         async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
+            if (!isLiveActive) return;
             try {
                 const fallbackSpeaker = targetLang === "te-IN" ? "pooja"
                     : targetLang === "hi-IN" ? "meera"
@@ -2492,13 +2493,18 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             }
         }
 
-        // PRIMARY: HTML5 Audio with Data URI (fastest & most reliable for WAV base64)
+        // PRIMARY: Dedicated DOM Audio Element (pre-unlocked during user gesture)
         // FALLBACK: AudioContext decodeAudioData
         function playAudioFromBase64(base64Audio, displayText) {
             return new Promise((resolve) => {
                 stopAudioPlayback();
                 isAITalking = true;
                 setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
+
+                // MUTE MICROPHONE: Essential to switch mobile hardware to media loudspeaker & prevent acoustic feedback
+                if (mediaStream) {
+                    mediaStream.getAudioTracks().forEach(track => { track.enabled = false; });
+                }
 
                 let finished = false;
                 const finishTurn = () => {
@@ -2507,41 +2513,50 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     isAITalking = false;
                     currentAudio = null;
                     currentAudioSource = null;
-                    document.querySelectorAll('.msg-speak-btn.speaking').forEach(btn => btn.classList.remove('speaking'));
+
+                    // UN-MUTE MICROPHONE so user can speak immediately
+                    if (mediaStream) {
+                        mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
+                    }
+
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        setTimeout(() => startContinuousListening(), 400);
+                        setTimeout(() => startContinuousListening(), 300);
                     }
                     resolve();
                 };
 
                 const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
 
-                // Method 1: HTML5 Audio with data URI — simplest and most reliable for WAV
-                try {
-                    const audioElement = new Audio("data:audio/wav;base64," + cleanBase64);
-                    audioElement.volume = 1.0;
-                    currentAudio = audioElement;
+                const livePlayer = document.getElementById('liveAudioPlayer');
+                if (livePlayer) {
+                    try {
+                        livePlayer.src = "data:audio/wav;base64," + cleanBase64;
+                        livePlayer.volume = 1.0;
+                        currentAudio = livePlayer;
 
-                    audioElement.onended = finishTurn;
-                    audioElement.onerror = (e) => {
-                        console.warn("HTML5 Audio error, trying Web Audio decode:", e);
-                        playViaWebAudio(cleanBase64, displayText, finishTurn);
-                    };
-
-                    const playPromise = audioElement.play();
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            console.log("✅ Audio successfully playing via HTML5 Audio");
-                        }).catch((playErr) => {
-                            console.warn("HTML5 Audio play() blocked, trying Web Audio decode:", playErr);
+                        livePlayer.onended = finishTurn;
+                        livePlayer.onerror = (e) => {
+                            console.warn("liveAudioPlayer playback error, trying Web Audio API:", e);
                             playViaWebAudio(cleanBase64, displayText, finishTurn);
-                        });
+                        };
+
+                        const playPromise = livePlayer.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                console.log("✅ Live audio playing successfully via liveAudioPlayer");
+                            }).catch((playErr) => {
+                                console.warn("liveAudioPlayer play() rejected, trying Web Audio API:", playErr);
+                                playViaWebAudio(cleanBase64, displayText, finishTurn);
+                            });
+                        }
+                        return;
+                    } catch (err) {
+                        console.warn("liveAudioPlayer setup failed, using Web Audio API:", err);
                     }
-                } catch (playErr) {
-                    console.warn("HTML5 Audio init failed, trying Web Audio decode:", playErr);
-                    playViaWebAudio(cleanBase64, displayText, finishTurn);
                 }
+
+                playViaWebAudio(cleanBase64, displayText, finishTurn);
             });
         }
 
@@ -2593,10 +2608,12 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             return new Promise((resolve) => {
                 const cleanup = () => {
                     isAITalking = false;
-                    document.querySelectorAll('.msg-speak-btn.speaking').forEach(btn => btn.classList.remove('speaking'));
+                    if (mediaStream) {
+                        mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
+                    }
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        setTimeout(() => startContinuousListening(), 400);
+                        setTimeout(() => startContinuousListening(), 300);
                     }
                     resolve();
                 };
@@ -2624,65 +2641,12 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             });
         }
 
-        let recognition = null;
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'te-IN';
-
-            recognition.onstart = function () {
-                micBtn.classList.add('recording');
-                chatInput.placeholder = "Listening (speak now)...";
-            };
-
-            recognition.onresult = function (event) {
-                const transcript = event.results[0][0].transcript;
-                chatInput.value = transcript;
-                sendMessage();
-            };
-
-            recognition.onerror = function () {
-                micBtn.classList.remove('recording');
-                chatInput.placeholder = "Ask anything";
-            };
-
-            recognition.onend = function () {
-                micBtn.classList.remove('recording');
-                chatInput.placeholder = "Ask anything";
-            };
-        }
-
         function toggleMic() {
-            if (!recognition) {
-                alert("Voice input works best in Google Chrome!");
-                return;
-            }
-            if (micBtn.classList.contains('recording')) {
-                recognition.stop();
-            } else {
-                try {
-                    recognition.start();
-                } catch (e) {
-                    recognition.stop();
-                }
-            }
+            // Chat mode is pure text (Gemini Chat mode)
         }
 
-        // Toggle voice output on/off
         function toggleVoiceOutput() {
-            voiceEnabled = !voiceEnabled;
-            const icon = document.getElementById('voiceToggleIcon');
-            if (voiceEnabled) {
-                icon.className = 'fa-solid fa-volume-high';
-                document.getElementById('voiceToggleBtn').title = 'Voice On (Click to Mute)';
-            } else {
-                icon.className = 'fa-solid fa-volume-xmark';
-                document.getElementById('voiceToggleBtn').title = 'Voice Off (Click to Unmute)';
-                // Stop any currently playing audio
-                stopAudioPlayback();
-            }
+            // Live voice is handled in Live Mode (Gemini Live mode)
         }
     </script>
 </body>
