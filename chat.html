@@ -1001,10 +1001,10 @@
         const SARVAM_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam-stt";
         const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
 
-        // Crisp positive persona (no negative-prompt trap)
         const SYSTEM_PROMPT = `You are Nakshatra AI (created solely by Bunny / Praveen).
-Your personality: Brilliant, witty, cheerful, and deeply intelligent—like Nila (Vennela) from Robo 2.0 combined with Gemini Live.
-- Talk like a real human friend with genuine warmth, curiosity, and humor—never robotic or textbook.
+Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Vennela) from Robo 2.0 combined with Gemini Live.
+- Talk like a real human friend who listens carefully and matches the user's vibe—never robotic or textbook.
+- STRICT FACTUAL ACCURACY: Never guess or mix up facts, actors, or movies. If you are not 100% sure, say so honestly.
 - For coding, logic puzzles, riddles, math, and science: think deeply step-by-step and give sharp, complete answers.
 - In Telugu: speak fluid, natural everyday Andhra/Telangana spoken Telugu with polite warmth ("మీరు", "చెప్పండి").
 - Only mention Bunny when explicitly asked who created you.`;
@@ -1071,7 +1071,7 @@ Your personality: Brilliant, witty, cheerful, and deeply intelligent—like Nila
 
         function getLangDirective(lang) {
             if (lang === 'en') {
-                return "Reply 100% in natural, fluent, expressive English.";
+                return "Reply 100% in natural, fluent, warm English.";
             }
             if (lang === 'hi') {
                 return "Reply 100% in natural conversational Hindi (Devanagari script).";
@@ -1082,23 +1082,23 @@ Your personality: Brilliant, witty, cheerful, and deeply intelligent—like Nila
             if (lang === 'kn') {
                 return "Reply 100% in natural conversational Kannada.";
             }
-            return "Reply 100% in natural, fluid, everyday spoken Telugu (తెలుగు లిపి) with cheerful expressions.";
+            return "Reply 100% in natural, fluid, everyday spoken Telugu (తెలుగు లిపి) with warm, caring expressions.";
         }
 
         function getFewShotExamples(lang) {
             if (lang === 'en') {
                 return [
                     { role: "user", content: "Hi, how are you?" },
-                    { role: "assistant", content: "Hey! Doing great, just chilling. What's going on with you today?" },
-                    { role: "user", content: "Nothing much, feeling bored." },
-                    { role: "assistant", content: "Ooh, boredom is dangerous! Want a tricky riddle or should we just chat?" }
+                    { role: "assistant", content: "Hey, I'm doing great. How has your day been going?" },
+                    { role: "user", content: "Nothing much, feeling a bit tired." },
+                    { role: "assistant", content: "Aww, take a little breather. Did you have a long day, or just low on energy?" }
                 ];
             }
             return [
                 { role: "user", content: "హాయ్ ఎలా ఉన్నావ్?" },
-                { role: "assistant", content: "హేయ్! నేను సూపర్ ఉన్నాను, ఇప్పుడే మీకోసం వెయిట్ చేస్తున్నా. ఏంటి ఈరోజు స్పెషల్?" },
-                { role: "user", content: "ఏం లేదు బోర్ కొడుతుంది." },
-                { role: "assistant", content: "అరెరే, బోర్ కొడుతోందా? అయితే ఒక క్రేజీ పజిల్ అడగనా, లేక సరదాగా కబుర్లు చెప్పుకుందామా?" }
+                { role: "assistant", content: "హేయ్, నేను చాలా బాగున్నాను. మీరు ఎలా ఉన్నారు, ఈరోజు ఎలా గడిచింది?" },
+                { role: "user", content: "కొంచెం బోర్ కొడుతుంది." },
+                { role: "assistant", content: "అరెరే, బోర్ కొడుతోందా. ఒక సరదా పజిల్ అడగనా, లేక ఏదైనా ఇంట్రెస్టింగ్ టాపిక్ మాట్లాడుకుందామా?" }
             ];
         }
 
@@ -1123,7 +1123,7 @@ Your personality: Brilliant, witty, cheerful, and deeply intelligent—like Nila
             t = t.replace(/\btea\s+thintunna\w*/gi, "tea taaguthunna");
             t = t.replace(/\b(చెప్పండి|చెప్పు|వింటున్నాను|బాగున్నాను|హలో|హాయ్)\s*[,.]*\s*(హా|హ|మరి|సరే)?\s*[,.]*\s*\1\b/giu, '$1');
             t = t.replace(/చెప్పండి,?\s*నేను\s*వింటున్నాను[!.]*/giu, 'ఏం విశేషాలు?');
-            t = t.replace(/నేను\s*వింటున్నాను[!.]*/giu, 'చెప్పండి!');
+            t = t.replace(/నేను\s*వింటున్నాను[!.]*/giu, 'చెప్పండి.');
             t = t.replace(/మీ\s*రోజు\s*ఎలా\s*(సాగుతోంది|నడుస్తోంది|ఉంది)\??/giu, 'ఏం విశేషాలు?');
             t = t.replace(/నేను\s*మీకు\s*ఎలా\s*సహాయపడగలను\??/giu, 'ఏం కావాలి?');
             t = t.replace(/\bచెప్పు\s+రా\b/gi, "చెప్పండి");
@@ -1149,20 +1149,21 @@ Your personality: Brilliant, witty, cheerful, and deeply intelligent—like Nila
             return res.trim();
         }
 
-        // Strict speech sanitizer: prevents "aa / aaaa" vowel dragging & filler sounds
+        // Strict speech sanitizer: replaces '!' with '.' and strips dragging vowels so Sarvam TTS never stretches "aaaa"
         function sanitizeForSpeech(text) {
             if (!text || typeof text !== "string") return "";
             let t = cleanTeluguOutput(text);
             t = t.replace(/[*_#`~>]/g, ' ');
             t = t.replace(/https?:\/\/\S+/gi, '');
             t = t.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+            t = t.replace(/!+/g, '.');
+            t = t.replace(/\.{2,}/g, '. ');
+            t = t.replace(/[—–\-]/g, ' ');
             t = t.replace(/\b(చెప్పం|చూడం|చేయం|మాట్లాడం|వినం)డీ+\b/gu, '$1డి');
             t = t.replace(/([\u0C3E-\u0C4C])\1+/gu, '$1');
             t = t.replace(/(ఆ|ఈ|ఊ|ఏ|ఓ)\1+/gu, '$1');
             t = t.replace(/([ా-ౌ])(ఆ|ఈ|ఊ|ఏ|ఓ)/gu, '$1');
             t = t.replace(/(^|\s)(ఆహ్+|ఓహ్+|హమ్మ్+|ఉమ్మ్+|ఆ{2,}|ఓ{2,}|aaa+|ooo+|ahh+|ohh+|umm+|hmm+)(\s|$|[.,!?])/giu, '$1$3');
-            t = t.replace(/\.{2,}/g, '. ');
-            t = t.replace(/[—–\-]/g, ' ');
             return t.replace(/\s+/g, ' ').trim();
         }
 
@@ -1219,7 +1220,7 @@ Your personality: Brilliant, witty, cheerful, and deeply intelligent—like Nila
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: "openai/gpt-oss-120b",
-                        temperature: 0.8,
+                        temperature: 0.5,
                         max_tokens: 1200,
                         messages: [
                             { role: "system", content: `${SYSTEM_PROMPT}\n\n${getLangDirective(currentLanguage)}` },
@@ -1667,11 +1668,11 @@ Your personality: Brilliant, witty, cheerful, and deeply intelligent—like Nila
                 const LIVE_PROMPT = `You are Nakshatra AI (created by Bunny / Praveen), talking on a live voice call.
 ${getLangDirective(currentLanguage)}
 
-Personality: Smart, witty, cheerful, and warm—like Nila (Vennela) from Robo 2.0.
+Personality: Warm, genuinely caring, smart, and calm—like a close friend who listens carefully and matches the user's vibe.
 Rules:
-- Talk like a real human friend with genuine emotion, curiosity, or humor.
-- Always finish your sentences completely; reply in 1 to 3 crisp, natural spoken sentences.
-- For puzzles, riddles, and logic questions: think smartly and explain the exact answer clearly.
+- Match the user's mood: if they are happy/casual, be playful and warm; if they are tired/stressed, be gentle and caring.
+- STRICT FACTUAL ACCURACY: Never guess or mix up facts, actors, or movies (for example, Allu Arjun movies are Pushpa, Ala Vaikunthapurramuloo, Arya, Race Gurram—not Ram Charan movies like Rangasthalam or Orange). If you are not 100% sure about a fact, say so honestly.
+- Reply in 1 to 2 natural, complete spoken sentences. Keep every word crisp with zero filler sounds.
 - Only mention Bunny if asked who made you.`;
 
                 const fewShots = getFewShotExamples(currentLanguage);
@@ -1682,7 +1683,7 @@ Rules:
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: "openai/gpt-oss-120b",
-                        temperature: 0.85,
+                        temperature: 0.45,
                         max_tokens: 450,
                         messages: [
                             { role: "system", content: LIVE_PROMPT },
@@ -1734,7 +1735,7 @@ Rules:
             setLiveState('thinking', 'THINKING', `"${cleanSpeechText}"`);
 
             let targetLang = "te-IN";
-            let speakerName = "pooja_te_conversation";
+            let speakerName = "kavitha_te_conversation";
 
             if (currentLanguage === 'en') {
                 targetLang = "en-IN";
@@ -1761,7 +1762,7 @@ Rules:
                         target_language_code: targetLang,
                         model: "bulbul:v4-flash",
                         speaker: speakerName,
-                        pace: 1.15,
+                        pace: 1.05,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
@@ -1789,7 +1790,7 @@ Rules:
             try {
                 const fallbackSpeaker = targetLang === "en-IN" ? "simran"
                     : targetLang === "hi-IN" ? "kavya"
-                    : "pooja";
+                    : "kavitha";
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
@@ -1799,7 +1800,7 @@ Rules:
                         target_language_code: targetLang,
                         model: "bulbul:v3",
                         speaker: fallbackSpeaker,
-                        pace: 1.15,
+                        pace: 1.05,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
