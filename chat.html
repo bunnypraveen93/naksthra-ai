@@ -996,11 +996,11 @@
         }
 
         // Cloudflare Worker Endpoints
-        const WORKER_BASE = "https://small-leaf-d4fb.bunnypraveen939.workers.dev"; //
-        const API_URL = `${WORKER_BASE}/groq`; //
-        const GROQ_STT_URL = `${WORKER_BASE}/groq-stt`; //
-        const SARVAM_STT_URL = `${WORKER_BASE}/sarvam-stt`; //
-        const SARVAM_TTS_URL = `${WORKER_BASE}/sarvam`; //
+        const WORKER_BASE = "https://small-leaf-d4fb.bunnypraveen939.workers.dev";
+        const API_URL = `${WORKER_BASE}/groq`;
+        const GROQ_STT_URL = `${WORKER_BASE}/groq-stt`;
+        const SARVAM_STT_URL = `${WORKER_BASE}/sarvam-stt`;
+        const SARVAM_TTS_URL = `${WORKER_BASE}/sarvam`;
 
         const SYSTEM_PROMPT = `You are Nakshatra AI (created solely by Bunny / Praveen).
 Personality: Sharp, caring, witty, modern Gen-Z best friend with high IQ—like Nila (Vennela) from Robo 2.0 + Gemini Live.
@@ -1745,9 +1745,9 @@ HIGH-IQ LOGIC:
 
             setLiveState('thinking', 'THINKING', `"${cleanSpeechText}"`);
 
-            // Fresh, young, bright voice ('anushka' on bulbul:v3; fallback to v4 pooja_te_conversation)
+            // 'kavya' voice on bulbul:v3; fallback to v4 conversational speakers
             let targetLang = "te-IN";
-            let speakerName = "anushka";
+            let speakerName = "kavya";
             let ttsModel = "bulbul:v3";
 
             if (currentLanguage === 'en') {
@@ -1755,13 +1755,13 @@ HIGH-IQ LOGIC:
                 speakerName = "simran";
             } else if (currentLanguage === 'hi') {
                 targetLang = "hi-IN";
-                speakerName = "anushka";
+                speakerName = "kavya";
             } else if (currentLanguage === 'ta') {
                 targetLang = "ta-IN";
-                speakerName = "anushka";
+                speakerName = "kavya";
             } else if (currentLanguage === 'kn') {
                 targetLang = "kn-IN";
-                speakerName = "anushka";
+                speakerName = "kavya";
             }
 
             try {
