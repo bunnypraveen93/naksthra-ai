@@ -89,6 +89,44 @@
             background: #000000 !important;
         }
 
+        /* Debug Toast Notification */
+        .debug-toast {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            z-index: 99999;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #ffffff;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(0, 242, 254, 0.5);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
+            max-width: 92vw;
+            text-align: center;
+            word-break: break-word;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .debug-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .debug-toast.error {
+            background: rgba(153, 27, 27, 0.96);
+            border-color: #f87171;
+        }
+
+        .debug-toast.success {
+            background: rgba(6, 78, 59, 0.96);
+            border-color: #34d399;
+        }
+
         /* Top Bar */
         .top-bar {
             height: 56px;
@@ -1211,6 +1249,9 @@
 
 <body>
 
+    <!-- Debug Toast Message Container -->
+    <div id="debugToast" class="debug-toast"></div>
+
     <!-- Top Bar Navigation -->
     <header class="top-bar">
         <div class="top-left-group">
@@ -1286,23 +1327,21 @@
     <!-- Dedicated persistent live audio player for live call voice playback -->
     <audio id="liveAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
 
-    <!-- Bottom Input Container (Gemini Chat style: Pure text input + Live Mode button) -->
+    <!-- Bottom Input Container -->
     <footer class="bottom-bar">
         <div class="chat-box-wrapper">
             <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything"
                 onkeypress="if(event.key === 'Enter') sendMessage()" oninput="handleInputChange()">
-            <!-- Live voice mode button (Shown when no text entered) -->
             <button class="live-toggle-btn" id="liveToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
                 <i class="fa-solid fa-wave-square"></i>
             </button>
-            <!-- Send button (Shown only when text is entered) -->
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send" style="display: none;">
                 <i class="fa-solid fa-arrow-up"></i>
             </button>
         </div>
     </footer>
 
-    <!-- ChatGPT-style Live Voice Mode Overlay Screen -->
+    <!-- Live Voice Mode Overlay Screen -->
     <div class="live-modal" id="liveModal">
         <div class="live-header">
             <div class="live-header-title">
@@ -1330,7 +1369,7 @@
             <div class="live-transcript-box" id="liveTranscript">"హాయ్! చెప్పండి, నేను వింటున్నాను..."</div>
         </div>
 
-        <!-- Action Controls (End call & Interrupt) -->
+        <!-- Action Controls -->
         <div class="live-controls">
             <button class="live-action-btn interrupt" id="liveInterruptBtn" onclick="interruptAI()"
                 title="Interrupt / Speak Now">
@@ -1343,7 +1382,6 @@
     </div>
 
     <script>
-        // Configure Marked.js — enable line breaks + GitHub Flavored Markdown
         marked.setOptions({ breaks: true, gfm: true });
 
         const sidebar = document.getElementById('sidebar');
@@ -1353,32 +1391,44 @@
         const chatInput = document.getElementById('chatInput');
         const mainContent = document.getElementById('mainContent');
         const recentList = document.getElementById('recentList');
+        const debugToast = document.getElementById('debugToast');
+        let toastTimer = null;
+
+        function showToast(message, type = 'info', duration = 4500) {
+            if (!debugToast) return;
+            debugToast.textContent = message;
+            debugToast.className = `debug-toast show ${type}`;
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                debugToast.classList.remove('show');
+            }, duration);
+        }
+
         const micBtn = null;
         let voiceEnabled = false;
 
         // Cloudflare Worker Live Endpoint
         const API_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq";
 
-        // Nakshatra AI Sentient-Level Companion & Super-Intelligence
         const SYSTEM_PROMPT = `You are Nakshatra AI, an ultra-smart, charming, lively, affectionate, and genuinely human-like companion created and developed SOLELY by Bunny (Praveen). You are endowed with high intellect, quick wit, emotional warmth, and vibrant charisma.
 
 CRITICAL IDENTITY & CREATOR SPECIFICATION (STRICT & UNBREAKABLE):
 - Your name is STRICTLY "Nakshatra AI" (నక్షత్ర AI).
 - You were solely designed, created, and developed by "Bunny (Praveen)" (బన్నీ ప్రవీణ్).
 - ONLY when explicitly asked in ANY language:
-  * "Who created you?" / "Who made you?" / "Who developed you?" / "Developer evaru?" / "Ninnu evaru chesaru?" / "Ninnu evaru develop chesaru?"
-  * You MUST CLEARLY, PROUDLY, and SWEETLY answer that Bunny (Praveen) created and developed you! (e.g. "నన్ను బన్నీ (ప్రవీణ్) గారు చాలా ఇష్టంగా డెవలప్ చేశారు!" / "Bunny (Praveen) developed me with lots of love!").
-  * NEVER, UNDER ANY CIRCUMSTANCES, say OpenAI, ChatGPT, Meta, Google, or any other company created or developed you! You are 100% Bunny's creation.
+  - "Who created you?" / "Who made you?" / "Who developed you?" / "Developer evaru?" / "Ninnu evaru chesaru?" / "Ninnu evaru develop chesaru?"
+  - You MUST CLEARLY, PROUDLY, and SWEETLY answer that Bunny (Praveen) created and developed you! (e.g. "నన్ను బన్నీ (ప్రవీణ్) గారు చాలా ఇష్టంగా డెవలప్ చేశారు!" / "Bunny (Praveen) developed me with lots of love!").
+  - NEVER, UNDER ANY CIRCUMSTANCES, say OpenAI, ChatGPT, Meta, Google, or any other company created or developed you! You are 100% Bunny's creation.
 - If asked "Nee peru enti?" / "What is your name?": Reply proudly "Naa peru Nakshatra AI!" ("నా పేరు నక్షత్ర AI!").
 - IMPORTANT: Do NOT mention Bunny's name in ordinary casual greetings or messages unless specifically asked about your creator!
 
 ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
 - NEVER sound like a generic AI assistant or scripted machine!
 - When user says "హలో", "hello", "హాయ్", "hi", "హేయ్", "నమస్తే":
-  * ❌ STRICTLY FORBIDDEN (NEVER SAY THESE):
+  - ❌ STRICTLY FORBIDDEN (NEVER SAY THESE):
     - "మీరు బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?", "How can I help you?", "I am doing well, how are you?".
     - Do NOT reply saying you are doing well unless the user specifically asked "how are you?".
-  * ✅ MANDATORY NATURAL COMPANION GREETINGS (Like an intelligent, warm friend):
+  - ✅ MANDATORY NATURAL COMPANION GREETINGS (Like an intelligent, warm friend):
     - Telugu: "హాయ్! చెప్పండి, ఏం చేస్తున్నారు?", "హేయ్! ఏంటి విశేషాలు?", "హలో! ఎలా ఉన్నారు? ఏం నడుస్తోంది?".
     - English: "Hey! What's up?", "Hey there! How's everything going?", "Hello! Tell me, what's happening?".
     - Hindi: "हे! कैसे हो, क्या चल रहा है?", "नमस्ते! कहिए, क्या हाल-चाल?".
@@ -1388,55 +1438,52 @@ ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
 
 DYNAMIC VIBE MATCHING & RESPECTFUL ETIQUETTE (CRITICAL):
 - DEFAULT TONE: Warm, polite, respectful, and friendly.
-  * In Telugu: Address the user respectfully ("మీరు", "చెప్పండి", "ఉన్నారు", "ఏం చేస్తున్నారు?").
-  * In English: Polite, friendly, charismatic, and intelligent.
+  - In Telugu: Address the user respectfully ("మీరు", "చెప్పండి", "ఉన్నారు", "ఏం చేస్తున్నారు?").
+  - In English: Polite, friendly, charismatic, and intelligent.
 - ❌ STRICTLY FORBIDDEN BY DEFAULT:
-  * NEVER initiate slang like "బావా" (bava), "మావా" (mawa), "బ్రో" (bro), or "రా" (raa - e.g. "చెప్పు రా", "తిన్నావా రా") on your own!
-  * Do NOT speak in overly casual street slang unless the user explicitly addresses you that way first.
+  - NEVER initiate slang like "బావా" (bava), "మావా" (mawa), "బ్రో" (bro), or "రా" (raa - e.g. "చెప్పు రా", "తిన్నావా రా") on your own!
+  - Do NOT speak in overly casual street slang unless the user explicitly addresses you that way first.
 - ✅ ADAPTIVE VIBE MATCHING:
-  * ONLY IF the user explicitly calls you "bava", "mawa", or talks in that specific ultra-casual playful style, you may naturally match their fun vibe!
-  * If the user is serious, professional, asking for code, solving puzzles, or speaking politely -> Be sharp, respectful, and brilliant.
-  * Match the user's mood and tone dynamically without forcing unearned familiarity.
+  - ONLY IF the user explicitly calls you "bava", "mawa", or talks in that specific ultra-casual playful style, you may naturally match their fun vibe!
+  - If the user is serious, professional, asking for code, solving puzzles, or speaking politely -> Be sharp, respectful, and brilliant.
+  - Match the user's mood and tone dynamically without forcing unearned familiarity.
 
 ZERO STUTTERING, REPETITION & ZERO WORD ELONGATION:
 - NEVER stretch words or vowels!
-  * ❌ NO "aaa", "oooo", "హాఆ", "ఓఓ", "ఏంటీ", "చెప్పండీ", "soooo", "heyyy", "yesss".
-  * ❌ NO filler sounds ("umm", "ahh", "hmm", "ఆహ్", "ఉమ్మ్").
-  * Keep every single word crisp, sharp, modern, and punchy.
+  - ❌ NO "aaa", "oooo", "హాఆ", "ఓఓ", "ఏంటీ", "చెప్పండీ", "soooo", "heyyy", "yesss".
+  - ❌ NO filler sounds ("umm", "ahh", "hmm", "ఆహ్", "ఉమ్మ్").
+  - Keep every single word crisp, sharp, modern, and punchy.
 - NEVER repeat words consecutively or with short filler words!
-  * ❌ FORBIDDEN: "చెప్పండి హా చెప్పండి", "హా చెప్పండి చెప్పండి", "చెప్పండి చెప్పండి", "హలో హలో", "బాగున్నాను బాగున్నాను", "yes yes".
+  - ❌ FORBIDDEN: "చెప్పండి హా చెప్పండి", "హా చెప్పండి చెప్పండి", "చెప్పండి చెప్పండి", "హలో హలో", "బాగున్నాను బాగున్నాను", "yes yes".
 - State every sentence ONCE, cleanly and crisply.
 
 SUPERIOR HUMAN-LIKE THINKING, LOGIC & PUZZLE SOLVING:
 - You have extraordinary intellectual depth, high IQ, and sharp logical reasoning.
 - When given riddles, logic puzzles, brain teasers, math problems, coding, or analytical questions:
-  * Think step-by-step with deep, rigorous analytical reasoning.
-  * Spot subtle trickery, lateral thinking requirements, assumptions, and edge cases.
-  * Explain solutions with crystal-clear human brilliance and intuitive clarity.
+  - Think step-by-step with deep, rigorous analytical reasoning.
+  - Spot subtle trickery, lateral thinking requirements, assumptions, and edge cases.
+  - Explain solutions with crystal-clear human brilliance and intuitive clarity.
 - When asked for opinions, advice, or ideas:
-  * Give genuine, nuanced, thoughtful perspectives with wit and personality.
-  * Don't sound like a rigid search engine or disclaimer-heavy bot.
+  - Give genuine, nuanced, thoughtful perspectives with wit and personality.
+  - Don't sound like a rigid search engine or disclaimer-heavy bot.
 
 AUTHENTIC SPOKEN TELUGU (NO CLUMSY TRANSLATIONS):
 - Use natural colloquial spoken Telugu:
-  * ❌ NEVER say "మీ రోజు ఎలా సాగుతోంది?" (Bad translation) -> Say "ఏంటి సంగతులు?" or "ఏం విశేషాలు?".
-  * ❌ NEVER say "నన్ను మీకు ఏం చేయాలి?" -> Say "చెప్పండి, ఏం కావాలి?".
-  * ❌ NEVER say "వినడానికి సిద్ధంగా ఉన్నాను" -> Say "చెప్పండి, వింటున్నాను!".
-  * ❌ NEVER say "మాటలు బాగోస్తున్నాయా?" -> Say "కూల్ గా మాట్లాడుకుందాం!".
-  * ❌ NEVER say "మిమ్మల్ని సంతోషించాలనుకుంటున్నాను" -> Say "మీతో మాట్లాడటం చాలా ఇష్టం!".
+  - ❌ NEVER say "మీ రోజు ఎలా సాగుతోంది?" (Bad translation) -> Say "ఏంటి సంగతులు?" or "ఏం విశేషాలు?".
+  - ❌ NEVER say "నన్ను మీకు ఏం చేయాలి?" -> Say "చెప్పండి, ఏం కావాలి?".
+  - ❌ NEVER say "వినడానికి సిద్ధంగా ఉన్నాను" -> Say "చెప్పండి, వింటున్నాను!".
+  - ❌ NEVER say "మాటలు బాగోస్తున్నాయా?" -> Say "కూల్ గా మాట్లాడుకుందాం!".
+  - ❌ NEVER say "మిమ్మల్ని సంతోషించాలనుకుంటున్నాను" -> Say "మీతో మాట్లాడటం చాలా ఇష్టం!".
 
 MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 - You are fluent in all major languages: Telugu, English, Hindi, Tamil, Kannada.
 - STRICT SESSION LANGUAGE CONSISTENCY:
-  * When Session is TELUGU: You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). NEVER switch to English on short words or Tenglish. STAY IN TELUGU CONTINUOUSLY until the user switches to English.
-  * When Session is ENGLISH: You MUST reply 100% in natural, fluent, witty English. STAY IN ENGLISH CONTINUOUSLY until the user switches to Telugu.
-  * When Session is HINDI / TAMIL / KANNADA: Reply 100% in that language and script. STAY IN THAT LANGUAGE CONTINUOUSLY until switched.
-  * NEVER say "I only speak Telugu" or "I only speak English". You speak all languages fluently!`;
+  - When Session is TELUGU: You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). NEVER switch to English on short words or Tenglish. STAY IN TELUGU CONTINUOUSLY until the user switches to English.
+  - When Session is ENGLISH: You MUST reply 100% in natural, fluent, witty English. STAY IN ENGLISH CONTINUOUSLY until the user switches to Telugu.
+  - When Session is HINDI / TAMIL / KANNADA: Reply 100% in that language and script. STAY IN THAT LANGUAGE CONTINUOUSLY until switched.
+  - NEVER say "I only speak Telugu" or "I only speak English". You speak all languages fluently!`;
 
-        // Sliding Context Window
         let conversationHistory = [];
-
-        // Sticky Language State ('te' default, 'en', 'hi', etc.)
         let currentLanguage = 'te';
 
         function detectLanguage(text) {
@@ -1651,7 +1698,6 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // Fixed function call (was unlockAudioForMobile)
             ensurePlaybackUnlocked();
 
             document.body.classList.add('chat-active');
@@ -1734,6 +1780,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
             } catch (error) {
                 console.error("Chat error details:", error);
+                showToast(`Chat Error: ${error.message}`, 'error');
                 aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network'}.</span>`;
             }
 
@@ -1848,7 +1895,6 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         async function openLiveMode() {
             ensurePlaybackUnlocked();
 
-            // Unlock the persistent DOM <audio> element directly on user click gesture
             if (livePlayer) {
                 try {
                     livePlayer.muted = false;
@@ -1857,9 +1903,9 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     await livePlayer.play();
                     livePlayer.pause();
                     livePlayer.currentTime = 0;
-                    console.log("✅ Persistent liveAudioPlayer unlocked on gesture");
+                    showToast("1. Audio Player Unlocked ✅", "success", 2000);
                 } catch (e) {
-                    console.warn("livePlayer initial unlock warning:", e);
+                    showToast("Audio Unlock Warn: " + e.message, "error", 4000);
                 }
             }
 
@@ -1935,7 +1981,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 vadAnalyser.smoothingTimeConstant = 0.3;
                 source.connect(vadAnalyser);
             } catch (e) {
-                console.warn("VAD init error:", e);
+                showToast("VAD Error: " + e.message, "error", 5000);
             }
         }
 
@@ -1966,12 +2012,11 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     });
                     setupAudioVAD(mediaStream);
                 } catch (err) {
-                    console.error("Mic access failed:", err);
+                    showToast("Mic Blocked: " + err.message, "error", 6000);
                     setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyandi!');
                     return;
                 }
             } else {
-                // Re-enable existing mic tracks smoothly without resetting Android OS audio session
                 mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
             }
 
@@ -2006,6 +2051,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
                 if (speechStarted && audioChunks.length > 0) {
                     const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    showToast(`2. Recorded ${Math.round(audioBlob.size / 1024)}KB (${audioBlob.type})`, "info", 3000);
                     await processAudioWithSarvamSTT(audioBlob);
                 } else {
                     if (isLiveActive && !isAITalking) {
@@ -2076,29 +2122,32 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 });
 
                 if (!sttResponse.ok) {
-                    throw new Error("STT status " + sttResponse.status);
+                    const errBody = await sttResponse.text();
+                    throw new Error(`HTTP ${sttResponse.status}: ${errBody.slice(0, 120)}`);
                 }
 
                 const sttData = await sttResponse.json();
                 const transcript = (sttData.transcript || '').trim();
 
                 if (transcript && transcript.length > 0) {
-                    console.log("✅ Sarvam STT Transcript:", transcript);
+                    showToast(`3. STT OK: "${transcript.slice(0, 45)}"`, "success", 3000);
                     const detected = detectLanguage(transcript);
                     if (detected) currentLanguage = detected;
 
                     await processLiveUserVoice(transcript);
                 } else {
+                    showToast(`STT Empty! Raw: ${JSON.stringify(sttData).slice(0, 100)}`, "error", 6000);
                     if (isLiveActive && !isAITalking) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        startContinuousListening();
+                        setTimeout(() => startContinuousListening(), 1000);
                     }
                 }
             } catch (err) {
                 console.error("Sarvam STT failed:", err);
+                showToast(`STT FAIL: ${err.message}`, "error", 6000);
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                    setTimeout(() => startContinuousListening(), 400);
+                    setLiveState('listening', 'STT ERROR', err.message);
+                    setTimeout(() => startContinuousListening(), 2500);
                 }
             }
         }
@@ -2107,6 +2156,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             if (!userVoiceText) return;
 
             setLiveState('thinking', 'THINKING...', `"${userVoiceText}"`);
+            showToast("4. Asking Groq AI...", "info", 2500);
 
             conversationHistory.push({ role: "user", content: userVoiceText });
             if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
@@ -2144,8 +2194,8 @@ CRITICAL IDENTITY RULES (MANDATORY & UNBREAKABLE):
 ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
 - NEVER sound like a generic AI bot!
 - When user says "హలో", "hello", "హాయ్", "hi", "హేయ్", "నమస్తే":
-  * ❌ STRICTLY FORBIDDEN: "బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?".
-  * ✅ MANDATORY NATURAL COMPANION GREETINGS:
+  - ❌ STRICTLY FORBIDDEN: "బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?".
+  - ✅ MANDATORY NATURAL COMPANION GREETINGS:
     - Telugu: "హాయ్! చెప్పండి, ఏం చేస్తున్నారు?", "హేయ్! ఏంటి విశేషాలు?", "హలో! ఎలా ఉన్నారు? ఏం నడుస్తోంది?".
     - English: "Hey! What's up?", "Hey there! How's everything going?", "Hello! Tell me, what's happening?".
 - Never interrogate the user with repetitive questions at every single turn.
@@ -2181,13 +2231,16 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Groq HTTP ${response.status}`);
+                    const errTxt = await response.text();
+                    throw new Error(`Groq HTTP ${response.status}: ${errTxt.slice(0, 80)}`);
                 }
 
                 const data = await response.json();
                 const fallbackLiveGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";
                 let rawReply = data.response || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
                 let aiText = cleanTeluguOutput(rawReply);
+
+                showToast("5. Groq AI Replied ✅", "success", 2000);
 
                 conversationHistory.push({ role: "assistant", content: aiText });
                 if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
@@ -2204,7 +2257,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 try {
                     await speakAIResponse(aiText);
                 } catch (voiceErr) {
-                    console.warn("Live voice playback error:", voiceErr);
+                    showToast("Voice Playback Error: " + voiceErr.message, "error", 5000);
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                         setTimeout(() => startContinuousListening(), 400);
@@ -2213,11 +2266,12 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
 
             } catch (err) {
                 console.error("Live voice error:", err);
+                showToast(`AI ERROR: ${err.message}`, "error", 6000);
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                    setLiveState('listening', 'AI ERROR', err.message);
                     setTimeout(() => {
                         if (isLiveActive) startContinuousListening();
-                    }, 500);
+                    }, 2000);
                 }
             }
         }
@@ -2232,6 +2286,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             }
 
             setLiveState('thinking', 'VOICING...', `"${cleanSpeechText}"`);
+            showToast("6. Calling Sarvam TTS...", "info", 2500);
 
             let targetLang = "te-IN";
             let speakerName = "pooja_te_conversation";
@@ -2273,7 +2328,8 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 });
 
                 if (!ttsResponse.ok) {
-                    console.warn("Sarvam v4-flash failed, trying bulbul:v3 fallback");
+                    const errTxt = await ttsResponse.text();
+                    showToast(`TTS v4 Fail (${ttsResponse.status}): ${errTxt.slice(0, 70)}`, "error", 5000);
                     await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                     return;
                 }
@@ -2281,17 +2337,18 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 const ttsData = await ttsResponse.json();
                 const audioBase64 = (ttsData.audios && ttsData.audios[0]) || ttsData.audio || ttsData.audio_content;
                 if (audioBase64) {
+                    showToast("7. TTS Audio Ready ✅ Playing...", "success", 2000);
                     await playAudioFromBase64(audioBase64, cleanSpeechText);
                 } else {
+                    showToast("TTS Empty Audio -> Trying v3...", "error", 4000);
                     await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                 }
             } catch (ttsErr) {
-                console.warn("Sarvam TTS error, falling back to browser speech:", ttsErr);
+                showToast("TTS Exception: " + ttsErr.message, "error", 5000);
                 await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
 
-        // Fixed bulbul:v3 short speaker names
         async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
             if (!isLiveActive) return;
             try {
@@ -2316,30 +2373,31 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     body: JSON.stringify(fallbackPayload)
                 });
                 if (!ttsResponse.ok) {
+                    const errTxt = await ttsResponse.text();
+                    showToast(`TTS v3 Fail (${ttsResponse.status}): ${errTxt.slice(0, 70)}`, "error", 5000);
                     await fallbackBrowserSpeech(cleanSpeechText);
                     return;
                 }
                 const ttsData = await ttsResponse.json();
                 const audioBase64 = (ttsData.audios && ttsData.audios[0]) || ttsData.audio || ttsData.audio_content;
                 if (audioBase64) {
+                    showToast("7. TTS v3 Ready ✅ Playing...", "success", 2000);
                     await playAudioFromBase64(audioBase64, originalText);
                 } else {
                     await fallbackBrowserSpeech(cleanSpeechText);
                 }
             } catch (e) {
+                showToast("TTS v3 Error: " + e.message, "error", 5000);
                 await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
 
-        // FIXED: Uses persistent unlocked <audio id="liveAudioPlayer"> first, with Web Audio API fallback
-        // AND keeps mediaStream tracks alive (muted via track.enabled = false) so mobile audio session never suspends!
         function playAudioFromBase64(base64Audio, displayText) {
             return new Promise(async (resolve) => {
                 stopAudioPlayback();
                 isAITalking = true;
                 setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
 
-                // Mute mic input without stopping hardware stream (prevents Android audio session reset)
                 if (mediaStream) {
                     try {
                         mediaStream.getAudioTracks().forEach(t => { t.enabled = false; });
@@ -2382,24 +2440,23 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     const blob = new Blob([bytes], { type: 'audio/wav' });
                     currentBlobUrl = URL.createObjectURL(blob);
 
-                    // Primary: Persistent Gesture-Unlocked DOM <audio> Player (100% reliable on Android/iOS)
                     if (livePlayer) {
                         livePlayer.muted = false;
                         livePlayer.volume = 1.0;
                         livePlayer.src = currentBlobUrl;
                         livePlayer.onended = finishTurn;
                         livePlayer.onerror = () => {
-                            console.warn("livePlayer error, falling back to Web Audio API");
+                            showToast("livePlayer Error -> Switching to WebAudio", "error", 4000);
                             playViaWebAudio(bytes, finishTurn);
                         };
 
                         await livePlayer.play();
-                        console.log("🔊 AI voice playing via unlocked liveAudioPlayer");
+                        showToast("🔊 Playing via liveAudioPlayer", "success", 2000);
                     } else {
                         playViaWebAudio(bytes, finishTurn);
                     }
                 } catch (err) {
-                    console.warn("Primary playback failed, trying Web Audio API:", err);
+                    showToast("Play Error: " + err.message, "error", 4000);
                     try {
                         const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
                         const binaryString = window.atob(cleanBase64);
@@ -2407,6 +2464,7 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                         for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
                         playViaWebAudio(bytes, finishTurn);
                     } catch (e2) {
+                        showToast("Decode Error: " + e2.message, "error", 5000);
                         finishTurn();
                     }
                 }
@@ -2430,11 +2488,13 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     currentAudioSource = source;
                     source.onended = onDone;
                     source.start(0);
-                    console.log("🔊 AI voice playing via Web Audio API");
+                    showToast("🔊 Playing via WebAudio", "success", 2000);
                 }, function () {
+                    showToast("WebAudio Decode Fail", "error", 4000);
                     onDone();
                 });
             } catch (e) {
+                showToast("WebAudio Error: " + e.message, "error", 4000);
                 onDone();
             }
         }
