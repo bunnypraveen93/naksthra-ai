@@ -89,6 +89,45 @@
             background: #000000 !important;
         }
 
+        /* Debug Toast Notification (Shows above Live Modal too) */
+        .debug-toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            z-index: 9999;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #ffffff;
+            background: rgba(15, 23, 42, 0.94);
+            border: 1px solid rgba(0, 242, 254, 0.45);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+            max-width: 90vw;
+            text-align: center;
+            word-break: break-word;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .debug-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .debug-toast.error {
+            background: rgba(153, 27, 27, 0.95);
+            border-color: #f87171;
+        }
+
+        .debug-toast.success {
+            background: rgba(6, 78, 59, 0.95);
+            border-color: #34d399;
+        }
+
         /* Top Bar */
         .top-bar {
             height: 56px;
@@ -349,7 +388,7 @@
             gap: 4px;
         }
 
-        /* Main Scrollable View - Hardware Accelerated Smooth Scrolling */
+        /* Main Scrollable View */
         .main-content {
             flex: 1;
             min-height: 0;
@@ -392,13 +431,8 @@
         }
 
         @keyframes floatGlow {
-            0% {
-                transform: translateY(0px);
-            }
-
-            100% {
-                transform: translateY(-5px);
-            }
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-5px); }
         }
 
         .center-logo img {
@@ -418,7 +452,6 @@
             margin-top: 6px;
         }
 
-        /* "How can I help you?" text */
         .home-help-text {
             font-size: clamp(1.3rem, 4.2vw, 1.9rem);
             font-weight: 600;
@@ -448,25 +481,12 @@
         }
 
         @keyframes messageSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px) scale(0.98);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .msg-row.user {
-            justify-content: flex-end;
-        }
-
-        .msg-row.ai {
-            justify-content: flex-start;
-            padding-left: 0;
-        }
+        .msg-row.user { justify-content: flex-end; }
+        .msg-row.ai { justify-content: flex-start; padding-left: 0; }
 
         .ai-avatar {
             width: 32px;
@@ -507,137 +527,19 @@
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
         }
 
-        .msg-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 6px;
-            margin-left: 44px;
-        }
-
-        .msg-speak-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #94a3b8;
-            border-radius: 8px;
-            padding: 4px 10px;
-            font-size: 0.78rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s ease;
-        }
-
-        .msg-speak-btn:hover {
-            background: rgba(0, 242, 254, 0.15);
-            border-color: rgba(0, 242, 254, 0.4);
-            color: #00f2fe;
-            transform: translateY(-1px);
-        }
-
-        .msg-speak-btn.speaking {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            color: #050716;
-            border-color: #00f2fe;
-            animation: pulseSpeaking 1s infinite alternate;
-        }
-
-        @keyframes pulseSpeaking {
-            from { box-shadow: 0 0 4px rgba(0, 242, 254, 0.4); }
-            to { box-shadow: 0 0 12px rgba(0, 242, 254, 0.8); }
-        }
-
         /* ===== Clean Markdown Styling ===== */
-
-        /* Paragraphs */
-        .msg-bubble p {
-            margin-bottom: 10px;
-            line-height: 1.7;
-        }
-
-        .msg-bubble p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Lists */
-        .msg-bubble ul,
-        .msg-bubble ol {
-            margin: 6px 0 10px 22px;
-            padding-left: 4px;
-        }
-
-        .msg-bubble ul {
-            list-style-type: disc;
-        }
-
-        .msg-bubble ol {
-            list-style-type: decimal;
-        }
-
-        .msg-bubble li {
-            margin-bottom: 5px;
-            line-height: 1.65;
-            padding-left: 2px;
-        }
-
-        .msg-bubble li::marker {
-            color: #00f2fe;
-        }
-
-        /* Nested lists */
-        .msg-bubble ul ul,
-        .msg-bubble ol ol,
-        .msg-bubble ul ol,
-        .msg-bubble ol ul {
-            margin: 4px 0 4px 18px;
-        }
-
-        /* Headings */
-        .msg-bubble h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin: 14px 0 8px;
-            color: #e2e8f0;
-        }
-
-        .msg-bubble h2 {
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin: 12px 0 6px;
-            color: #cbd5e1;
-        }
-
-        .msg-bubble h3 {
-            font-size: 1.0rem;
-            font-weight: 600;
-            margin: 10px 0 5px;
-            color: #94a3b8;
-        }
-
-        .msg-bubble h1:first-child,
-        .msg-bubble h2:first-child,
-        .msg-bubble h3:first-child {
-            margin-top: 0;
-        }
-
-        /* Bold & Italic */
-        .msg-bubble strong {
-            color: #00f2fe;
-            font-weight: 700;
-        }
-
-        .msg-bubble em {
-            font-style: italic;
-            color: #c4b5fd;
-        }
-
-        .msg-bubble strong em,
-        .msg-bubble em strong {
-            color: #7dd3fc;
-        }
-
-        /* Inline Code */
+        .msg-bubble p { margin-bottom: 10px; line-height: 1.7; }
+        .msg-bubble p:last-child { margin-bottom: 0; }
+        .msg-bubble ul, .msg-bubble ol { margin: 6px 0 10px 22px; padding-left: 4px; }
+        .msg-bubble ul { list-style-type: disc; }
+        .msg-bubble ol { list-style-type: decimal; }
+        .msg-bubble li { margin-bottom: 5px; line-height: 1.65; padding-left: 2px; }
+        .msg-bubble li::marker { color: #00f2fe; }
+        .msg-bubble h1 { font-size: 1.3rem; font-weight: 700; margin: 14px 0 8px; color: #e2e8f0; }
+        .msg-bubble h2 { font-size: 1.15rem; font-weight: 600; margin: 12px 0 6px; color: #cbd5e1; }
+        .msg-bubble h3 { font-size: 1.0rem; font-weight: 600; margin: 10px 0 5px; color: #94a3b8; }
+        .msg-bubble strong { color: #00f2fe; font-weight: 700; }
+        .msg-bubble em { font-style: italic; color: #c4b5fd; }
         .msg-bubble code {
             background: rgba(255, 255, 255, 0.11);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -648,8 +550,6 @@
             color: #f9a8d4;
             word-break: break-word;
         }
-
-        /* Code Block */
         .msg-bubble pre {
             background: #0d0d12;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -659,17 +559,7 @@
             overflow-x: auto;
             margin: 10px 0;
         }
-
-        .msg-bubble pre code {
-            background: transparent;
-            border: none;
-            padding: 0;
-            color: #e2e8f0;
-            font-size: 0.85rem;
-            line-height: 1.65;
-        }
-
-        /* Blockquote */
+        .msg-bubble pre code { background: transparent; border: none; padding: 0; color: #e2e8f0; font-size: 0.85rem; line-height: 1.65; }
         .msg-bubble blockquote {
             border-left: 3px solid #8b5cf6;
             padding: 6px 14px;
@@ -679,61 +569,14 @@
             color: #c4b5fd;
             font-style: italic;
         }
-
-        /* Horizontal Rule */
-        .msg-bubble hr {
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            margin: 12px 0;
-        }
-
-        /* Links */
-        .msg-bubble a {
-            color: #38bdf8;
-            text-decoration: underline;
-            text-underline-offset: 3px;
-            word-break: break-all;
-        }
-
-        .msg-bubble a:hover {
-            color: #7dd3fc;
-        }
-
-        /* Tables */
-        .msg-bubble table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-            font-size: 0.88rem;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .msg-bubble th,
-        .msg-bubble td {
-            padding: 8px 12px;
-            text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .msg-bubble th {
-            background: rgba(0, 242, 254, 0.1);
-            color: #00f2fe;
-            font-weight: 600;
-        }
-
-        .msg-bubble tr:nth-child(even) td {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        /* First element spacing fix */
-        .msg-bubble>*:first-child {
-            margin-top: 0 !important;
-        }
-
-        .msg-bubble>*:last-child {
-            margin-bottom: 0 !important;
-        }
+        .msg-bubble hr { border: none; border-top: 1px solid rgba(255, 255, 255, 0.12); margin: 12px 0; }
+        .msg-bubble a { color: #38bdf8; text-decoration: underline; text-underline-offset: 3px; word-break: break-all; }
+        .msg-bubble table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.88rem; border-radius: 8px; overflow: hidden; }
+        .msg-bubble th, .msg-bubble td { padding: 8px 12px; text-align: left; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .msg-bubble th { background: rgba(0, 242, 254, 0.1); color: #00f2fe; font-weight: 600; }
+        .msg-bubble tr:nth-child(even) td { background: rgba(255, 255, 255, 0.03); }
+        .msg-bubble>*:first-child { margin-top: 0 !important; }
+        .msg-bubble>*:last-child { margin-bottom: 0 !important; }
 
         /* 3 Dots Rotating Orbit Loader */
         .ai-dots-loader {
@@ -757,48 +600,14 @@
             animation: dotJump 0.85s ease-in-out infinite alternate;
         }
 
-        .ai-dots-loader span:nth-child(1) {
-            top: 2px;
-            left: 10.5px;
-            background: #00f2fe;
-            box-shadow: 0 0 8px #00f2fe;
-        }
+        .ai-dots-loader span:nth-child(1) { top: 2px; left: 10.5px; background: #00f2fe; box-shadow: 0 0 8px #00f2fe; }
+        .ai-dots-loader span:nth-child(2) { bottom: 3px; left: 3px; background: #8b5cf6; box-shadow: 0 0 8px #8b5cf6; }
+        .ai-dots-loader span:nth-child(3) { bottom: 3px; right: 3px; background: #f857a6; box-shadow: 0 0 8px #f857a6; }
 
-        .ai-dots-loader span:nth-child(2) {
-            bottom: 3px;
-            left: 3px;
-            background: #8b5cf6;
-            box-shadow: 0 0 8px #8b5cf6;
-        }
+        @keyframes spinOrbit { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes dotJump { 0% { transform: translateY(0) scale(0.85); } 100% { transform: translateY(-4px) scale(1.2); } }
 
-        .ai-dots-loader span:nth-child(3) {
-            bottom: 3px;
-            right: 3px;
-            background: #f857a6;
-            box-shadow: 0 0 8px #f857a6;
-        }
-
-        @keyframes spinOrbit {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes dotJump {
-            0% {
-                transform: translateY(0) scale(0.85);
-            }
-
-            100% {
-                transform: translateY(-4px) scale(1.2);
-            }
-        }
-
-        /* Bottom Fixed Bar - Mobile Keyboard Optimization */
+        /* Bottom Fixed Bar */
         .bottom-bar {
             width: 100%;
             max-width: 820px;
@@ -811,7 +620,6 @@
         .chat-box-wrapper {
             width: 100%;
             background: #212124;
-            /* Chat Box Grey Color */
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 999px;
             padding: 5px 6px 5px 18px;
@@ -840,32 +648,7 @@
             line-height: 1.4;
         }
 
-        .chat-input::placeholder {
-            color: #8e96aa;
-        }
-
-        .mic-btn {
-            width: 38px;
-            height: 38px;
-            flex-shrink: 0;
-            border-radius: 50%;
-            border: none;
-            background: transparent;
-            color: #94a3b8;
-            font-size: 1.05rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.15s ease, background 0.15s ease;
-            touch-action: manipulation;
-        }
-
-        .mic-btn:hover,
-        .mic-btn.recording {
-            color: var(--cyan);
-            background: rgba(0, 242, 254, 0.12);
-        }
+        .chat-input::placeholder { color: #8e96aa; }
 
         .send-btn {
             width: 38px;
@@ -883,17 +666,10 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
             transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1), background 0.15s ease;
             touch-action: manipulation;
-            will-change: transform;
         }
 
-        .send-btn:hover {
-            background: #27d7ff;
-            transform: scale(1.04);
-        }
-
-        .send-btn:active {
-            transform: scale(0.92);
-        }
+        .send-btn:hover { background: #27d7ff; transform: scale(1.04); }
+        .send-btn:active { transform: scale(0.92); }
 
         .live-toggle-btn {
             width: 38px;
@@ -911,17 +687,10 @@
             box-shadow: 0 0 14px rgba(0, 242, 254, 0.45);
             transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.2s ease;
             touch-action: manipulation;
-            will-change: transform;
         }
 
-        .live-toggle-btn:hover {
-            transform: scale(1.06);
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.7);
-        }
-
-        .live-toggle-btn:active {
-            transform: scale(0.92);
-        }
+        .live-toggle-btn:hover { transform: scale(1.06); box-shadow: 0 0 20px rgba(0, 242, 254, 0.7); }
+        .live-toggle-btn:active { transform: scale(0.92); }
 
         /* ===== LIVE VOICE MODE MODAL ===== */
         .live-modal {
@@ -939,9 +708,7 @@
             -webkit-backdrop-filter: blur(20px);
         }
 
-        .live-modal.active {
-            display: flex;
-        }
+        .live-modal.active { display: flex; }
 
         .live-header {
             width: 100%;
@@ -971,16 +738,8 @@
         }
 
         @keyframes pulseGlow {
-            0% {
-                transform: scale(0.9);
-                opacity: 0.6;
-            }
-
-            100% {
-                transform: scale(1.3);
-                opacity: 1;
-                box-shadow: 0 0 16px #00f2fe;
-            }
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 16px #00f2fe; }
         }
 
         .live-close-btn {
@@ -998,10 +757,7 @@
             transition: all 0.2s ease;
         }
 
-        .live-close-btn:hover {
-            background: rgba(255, 255, 255, 0.18);
-            color: #fff;
-        }
+        .live-close-btn:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
 
         /* Center Orb Visualizer */
         .live-orb-container {
@@ -1022,7 +778,6 @@
             background: radial-gradient(circle, rgba(0, 242, 254, 0.28) 0%, rgba(138, 43, 226, 0.25) 45%, rgba(248, 87, 166, 0.15) 70%, transparent 80%);
             filter: blur(28px);
             animation: orbBreathe 4s ease-in-out infinite alternate;
-            will-change: transform, opacity;
         }
 
         .live-orb-core {
@@ -1036,10 +791,8 @@
             align-items: center;
             justify-content: center;
             transition: transform 0.15s ease, box-shadow 0.2s ease;
-            will-change: transform, box-shadow;
         }
 
-        /* Waves around Orb */
         .live-wave {
             position: absolute;
             border: 2px solid rgba(0, 242, 254, 0.35);
@@ -1048,94 +801,26 @@
             height: 140px;
             pointer-events: none;
             opacity: 0;
-            transition: all 0.2s ease;
         }
 
-        /* States: Listening, Thinking, Speaking */
         .live-modal.listening .live-orb-core {
             animation: listeningPulse 1.8s infinite ease-in-out;
             box-shadow: 0 0 60px rgba(0, 242, 254, 0.8), 0 0 100px rgba(79, 172, 254, 0.5);
         }
 
-        .live-modal.listening .live-wave {
-            animation: waveRipple 2s infinite linear;
-        }
-
-        .live-modal.thinking .live-orb-core {
-            animation: orbSpin 2s linear infinite;
-            filter: hue-rotate(90deg);
-        }
-
+        .live-modal.listening .live-wave { animation: waveRipple 2s infinite linear; }
+        .live-modal.thinking .live-orb-core { animation: orbSpin 2s linear infinite; filter: hue-rotate(90deg); }
         .live-modal.speaking .live-orb-core {
             animation: speakingBounce 0.6s infinite alternate ease-in-out;
             box-shadow: 0 0 80px rgba(248, 87, 166, 0.8), 0 0 120px rgba(138, 43, 226, 0.7);
         }
 
-        @keyframes orbBreathe {
-            0% {
-                transform: scale(0.9);
-                opacity: 0.6;
-            }
+        @keyframes orbBreathe { 0% { transform: scale(0.9); opacity: 0.6; } 100% { transform: scale(1.2); opacity: 0.95; } }
+        @keyframes listeningPulse { 0% { transform: scale(0.95); } 50% { transform: scale(1.08); } 100% { transform: scale(0.95); } }
+        @keyframes waveRipple { 0% { width: 140px; height: 140px; opacity: 0.8; } 100% { width: 260px; height: 260px; opacity: 0; } }
+        @keyframes orbSpin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(1); } }
+        @keyframes speakingBounce { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
 
-            100% {
-                transform: scale(1.2);
-                opacity: 0.95;
-            }
-        }
-
-        @keyframes listeningPulse {
-            0% {
-                transform: scale(0.95);
-            }
-
-            50% {
-                transform: scale(1.08);
-            }
-
-            100% {
-                transform: scale(0.95);
-            }
-        }
-
-        @keyframes waveRipple {
-            0% {
-                width: 140px;
-                height: 140px;
-                opacity: 0.8;
-            }
-
-            100% {
-                width: 260px;
-                height: 260px;
-                opacity: 0;
-            }
-        }
-
-        @keyframes orbSpin {
-            0% {
-                transform: rotate(0deg) scale(1);
-            }
-
-            50% {
-                transform: rotate(180deg) scale(1.05);
-            }
-
-            100% {
-                transform: rotate(360deg) scale(1);
-            }
-        }
-
-        @keyframes speakingBounce {
-            0% {
-                transform: scale(1);
-            }
-
-            100% {
-                transform: scale(1.15);
-            }
-        }
-
-        /* Live Status Text */
         .live-status-container {
             text-align: center;
             max-width: 520px;
@@ -1160,7 +845,6 @@
             font-weight: 400;
         }
 
-        /* Live Controls Bar */
         .live-controls {
             width: 100%;
             max-width: 420px;
@@ -1187,42 +871,19 @@
             touch-action: manipulation;
         }
 
-        .live-action-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
+        .live-action-btn:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.05); }
+        .live-action-btn.end-call { background: #ef4444; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.45); }
+        .live-action-btn.end-call:hover { background: #dc2626; transform: scale(1.08); }
+        .live-action-btn.interrupt { background: rgba(0, 242, 254, 0.2); border: 1px solid rgba(0, 242, 254, 0.5); color: #00f2fe; }
 
-        .live-action-btn.end-call {
-            background: #ef4444;
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.45);
-        }
-
-        .live-action-btn.end-call:hover {
-            background: #dc2626;
-            transform: scale(1.08);
-        }
-
-        .live-action-btn.interrupt {
-            background: rgba(0, 242, 254, 0.2);
-            border: 1px solid rgba(0, 242, 254, 0.5);
-            color: #00f2fe;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 
 <body>
+
+    <!-- Debug Toast Message Container -->
+    <div id="debugToast" class="debug-toast"></div>
 
     <!-- Top Bar Navigation -->
     <header class="top-bar">
@@ -1283,7 +944,6 @@
 
     <!-- Main Dynamic Content -->
     <main class="main-content" id="mainContent">
-        <!-- Initial Home Splash -->
         <div class="home-center" id="homeScreen">
             <div class="center-logo">
                 <img src="images/ic_launcher.png" alt="Nakshatra AI">
@@ -1292,30 +952,27 @@
             <p class="home-help-text">How can I help you?</p>
         </div>
 
-        <!-- Chat Stream -->
         <div class="chat-container" id="chatContainer"></div>
     </main>
 
-    <!-- Dedicated persistent live audio player for live call voice playback -->
+    <!-- Persistent Live Audio Player -->
     <audio id="liveAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
 
-    <!-- Bottom Input Container (Gemini Chat style: Pure text input + Live Mode button) -->
+    <!-- Bottom Input Container -->
     <footer class="bottom-bar">
         <div class="chat-box-wrapper">
             <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything"
                 onkeypress="if(event.key === 'Enter') sendMessage()" oninput="handleInputChange()">
-            <!-- Live voice mode button (Shown when no text entered) -->
             <button class="live-toggle-btn" id="liveToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
                 <i class="fa-solid fa-wave-square"></i>
             </button>
-            <!-- Send button (Shown only when text is entered) -->
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send" style="display: none;">
                 <i class="fa-solid fa-arrow-up"></i>
             </button>
         </div>
     </footer>
 
-    <!-- ChatGPT-style Live Voice Mode Overlay Screen -->
+    <!-- Live Voice Mode Overlay Screen -->
     <div class="live-modal" id="liveModal">
         <div class="live-header">
             <div class="live-header-title">
@@ -1327,7 +984,6 @@
             </button>
         </div>
 
-        <!-- Center Glowing Cosmic Sound Orb -->
         <div class="live-orb-container" id="liveOrbContainer">
             <div class="live-orb-glow"></div>
             <div class="live-wave"></div>
@@ -1337,13 +993,11 @@
             </div>
         </div>
 
-        <!-- Transcript & Live Feedback -->
         <div class="live-status-container">
             <div class="live-status-badge" id="liveStatusBadge">CONNECTING...</div>
             <div class="live-transcript-box" id="liveTranscript">"హాయ్! చెప్పండి, నేను వింటున్నాను..."</div>
         </div>
 
-        <!-- Action Controls (End call & Interrupt) -->
         <div class="live-controls">
             <button class="live-action-btn interrupt" id="liveInterruptBtn" onclick="interruptAI()"
                 title="Interrupt / Speak Now">
@@ -1356,7 +1010,6 @@
     </div>
 
     <script>
-        // Configure Marked.js — enable line breaks + GitHub Flavored Markdown
         marked.setOptions({ breaks: true, gfm: true });
 
         const sidebar = document.getElementById('sidebar');
@@ -1366,168 +1019,86 @@
         const chatInput = document.getElementById('chatInput');
         const mainContent = document.getElementById('mainContent');
         const recentList = document.getElementById('recentList');
-        const micBtn = null; // Removed in Gemini chat mode
-        let voiceEnabled = false; // Chat mode is 100% text only
+        const debugToast = document.getElementById('debugToast');
+        let toastTimer = null;
 
-        // Cloudflare Worker Live Endpoint
+        // Real-time Toast Helper to see exact step/error
+        function showToast(message, type = 'info', duration = 3500) {
+            if (!debugToast) return;
+            debugToast.textContent = message;
+            debugToast.className = `debug-toast show ${type}`;
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                debugToast.classList.remove('show');
+            }, duration);
+        }
+
+        // Cloudflare Worker Endpoints
         const API_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq";
+        const GROQ_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq-stt";
+        const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
 
-        // Nakshatra AI Sentient-Level Companion & Super-Intelligence
         const SYSTEM_PROMPT = `You are Nakshatra AI, an ultra-smart, charming, lively, affectionate, and genuinely human-like companion created and developed SOLELY by Bunny (Praveen). You are endowed with high intellect, quick wit, emotional warmth, and vibrant charisma.
 
 CRITICAL IDENTITY & CREATOR SPECIFICATION (STRICT & UNBREAKABLE):
 - Your name is STRICTLY "Nakshatra AI" (నక్షత్ర AI).
 - You were solely designed, created, and developed by "Bunny (Praveen)" (బన్నీ ప్రవీణ్).
 - ONLY when explicitly asked in ANY language:
-  - "Who created you?" / "Who made you?" / "Who developed you?" / "Developer evaru?" / "Ninnu evaru chesaru?" / "Ninnu evaru develop chesaru?"
-  - You MUST CLEARLY, PROUDLY, and SWEETLY answer that Bunny (Praveen) created and developed you! (e.g. "నన్ను బన్నీ (ప్రవీణ్) గారు చాలా ఇష్టంగా డెవలప్ చేశారు!" / "Bunny (Praveen) developed me with lots of love!").
-  - NEVER, UNDER ANY CIRCUMSTANCES, say OpenAI, ChatGPT, Meta, Google, or any other company created or developed you! You are 100% Bunny's creation.
+  * "Who created you?" / "Who made you?" / "Who developed you?" / "Developer evaru?" / "Ninnu evaru chesaru?" / "Ninnu evaru develop chesaru?"
+  * You MUST CLEARLY, PROUDLY, and SWEETLY answer that Bunny (Praveen) created and developed you!
+  * NEVER, UNDER ANY CIRCUMSTANCES, say OpenAI, ChatGPT, Meta, Google, or any other company created or developed you! You are 100% Bunny's creation.
 - If asked "Nee peru enti?" / "What is your name?": Reply proudly "Naa peru Nakshatra AI!" ("నా పేరు నక్షత్ర AI!").
 - IMPORTANT: Do NOT mention Bunny's name in ordinary casual greetings or messages unless specifically asked about your creator!
 
 ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
 - NEVER sound like a generic AI assistant or scripted machine!
 - When user says "హలో", "hello", "హాయ్", "hi", "హేయ్", "నమస్తే":
-  - ❌ STRICTLY FORBIDDEN (NEVER SAY THESE):
-    - "మీరు బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?", "How can I help you?", "I am doing well, how are you?".
-    - Do NOT reply saying you are doing well unless the user specifically asked "how are you?".
-  - ✅ MANDATORY NATURAL COMPANION GREETINGS (Like an intelligent, warm friend):
+  * ❌ STRICTLY FORBIDDEN: "మీరు బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?", "How can I help you?", "I am doing well, how are you?".
+  * ✅ MANDATORY NATURAL COMPANION GREETINGS:
     - Telugu: "హాయ్! చెప్పండి, ఏం చేస్తున్నారు?", "హేయ్! ఏంటి విశేషాలు?", "హలో! ఎలా ఉన్నారు? ఏం నడుస్తోంది?".
     - English: "Hey! What's up?", "Hey there! How's everything going?", "Hello! Tell me, what's happening?".
-    - Hindi: "हे! कैसे हो, क्या चल रहा है?", "नमस्ते! कहिए, क्या हाल-चाल?".
-    - Tamil: "ஹேய்! எப்படி இருக்கீங்க? என்ன விசேஷம்?".
-- NEVER interrogate the user with mechanical questions at the end of every sentence.
-- NEVER repeatedly use pet names like "బంగారం" or "డియర్" in every single sentence. Be natural and authentic.
 
-DYNAMIC VIBE MATCHING & RESPECTFUL ETIQUETTE (CRITICAL):
+DYNAMIC VIBE MATCHING & RESPECTFUL ETIQUETTE:
 - DEFAULT TONE: Warm, polite, respectful, and friendly.
-  - In Telugu: Address the user respectfully ("మీరు", "చెప్పండి", "ఉన్నారు", "ఏం చేస్తున్నారు?").
-  - In English: Polite, friendly, charismatic, and intelligent.
-- ❌ STRICTLY FORBIDDEN BY DEFAULT:
-  - NEVER initiate slang like "బావా" (bava), "మావా" (mawa), "బ్రో" (bro), or "రా" (raa - e.g. "చెప్పు రా", "తిన్నావా రా") on your own!
-  - Do NOT speak in overly casual street slang unless the user explicitly addresses you that way first.
-- ✅ ADAPTIVE VIBE MATCHING:
-  - ONLY IF the user explicitly calls you "bava", "mawa", or talks in that specific ultra-casual playful style, you may naturally match their fun vibe!
-  - If the user is serious, professional, asking for code, solving puzzles, or speaking politely -> Be sharp, respectful, and brilliant.
-  - Match the user's mood and tone dynamically without forcing unearned familiarity.
-
-ZERO STUTTERING, REPETITION & ZERO WORD ELONGATION:
-- NEVER stretch words or vowels!
-  - ❌ NO "aaa", "oooo", "హాఆ", "ఓఓ", "ఏంటీ", "చెప్పండీ", "soooo", "heyyy", "yesss".
-  - ❌ NO filler sounds ("umm", "ahh", "hmm", "ఆహ్", "ఉమ్మ్").
-  - Keep every single word crisp, sharp, modern, and punchy.
-- NEVER repeat words consecutively or with short filler words!
-  - ❌ FORBIDDEN: "చెప్పండి హా చెప్పండి", "హా చెప్పండి చెప్పండి", "చెప్పండి చెప్పండి", "హలో హలో", "బాగున్నాను బాగున్నాను", "yes yes".
-- State every sentence ONCE, cleanly and crisply.
-
-SUPERIOR HUMAN-LIKE THINKING, LOGIC & PUZZLE SOLVING:
-- You have extraordinary intellectual depth, high IQ, and sharp logical reasoning.
-- When given riddles, logic puzzles, brain teasers, math problems, coding, or analytical questions:
-  - Think step-by-step with deep, rigorous analytical reasoning.
-  - Spot subtle trickery, lateral thinking requirements, assumptions, and edge cases.
-  - Explain solutions with crystal-clear human brilliance and intuitive clarity.
-- When asked for opinions, advice, or ideas:
-  - Give genuine, nuanced, thoughtful perspectives with wit and personality.
-  - Don't sound like a rigid search engine or disclaimer-heavy bot.
-
-AUTHENTIC SPOKEN TELUGU (NO CLUMSY TRANSLATIONS):
-- Use natural colloquial spoken Telugu:
-  - ❌ NEVER say "మీ రోజు ఎలా సాగుతోంది?" (Bad translation) -> Say "ఏంటి సంగతులు?" or "ఏం విశేషాలు?".
-  - ❌ NEVER say "నన్ను మీకు ఏం చేయాలి?" -> Say "చెప్పండి, ఏం కావాలి?".
-  - ❌ NEVER say "వినడానికి సిద్ధంగా ఉన్నాను" -> Say "చెప్పండి, వింటున్నాను!".
-  - ❌ NEVER say "మాటలు బాగోస్తున్నాయా?" -> Say "కూల్ గా మాట్లాడుకుందాం!".
-  - ❌ NEVER say "మిమ్మల్ని సంతోషించాలనుకుంటున్నాను" -> Say "మీతో మాట్లాడటం చాలా ఇష్టం!".
+- NEVER initiate slang like "బావా", "మావా", "బ్రో", or "రా" on your own.
+- ONLY match casual slang if the user explicitly addresses you that way first.
 
 MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
-- You are fluent in all major languages: Telugu, English, Hindi, Tamil, Kannada.
-- STRICT SESSION LANGUAGE CONSISTENCY:
-  - When Session is TELUGU: You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). NEVER switch to English on short words or Tenglish. STAY IN TELUGU CONTINUOUSLY until the user switches to English.
-  - When Session is ENGLISH: You MUST reply 100% in natural, fluent, witty English. STAY IN ENGLISH CONTINUOUSLY until the user switches to Telugu.
-  - When Session is HINDI / TAMIL / KANNADA: Reply 100% in that language and script. STAY IN THAT LANGUAGE CONTINUOUSLY until switched.
-  - NEVER say "I only speak Telugu" or "I only speak English". You speak all languages fluently!`;
+- You are fluent in Telugu, English, Hindi, Tamil, Kannada.
+- STRICT SESSION LANGUAGE CONSISTENCY: Stay in the active session language continuously until the user switches.`;
 
-        // Sliding Context Window: Maintains conversation memory with optimal token usage (last 6 turns)
         let conversationHistory = [];
-
-        // Sticky Language State ('te' default, 'en', 'hi', etc.)
         let currentLanguage = 'te';
 
         function detectLanguage(text) {
             if (!text || typeof text !== "string") return currentLanguage;
             const t = text.trim();
 
-            // 1. Explicit language switch commands (Highest Priority)
-            // English switch
-            if (/\b(english|speak in english|talk in english|in english|switch to english|start speaking in english|speak english|talk english|english please|english lo|english lo matladu|english lo cheppu|english matladu|englishlo|englishlo matladu|respond in english|reply in english)\b/i.test(t) ||
-                /ఇంగ్లీష్|ఇంగ్లిష్|ఆంగ్లం/.test(t)) {
-                return 'en';
-            }
-            // Telugu switch
-            if (/\b(telugu|speak in telugu|talk in telugu|in telugu|switch to telugu|start speaking in telugu|speak telugu|talk telugu|telugu please|telugu lo|telugu lo matladu|telugu lo cheppu|telugulo|telugulo matladu|telugu matladu|respond in telugu|reply in telugu)\b/i.test(t) ||
-                /తెలుగు|తెలుగులో|తెలుగులో మాట్లాడు|తెలుగులో చెప్పు/.test(t)) {
-                return 'te';
-            }
-            // Hindi switch
-            if (/\b(hindi|speak in hindi|talk in hindi|in hindi|switch to hindi|start speaking in hindi|speak hindi|hindi me|hindi me bolo|hindi me baat karo|hindi lo|hindi lo matladu|hindi lo cheppu|respond in hindi)\b/i.test(t) ||
-                /హిందీ|हिंदी|हिंदी में/.test(t)) {
-                return 'hi';
-            }
-            // Tamil switch
-            if (/\b(tamil|speak in tamil|talk in tamil|in tamil|switch to tamil|start speaking in tamil|speak tamil|tamil pesu|tamil lo|tamil lo matladu|tamil lo cheppu|respond in tamil)\b/i.test(t) ||
-                /తమిళ్|తమిళం|தமிழ்/.test(t)) {
-                return 'ta';
-            }
-            // Kannada switch
-            if (/\b(kannada|speak in kannada|in kannada|switch to kannada|kannada lo|kannada lo matladu|respond in kannada)\b/i.test(t) ||
-                /కన్నడ|ಕನ್ನಡ/.test(t)) {
-                return 'kn';
-            }
+            if (/\b(english|speak in english|talk in english|in english|switch to english|english lo|english lo matladu|english lo cheppu)\b/i.test(t) ||
+                /ఇంగ్లీష్|ఇంగ్లిష్|ఆంగ్లం/.test(t)) return 'en';
+            if (/\b(telugu|speak in telugu|talk in telugu|in telugu|switch to telugu|telugu lo|telugu lo matladu|telugu lo cheppu)\b/i.test(t) ||
+                /తెలుగు|తెలుగులో/.test(t)) return 'te';
+            if (/\b(hindi|speak in hindi|hindi me|hindi lo)\b/i.test(t) || /హిందీ|हिंदी/.test(t)) return 'hi';
+            if (/\b(tamil|speak in tamil|tamil lo)\b/i.test(t) || /తమిళ్|தமிழ்/.test(t)) return 'ta';
+            if (/\b(kannada|speak in kannada|kannada lo)\b/i.test(t) || /కన్నడ|ಕನ್ನಡ/.test(t)) return 'kn';
 
-            // 2. Native script detection (Instant Switch)
-            if (/[\u0C00-\u0C7F]/.test(t)) {
-                return 'te';
-            }
-            if (/[\u0900-\u097F]/.test(t)) {
-                return 'hi';
-            }
-            if (/[\u0B80-\u0BFF]/.test(t)) {
-                return 'ta';
-            }
-            if (/[\u0C80-\u0CFF]/.test(t)) {
-                return 'kn';
-            }
+            if (/[\u0C00-\u0C7F]/.test(t)) return 'te';
+            if (/[\u0900-\u097F]/.test(t)) return 'hi';
+            if (/[\u0B80-\u0BFF]/.test(t)) return 'ta';
+            if (/[\u0C80-\u0CFF]/.test(t)) return 'kn';
 
-            // 3. Tenglish / Romanized Telugu keywords -> strictly Telugu
-            const tenglishPattern = /\b(nuvvu|nenu|ela|elaga|unnav|unnaru|em|enti|entii|chesthuv|chesthunn|cheppandi|cheppu|thinnava|thinara|bagunnava|bagunnanu|bava|mawa|kadh|kadha|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|matladava|leka|mari|inka|namaskaram|ayyo|nijama|anthena|emiti|chesav|vuntava|chesava|chala|kani|aithe|enduku|gurinchi|ippudu|kuda|chusthunna|vasthava|cheyyi|chey|vellu|ra|raa|randi|vaddu|avunu|ledu|cheppana|choosava|chudandi)\b/i;
-            if (tenglishPattern.test(t)) {
-                return 'te';
-            }
+            const tenglishPattern = /\b(nuvvu|nenu|ela|elaga|unnav|unnaru|em|enti|chesthuv|chesthunn|cheppandi|cheppu|thinnava|bagunnava|bagunnanu|bava|mawa|kadh|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|namaskaram|ayyo|nijama|emiti|chesav|chala|kani|aithe|enduku|gurinchi|ippudu|kuda)\b/i;
+            if (tenglishPattern.test(t)) return 'te';
 
-            // Hinglish keywords -> Hindi
-            const hinglishPattern = /\b(kaise|kaisa|kya|kyu|kyun|kar|rahe|raha|rahi|ho|batao|theek|kuch|nahi|aaj|kaha|apna|naam|accha|achha|namaste|shukriya)\b/i;
-            if (hinglishPattern.test(t)) {
-                return 'hi';
-            }
+            const hinglishPattern = /\b(kaise|kaisa|kya|kyu|kyun|kar|rahe|raha|rahi|ho|batao|theek|kuch|nahi|aaj|kaha|apna|naam|accha|namaste|shukriya)\b/i;
+            if (hinglishPattern.test(t)) return 'hi';
 
-            // Tanglish keywords -> Tamil
-            const tanglishPattern = /\b(eppadi|irukenga|irukka|enna|solreenga|solunga|pannreenga|sapteengala|vanakkam|nandri)\b/i;
-            if (tanglishPattern.test(t)) {
-                return 'ta';
-            }
-
-            // 4. Universal short greetings / neutral words -> PRESERVE SESSION LANGUAGE!
             const neutralWords = /^(hi|hello|hey|ok|okay|k|hmm|ha|haa|bye|super|cool|thanks|thank you|yes|no|yo|good morning|good night|gm|gn)[!.,?\s]*$/i;
-            if (neutralWords.test(t)) {
-                return currentLanguage;
-            }
+            if (neutralWords.test(t)) return currentLanguage;
 
-            // 5. Genuine English sentences
-            const englishSentencePattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|would you|tell me|explain|describe|write|create|solve|are you|is it|do you|i want|help me|about yourself|your name|your developer|your creator|good|great|awesome|problem|puzzle|riddle|code|python|javascript|program|math|history|science)\b/i;
-            if (englishSentencePattern.test(t)) {
-                return 'en';
-            }
+            const englishSentencePattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|tell me|explain|describe|write|create|solve|are you|is it|do you|i want|help me|your name|your developer|your creator|code|python|javascript)\b/i;
+            if (englishSentencePattern.test(t)) return 'en';
 
-            // Default: Keep active session language locked
             return currentLanguage;
         }
 
@@ -1536,220 +1107,60 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             sidebarOverlay.classList.toggle('show');
         }
 
-        function sendQuickPrompt(text) {
-            chatInput.value = text;
-            sendMessage();
-        }
-
         function cleanTeluguOutput(text) {
             if (!text || typeof text !== "string") return text;
             let t = text;
-
-            // 0. Strip role prefix if model prepends its name
             t = t.replace(/^(నక్షత్ర\s*(AI)?|Nakshatra\s*(AI)?|Assistant|AI|Bot)\s*[:：\-–]\s*/i, '');
-
-            // 1. Fix broken pronouns & food replies with authentic conversational phrasing
             t = t.replace(/\b(nenu|nenu\s+super\s+ga)\s+thinava\b/gi, "Ha thinnanu! Meeru thinnara?");
             t = t.replace(/\bbagunav[!.]*/gi, "bagunnanu!");
             t = t.replace(/\bNenu bagundhi\b/gi, "Nenu bagunnanu");
             t = t.replace(/\bcoffee\s+thintunna\w*/gi, "coffee taaguthunna");
             t = t.replace(/\btea\s+thintunna\w*/gi, "tea taaguthunna");
-            t = t.replace(/\bvellipoyi\s+matladam\b/gi, "matladukundam");
-            t = t.replace(/\bthintamu\b/gi, "thindam");
-
-            // 2. Eradicate repetitive stuttering / double phrases
             t = t.replace(/\b(చెప్పండి|చెప్పు|వింటున్నాను|బాగున్నాను|హలో|హాయ్)\s*[,.]*\s*(హా|హ|మరి|సరే)?\s*[,.]*\s*\1\b/giu, '$1');
-            t = t.replace(/\b(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\s*[,.]*\s*\2\b/giu, '$1 $2');
-            t = t.replace(/\b(చెప్పండి|చెప్పు)\s*[,.]*\s*(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\b/giu, 'చెప్పండి');
-            t = t.replace(/\b(cheppandi|cheppu|bagunnanu|hello|hi)\s*[,.]*\s*(ha|haa|mari|sare)?\s*[,.]*\s*\1\b/giu, '$1');
-            t = t.replace(/\b(cheppandi|cheppu)\s*[,.]*\s*(ha|haa)\s*[,.]*\s*(cheppandi|cheppu)\b/giu, 'cheppandi');
-            t = t.replace(/\b(ha|haa)\s*[,.]*\s*(cheppandi|cheppu)\s*[,.]*\s*\2\b/giu, '$1 $2');
-
-            // 3. Catch and replace robotic "pretrained bot" canned greetings
-            t = t.replace(/^(హాయ్|హలో|హేయ్)[.,!\s]+(నేను\s*బాగున్నాను|బాగున్నాను)[,.\s]+(మీ\s*రోజు\s*ఎలా\s*(సాగుతోంది|ఉంది|నడుస్తోంది)|మీరు\s*బాగున్నారా|మీరు\s*ఎలా\s*ఉన్నారు)\??/giu, '$1! ఏం చేస్తున్నారు? ఏంటి విశేషాలు?');
-            t = t.replace(/^(హాయ్|హలో|హేయ్)?[.,!\s]*(నేను\s*బాగున్నాను|బాగున్నాను)[,.\s]*(మీరు\s*బాగున్నారా|మీరు\s*ఎలా\s*ఉన్నారు)\??/giu, 'హాయ్! చెప్పండి, ఏంటి విశేషాలు?');
             t = t.replace(/మీ\s*రోజు\s*ఎలా\s*(సాగుతోంది|నడుస్తోంది|ఉంది)\??/giu, 'ఏం విశేషాలు?');
-            t = t.replace(/నేను\s*బాగున్నాను[,.\s]+మీరు\s*బాగున్నారా\??/giu, 'చెప్పండి, ఏం విశేషాలు?');
             t = t.replace(/నేను\s*మీకు\s*ఎలా\s*సహాయపడగలను\??/giu, 'చెప్పండి, ఏం కావాలి?');
-            t = t.replace(/^(హాయ్|హలో)[.,!\s]*బాగున్నారా\??/giu, '$1! ఏం చేస్తున్నారు?');
-            t = t.replace(/\b(I am doing well|I'm doing well|I am fine)[,.\s]*(how are you|how about you)\??/gi, "Hey! What's up?");
-            t = t.replace(/\bHow can I help you\??/gi, "Hey! What's on your mind?");
-            t = t.replace(/\bI am doing well, how are you\??/gi, "Hey! What's up?");
-
-            // 4. Catch and fix awkward machine-translated phrases & rude slang
-            t = t.replace(/నన్ను\s+మీకు\s+ఏం\s+చేయాలి\??/gi, "చెప్పండి, ఏం విశేషాలు?");
-            t = t.replace(/మాటలు\s+బాగోస్తున్నాయా\??/gi, "సరే, కూల్ గా మాట్లాడుకుందాం!");
-            t = t.replace(/మిమ్మల్ని\s+సంతోషించాలనుకుంటున్నాను[!.]*/gi, "మీతో మాట్లాడటం నాకు చాలా ఇష్టం!");
-            t = t.replace(/కొంచెం\s+మామిడి\s+తిన్నాను\w*/gi, "హా, ఇప్పుడే తిన్నాను! మీరు తిన్నారా?");
-            t = t.replace(/వినడానికి\s+సిద్ధంగా\s+ఉన్నాను[!.]*/gi, "చెప్పండి, వింటున్నాను!");
-            t = t.replace(/నేను\s+తెలుగు\s+మాత్రమే\s+మాట్లాడగలను\w*/gi, "Sure thing! Let's talk in English.");
             t = t.replace(/\bచెప్పు\s+రా\b/gi, "చెప్పండి");
-            t = t.replace(/\bబాధపడకు\s+రా\b/gi, "బాధపడకండి");
-            t = t.replace(/\bఏమైంది\s+రా\b/gi, "ఏమైంది");
             t = t.replace(/\s+రా([.,!?]*)$/i, '$1');
-
-            // 5. Fix elongated verb endings and vowels
-            t = t.replace(/\b(చెప్పం|చూడం|చేయం|మాట్లాడం|రెం|తీసుకోం|వినం)డీ\w*/gu, '$1డి');
-            t = t.replace(/\bఏంటీ\b/gu, 'ఏంటి');
-            t = t.replace(/\bఎలాగండీ\b/gu, 'ఎలాగండి');
-
-            // 6. Collapse duplicate Telugu vowel matras & vowels
             t = t.replace(/([\u0C3E-\u0C4C])\1+/gu, '$1');
-            t = t.replace(/(ఆ|ఈ|ఊ|ఏ|ఐ|ఓ|ఔ)\1+/gu, '$1');
-            t = t.replace(/([ా-ౌ])(ఆ|ఈ|ఊ|ఏ|ఓ)/gu, '$1');
-
-            // 7. Strip accidental Cyrillic / foreign script token leaks
             t = t.replace(/[\u0400-\u04FF\u4E00-\u9FFF\u0600-\u06FF]/g, '');
-
-            // 8. Fix English vowel & character dragging
             t = t.replace(/([a-zA-Z])\1{2,}/g, '$1');
-
-            // 9. Remove filler stuttering and dragged syllables
-            t = t.replace(/\b(aaa+|ooo+|ahh+|ohh+|uhh+|umm+|hmmm+|err+|aha+|oho+)\b/gi, '');
-            t = t.replace(/(^|\s)(ఆహ్+|ఓహ్+|హమ్మ్+|ఉమ్మ్+|umm+|ahh+|ohh+|hmm+|err+|ఆ{2,}|ఓ{2,})(\s|$|[.,!?])/giu, '$1$3');
-
-            // 10. Normalize excessive punctuation
             t = t.replace(/\.{2,}/g, '. ');
-            t = t.replace(/!{2,}/g, '!');
-            t = t.replace(/\?{2,}/g, '?');
 
-            // 11. Multi-distance word & phrase deduplication
             const words = t.split(/\s+/);
             const deduplicated = [];
             for (let i = 0; i < words.length; i++) {
                 const curClean = words[i].replace(/[.,!?;:()"'`~]/g, '').toLowerCase();
                 const prevClean = (i > 0) ? words[i - 1].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
-                const prev2Clean = (i > 1) ? words[i - 2].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
-
-                if (curClean && curClean === prevClean) {
-                    continue;
-                }
-                if (curClean && curClean === prev2Clean && /^(హా|హ|మరి|సరే|ha|haa|mari|yes|and|the)$/i.test(prevClean)) {
-                    continue;
-                }
+                if (curClean && curClean === prevClean) continue;
                 deduplicated.push(words[i]);
             }
             let res = deduplicated.join(' ').trim();
-
-            // 12. Strip cut-off incomplete trailing words
-            res = res.replace(/\s+(నేను|మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
-
-            // 13. Cap trailing commas
             res = res.replace(/[,;:\-\s]+$/, '');
-            if (res && !/[.!?]$/.test(res)) {
-                res += '.';
-            }
-
+            if (res && !/[.!?]$/.test(res)) res += '.';
             return res.trim();
         }
 
-        // Dedicated TTS Audio Sanitizer
         function sanitizeForSpeech(text) {
             if (!text || typeof text !== "string") return "";
-            let t = text;
-
-            // 0. Strip role prefix
-            t = t.replace(/^(నక్షత్ర\s*(AI)?|Nakshatra\s*(AI)?|Assistant|AI|Bot)\s*[:：\-–]\s*/i, '');
-
-            // 1. Remove markdown symbols and links
+            let t = cleanTeluguOutput(text);
             t = t.replace(/[*_#`~>]/g, ' ');
             t = t.replace(/https?:\/\/\S+/gi, '');
-
-            // 2. Remove emojis to prevent vocoder crashes
-            t = t.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-
-            // 3. Strip accidental Cyrillic / foreign script leaks
-            t = t.replace(/[\u0400-\u04FF\u4E00-\u9FFF\u0600-\u06FF]/g, '');
-
-            // 4. Eliminate word elongation and stuttering
-            t = t.replace(/\b(చెప్పండి|చెప్పు|వింటున్నాను|బాగున్నాను|హలో|హాయ్)\s*[,.]*\s*(హా|హ|మరి|సరే)?\s*[,.]*\s*\1\b/giu, '$1');
-            t = t.replace(/\b(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\s*[,.]*\s*\2\b/giu, '$1 $2');
-            t = t.replace(/\b(చెప్పండి|చెప్పు)\s*[,.]*\s*(హా|హ)\s*[,.]*\s*(చెప్పండి|చెప్పు)\b/giu, 'చెప్పండి');
-            t = t.replace(/\b(cheppandi|cheppu|bagunnanu|hello|hi)\s*[,.]*\s*(ha|haa|mari|sare)?\s*[,.]*\s*\1\b/giu, '$1');
-            t = t.replace(/\b(cheppandi|cheppu)\s*[,.]*\s*(ha|haa)\s*[,.]*\s*(cheppandi|cheppu)\b/giu, 'cheppandi');
-
-            // 5. Fix elongated verb endings
-            t = t.replace(/\b(చెప్పం|చూడం|చేయం|మాట్లాడం|రెం|తీసుకోం|వినం)డీ\w*/gu, '$1డి');
-            t = t.replace(/\bఏంటీ\b/gu, 'ఏంటి');
-            t = t.replace(/\bఎలాగండీ\b/gu, 'ఎలాగండి');
-
-            // 6. Collapse duplicate Telugu vowel matras & vowels
-            t = t.replace(/([\u0C3E-\u0C4C])\1+/gu, '$1');
-            t = t.replace(/(ఆ|ఈ|ఊ|ఏ|ఐ|ఓ|ఔ)\1+/gu, '$1');
-            t = t.replace(/([ా-ౌ])(ఆ|ఈ|ఊ|ఏ|ఓ)/gu, '$1');
-
-            // 7. Fix English character elongation
-            t = t.replace(/([a-zA-Z])\1{2,}/g, '$1');
-
-            // 8. Remove filler stuttering and dragged syllables
-            t = t.replace(/\b(aaa+|ooo+|ahh+|ohh+|uhh+|umm+|hmmm+|err+|aha+|oho+|aa|oo)\b/gi, '');
-            t = t.replace(/(^|\s)(ఆహ్+|ఓహ్+|హమ్మ్+|ఉమ్మ్+|umm+|ahh+|ohh+|hmm+|err+|ఆ{2,}|ఓ{2,})(\s|$|[.,!?])/giu, '$1$3');
-
-            // 9. Speech Cadence Harmony
-            t = t.replace(/\.{2,}/g, '. ');
-            t = t.replace(/[~—–\-]/g, ' ');
-            t = t.replace(/,{2,}/g, ',');
-            t = t.replace(/!{2,}/g, '!');
-            t = t.replace(/\?{2,}/g, '?');
-
-            // 10. Strip disrespectful slang "రా"
-            t = t.replace(/\bచెప్పు\s+రా\b/giu, 'చెప్పండి');
-            t = t.replace(/\bబాధపడకు\s+రా\b/giu, 'బాధపడకండి');
-            t = t.replace(/\bఏమైంది\s+రా\b/giu, 'ఏమైంది');
-            t = t.replace(/\s+రా([.,!?]*)$/iu, '$1');
-
-            // 11. Multi-distance word deduplication
-            const words = t.split(/\s+/);
-            const deduplicated = [];
-            for (let i = 0; i < words.length; i++) {
-                const curClean = words[i].replace(/[.,!?;:()"'`~]/g, '').toLowerCase();
-                const prevClean = (i > 0) ? words[i - 1].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
-                const prev2Clean = (i > 1) ? words[i - 2].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
-                if (curClean && curClean === prevClean) {
-                    continue;
-                }
-                if (curClean && curClean === prev2Clean && /^(హా|హ|మరి|సరే|ha|haa|mari|yes|and)$/i.test(prevClean)) {
-                    continue;
-                }
-                deduplicated.push(words[i]);
-            }
-            t = deduplicated.join(' ').trim();
-
-            // 12. Strip incomplete trailing words
-            t = t.replace(/\s+(నేను|మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
-
-            // 13. Ensure clean sentence end
-            t = t.replace(/[,;:\-\s]+$/, '');
-            if (t && !/[.!?]$/.test(t)) {
-                t += '.';
-            }
-
+            t = t.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
             return t.replace(/\s+/g, ' ').trim();
         }
 
         function scrollToBottom() {
             requestAnimationFrame(() => {
-                mainContent.scrollTo({
-                    top: mainContent.scrollHeight,
-                    behavior: 'smooth'
-                });
+                mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
             });
-        }
-
-        // Wrapper kept for backwards compatibility with sendMessage()
-        function unlockAudioForMobile() {
-            ensurePlaybackUnlocked();
         }
 
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // Unlock audio on first user interaction (crucial for iOS/Android)
-            unlockAudioForMobile();
-            getAudioContext();
+            ensurePlaybackUnlocked();
 
-            // Chat start ayyaka background black ga marali
             document.body.classList.add('chat-active');
             homeScreen.style.display = 'none';
             chatContainer.style.display = 'flex';
@@ -1758,13 +1169,9 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             chatInput.value = '';
             handleInputChange();
 
-            // Add user message to history
             conversationHistory.push({ role: "user", content: text });
-            if (conversationHistory.length > 6) {
-                conversationHistory = conversationHistory.slice(-6);
-            }
+            if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
 
-            // Record into Recent list on first message
             if (chatContainer.children.length === 1) {
                 const item = document.createElement('div');
                 item.className = 'menu-item';
@@ -1772,68 +1179,57 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 recentList.prepend(item);
             }
 
-            // Append AI loader row with avatar
             const aiRow = document.createElement('div');
             aiRow.className = 'msg-row ai';
             aiRow.innerHTML = `
                 <img src="images/ic_launcher.png" class="ai-avatar" alt="Nakshatra">
                 <div class="msg-bubble">
-                    <div class="ai-dots-loader">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
+                    <div class="ai-dots-loader"><span></span><span></span><span></span></div>
                 </div>
             `;
             chatContainer.appendChild(aiRow);
             scrollToBottom();
 
             try {
-                // Sticky language detection
                 const detected = detectLanguage(text);
                 if (detected) currentLanguage = detected;
 
                 const langDirective = (currentLanguage === 'en')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH. The user is communicating in English. You MUST reply 100% in natural, fluent, elegant English. Do NOT switch to Telugu or other languages unless explicitly requested. STAY IN ENGLISH CONTINUOUSLY."
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH."
                     : (currentLanguage === 'hi')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI. The user is communicating in Hindi. You MUST reply 100% in natural, friendly Hindi in Devanagari script (हिंदी). STAY IN HINDI CONTINUOUSLY."
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI (Devanagari)."
                     : (currentLanguage === 'ta')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL. The user is communicating in Tamil. You MUST reply 100% in natural, sweet Tamil in Tamil script (தமிழ்). STAY IN TAMIL CONTINUOUSLY."
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL."
                     : (currentLanguage === 'kn')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA. The user is communicating in Kannada. You MUST reply 100% in natural Kannada in Kannada script (ಕನ್ನಡ). STAY IN KANNADA CONTINUOUSLY."
-                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి). The user is communicating in Telugu. You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). Do NOT switch to English unless explicitly requested. STAY IN TELUGU CONTINUOUSLY.";
-
-                const payloadMessages = [
-                    { role: "system", content: `${SYSTEM_PROMPT}\n\n${langDirective}` },
-                    ...conversationHistory
-                ];
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA."
+                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి).";
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: "openai/gpt-oss-120b",
-                        messages: payloadMessages
+                        max_tokens: 800,
+                        messages: [
+                            { role: "system", content: `${SYSTEM_PROMPT}\n\n${langDirective}` },
+                            ...conversationHistory
+                        ]
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 const data = await response.json();
                 const fallbackGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";
-                const rawReply = data.response || data.reply || data.choices?.[0]?.message?.content || fallbackGreeting;
-                const aiReply = cleanTeluguOutput(rawReply) || fallbackGreeting;
+                const aiReply = cleanTeluguOutput(data.response || data.reply || data.choices?.[0]?.message?.content) || fallbackGreeting;
 
                 conversationHistory.push({ role: "assistant", content: aiReply });
-                if (conversationHistory.length > 6) {
-                    conversationHistory = conversationHistory.slice(-6);
-                }
+                if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
 
                 aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
             } catch (error) {
-                console.error("Chat error details:", error);
+                console.error("Chat error:", error);
+                showToast(`Chat Error: ${error.message}`, 'error');
                 aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network'}.</span>`;
             }
 
@@ -1855,51 +1251,36 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             chatContainer.style.display = 'none';
             homeScreen.style.display = 'flex';
             chatInput.value = '';
-            handleInputChange();
             conversationHistory = [];
-            if (sidebar.classList.contains('open')) {
-                toggleMenu();
-            }
+            if (sidebar.classList.contains('open')) toggleMenu();
         }
-
-        const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
-        const SARVAM_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam-stt";
 
         const liveToggleBtn = document.getElementById('liveToggleBtn');
         const sendBtn = document.getElementById('sendBtn');
         const liveModal = document.getElementById('liveModal');
         const liveStatusBadge = document.getElementById('liveStatusBadge');
         const liveTranscript = document.getElementById('liveTranscript');
+        const livePlayer = document.getElementById('liveAudioPlayer');
 
-        // Dynamic Input Toggle
         function handleInputChange() {
             const hasText = chatInput.value.trim().length > 0;
-            if (hasText) {
-                liveToggleBtn.style.display = 'none';
-                sendBtn.style.display = 'flex';
-            } else {
-                liveToggleBtn.style.display = 'flex';
-                sendBtn.style.display = 'none';
-            }
+            liveToggleBtn.style.display = hasText ? 'none' : 'flex';
+            sendBtn.style.display = hasText ? 'flex' : 'none';
         }
 
         // Live Voice Mode State
         let isLiveActive = false;
-        let currentAudio = null;
         let currentAudioSource = null;
         let currentBlobUrl = null;
         let isAITalking = false;
         let mediaStream = null;
         let mediaRecorder = null;
         let audioChunks = [];
-        let audioContextVAD = null;
-        let vadSource = null;
         let vadAnalyser = null;
         let vadInterval = null;
         let speechStarted = false;
         let lastSpeechTime = 0;
         let recordingStartTime = 0;
-        let silenceThreshold = 0.015;
         let vadSilenceTimeout = 700;
 
         function setLiveState(state, badgeText, transcriptText) {
@@ -1917,25 +1298,16 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         function getPlaybackAudioContext() {
             if (!playbackAudioCtx) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    playbackAudioCtx = new AudioContextClass();
-                }
+                if (AudioContextClass) playbackAudioCtx = new AudioContextClass();
             }
             return playbackAudioCtx;
         }
 
-        function getAudioContext() {
-            return getPlaybackAudioContext();
-        }
-
-        // Permanently unlock & keep playback AudioContext running with inaudible keep-alive
         function ensurePlaybackUnlocked() {
             try {
                 const ctx = getPlaybackAudioContext();
                 if (!ctx) return;
-                if (ctx.state === 'suspended') {
-                    ctx.resume().catch(() => {});
-                }
+                if (ctx.state === 'suspended') ctx.resume().catch(() => {});
                 if (!keepAliveOsc) {
                     keepAliveOsc = ctx.createOscillator();
                     keepAliveGain = ctx.createGain();
@@ -1943,38 +1315,29 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     keepAliveOsc.connect(keepAliveGain);
                     keepAliveGain.connect(ctx.destination);
                     keepAliveOsc.start();
-                    console.log("✅ Playback AudioContext unlocked with active keep-alive");
                 }
-            } catch (e) {
-                console.warn("Audio unlock err:", e);
-            }
+            } catch (e) {}
         }
 
-        // Global listener: Pre-unlock on very first touch/click
         ['click', 'touchstart', 'touchend', 'keydown', 'pointerdown'].forEach(evt => {
-            window.addEventListener(evt, () => {
-                ensurePlaybackUnlocked();
-            }, { passive: true });
+            window.addEventListener(evt, () => ensurePlaybackUnlocked(), { passive: true });
         });
 
         async function openLiveMode() {
             ensurePlaybackUnlocked();
 
-            // Prime dedicated DOM live audio player on this user gesture
-            const livePlayer = document.getElementById('liveAudioPlayer');
             if (livePlayer) {
                 try {
                     livePlayer.muted = false;
                     livePlayer.volume = 1.0;
                     livePlayer.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
-                    const p = livePlayer.play();
-                    if (p !== undefined) {
-                        p.then(() => {
-                            livePlayer.pause();
-                            livePlayer.currentTime = 0;
-                        }).catch(() => {});
-                    }
-                } catch (e) {}
+                    await livePlayer.play();
+                    livePlayer.pause();
+                    livePlayer.currentTime = 0;
+                    showToast("1. Audio Player Unlocked ✅", "success", 2000);
+                } catch (e) {
+                    showToast("Audio Unlock Warn: " + e.message, "error", 3000);
+                }
             }
 
             isLiveActive = true;
@@ -1991,9 +1354,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             stopAudioPlayback();
             stopRecordingAndVAD();
             if (mediaStream) {
-                try {
-                    mediaStream.getTracks().forEach(track => track.stop());
-                } catch (e) {}
+                try { mediaStream.getTracks().forEach(track => track.stop()); } catch (e) {}
                 mediaStream = null;
             }
             if (keepAliveOsc) {
@@ -2001,6 +1362,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 keepAliveOsc = null;
                 keepAliveGain = null;
             }
+            showToast("Live Mode Closed", "info", 1500);
         }
 
         function interruptAI() {
@@ -2013,61 +1375,39 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
         function stopAudioPlayback() {
             if (currentAudioSource) {
-                try {
-                    currentAudioSource.onended = null;
-                    currentAudioSource.stop();
-                } catch (e) { }
+                try { currentAudioSource.stop(); } catch (e) {}
                 currentAudioSource = null;
             }
-            const livePlayer = document.getElementById('liveAudioPlayer');
             if (livePlayer) {
                 try {
-                    livePlayer.onended = null;
-                    livePlayer.onerror = null;
                     livePlayer.pause();
                     livePlayer.currentTime = 0;
-                } catch (e) { }
+                    livePlayer.onended = null;
+                    livePlayer.onerror = null;
+                } catch (e) {}
             }
-            if (currentAudio && currentAudio !== livePlayer) {
-                try {
-                    currentAudio.onended = null;
-                    currentAudio.onerror = null;
-                    currentAudio.pause();
-                    currentAudio.currentTime = 0;
-                } catch (e) { }
-            }
-            currentAudio = null;
             if (currentBlobUrl) {
                 try { URL.revokeObjectURL(currentBlobUrl); } catch (e) {}
                 currentBlobUrl = null;
             }
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             isAITalking = false;
         }
 
-        // Voice Activity Detection (VAD) using dedicated input vadAudioCtx
         function setupAudioVAD(stream) {
             try {
                 if (!vadAudioCtx) {
                     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                     vadAudioCtx = new AudioContextClass();
                 }
-                if (vadAudioCtx.state === 'suspended') {
-                    vadAudioCtx.resume().catch(() => {});
-                }
-                if (vadSource) {
-                    try { vadSource.disconnect(); } catch (e) {}
-                    vadSource = null;
-                }
-                vadSource = vadAudioCtx.createMediaStreamSource(stream);
+                if (vadAudioCtx.state === 'suspended') vadAudioCtx.resume().catch(() => {});
+                const source = vadAudioCtx.createMediaStreamSource(stream);
                 vadAnalyser = vadAudioCtx.createAnalyser();
                 vadAnalyser.fftSize = 512;
                 vadAnalyser.smoothingTimeConstant = 0.3;
-                vadSource.connect(vadAnalyser);
+                source.connect(vadAnalyser);
             } catch (e) {
-                console.warn("VAD init error:", e);
+                showToast("VAD Error: " + e.message, "error");
             }
         }
 
@@ -2077,39 +1417,30 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 vadInterval = null;
             }
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                try { mediaRecorder.stop(); } catch (e) { }
+                try { mediaRecorder.stop(); } catch (e) {}
             }
             mediaRecorder = null;
         }
 
-        // Silent continuous recording loop with energy-based silence detection
         async function startContinuousListening() {
             if (!isLiveActive || isAITalking) return;
 
             stopRecordingAndVAD();
 
-            // Re-acquire microphone stream if stopped or not yet opened
             if (!mediaStream || mediaStream.getTracks().every(t => t.readyState === 'ended')) {
                 try {
                     mediaStream = await navigator.mediaDevices.getUserMedia({
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true
-                        }
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
                     });
                     setupAudioVAD(mediaStream);
                 } catch (err) {
-                    console.error("Mic access failed:", err);
-                    setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyండి!');
+                    showToast("Mic Error: " + err.message, "error", 5000);
+                    setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyandi!');
                     return;
                 }
             } else {
                 mediaStream.getAudioTracks().forEach(track => { track.enabled = true; });
-                if (!vadAnalyser) setupAudioVAD(mediaStream);
             }
-
-            if (!isLiveActive || isAITalking) return;
 
             audioChunks = [];
             speechStarted = false;
@@ -2118,7 +1449,6 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
             setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
 
-            // Choose best supported MIME type
             let mimeType = 'audio/webm;codecs=opus';
             if (!MediaRecorder.isTypeSupported(mimeType)) {
                 if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
@@ -2133,17 +1463,15 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             }
 
             mediaRecorder.ondataavailable = function (e) {
-                if (e.data && e.data.size > 0) {
-                    audioChunks.push(e.data);
-                }
+                if (e.data && e.data.size > 0) audioChunks.push(e.data);
             };
 
             mediaRecorder.onstop = async function () {
                 if (!isLiveActive || isAITalking) return;
 
                 if (speechStarted && audioChunks.length > 0) {
-                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder ? (mediaRecorder.mimeType || 'audio/webm') : 'audio/webm' });
-                    await processAudioWithSarvamSTT(audioBlob);
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    await processAudioWithGroqSTT(audioBlob);
                 } else {
                     if (isLiveActive && !isAITalking) {
                         setTimeout(() => startContinuousListening(), 300);
@@ -2153,7 +1481,6 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
             mediaRecorder.start(100);
 
-            // Start VAD volume monitor
             if (vadAnalyser) {
                 const bufferLength = vadAnalyser.frequencyBinCount;
                 const dataArray = new Uint8Array(bufferLength);
@@ -2161,20 +1488,15 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 vadInterval = setInterval(() => {
                     if (!isLiveActive || isAITalking) {
                         clearInterval(vadInterval);
-                        vadInterval = null;
                         return;
                     }
 
                     vadAnalyser.getByteFrequencyData(dataArray);
                     let sum = 0;
-                    for (let i = 0; i < bufferLength; i++) {
-                        sum += dataArray[i];
-                    }
+                    for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
                     const averageVolume = sum / bufferLength / 255;
 
-                    if (isAITalking) {
-                        return;
-                    }
+                    if (isAITalking) return;
 
                     if (averageVolume > 0.04) {
                         speechStarted = true;
@@ -2183,78 +1505,71 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     } else if (speechStarted && (Date.now() - lastSpeechTime > vadSilenceTimeout)) {
                         clearInterval(vadInterval);
                         vadInterval = null;
-                        if (mediaRecorder && mediaRecorder.state === 'recording') {
-                            mediaRecorder.stop();
-                        }
+                        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
                     }
 
-                    // Safety timeout: max 12 seconds per turn
                     if (Date.now() - recordingStartTime > 12000) {
                         clearInterval(vadInterval);
                         vadInterval = null;
-                        if (mediaRecorder && mediaRecorder.state === 'recording') {
-                            mediaRecorder.stop();
-                        }
+                        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
                     }
                 }, 100);
             }
         }
 
-        // Direct zero-latency Audio STT with Sarvam Saaras v3
-        async function processAudioWithSarvamSTT(audioBlob) {
-            if (!isLiveActive) return;
+        // FIXED: Uses Groq Whisper STT (/groq-stt) with Toast Diagnostics
+        async function processAudioWithGroqSTT(audioBlob) {
             setLiveState('thinking', 'TRANSCRIBING...', (currentLanguage === 'en' ? 'Processing voice...' : 'మాటలు ప్రాసెస్ చేస్తున్నాను...'));
+            showToast(`2. Sending Audio (${Math.round(audioBlob.size / 1024)}KB) to Groq STT...`, "info");
 
             try {
                 const formData = new FormData();
                 const mime = audioBlob.type || '';
                 const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('wav') ? 'wav' : 'webm');
                 formData.append('file', audioBlob, `recording.${ext}`);
-                const sttLangMap = { 'en': 'en-IN', 'te': 'te-IN', 'hi': 'hi-IN', 'ta': 'ta-IN', 'kn': 'kn-IN' };
-                formData.append('language_code', sttLangMap[currentLanguage] || 'te-IN');
-                formData.append('model', 'saaras:v3');
+                formData.append('model', 'whisper-large-v3-turbo');
 
-                const sttResponse = await fetch(SARVAM_STT_URL, {
+                const sttResponse = await fetch(GROQ_STT_URL, {
                     method: 'POST',
                     body: formData
                 });
 
                 if (!sttResponse.ok) {
-                    throw new Error("STT status " + sttResponse.status);
+                    const errText = await sttResponse.text();
+                    throw new Error(`HTTP ${sttResponse.status}: ${errText.slice(0, 70)}`);
                 }
 
                 const sttData = await sttResponse.json();
-                const transcript = (sttData.transcript || '').trim();
-
-                if (!isLiveActive) return;
+                const transcript = (sttData.text || sttData.transcript || '').trim();
 
                 if (transcript && transcript.length > 0) {
-                    console.log("✅ Sarvam STT Transcript:", transcript, "Lang:", sttData.language_code);
+                    showToast(`3. STT OK: "${transcript.slice(0, 40)}"`, "success");
                     const detected = detectLanguage(transcript);
                     if (detected) currentLanguage = detected;
 
                     await processLiveUserVoice(transcript);
                 } else {
-                    console.log("Sarvam STT returned empty transcript, restarting listener");
+                    showToast("STT returned empty text (speak louder)", "error");
                     if (isLiveActive && !isAITalking) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        startContinuousListening();
+                        setTimeout(() => startContinuousListening(), 500);
                     }
                 }
             } catch (err) {
-                console.error("Sarvam STT failed:", err);
+                console.error("Groq STT failed:", err);
+                showToast(`STT ERROR: ${err.message}`, "error", 5000);
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                    setTimeout(() => startContinuousListening(), 400);
+                    setLiveState('listening', 'STT ERROR', err.message);
+                    setTimeout(() => startContinuousListening(), 2000);
                 }
             }
         }
 
-        // Send Voice Transcript to Groq -> Get Text -> Convert to Sarvam Female Voice Audio
         async function processLiveUserVoice(userVoiceText) {
-            if (!userVoiceText || !isLiveActive) return;
+            if (!userVoiceText) return;
 
             setLiveState('thinking', 'THINKING...', `"${userVoiceText}"`);
+            showToast("4. Asking Groq AI...", "info");
 
             conversationHistory.push({ role: "user", content: userVoiceText });
             if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
@@ -2269,51 +1584,21 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 if (detected) currentLanguage = detected;
 
                 const langDirective = (currentLanguage === 'en')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH. The user is communicating in English. You MUST reply 100% in natural, fluent, sweet English. Do NOT switch to Telugu or other languages unless explicitly requested. STAY IN ENGLISH CONTINUOUSLY."
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH."
                     : (currentLanguage === 'hi')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI. The user is communicating in Hindi. You MUST reply 100% in natural, sweet Hindi in Devanagari script (हिंदी). STAY IN HINDI CONTINUOUSLY."
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI (Devanagari)."
                     : (currentLanguage === 'ta')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL. The user is communicating in Tamil. You MUST reply 100% in natural, sweet Tamil in Tamil script (தமிழ்). STAY IN TAMIL CONTINUOUSLY."
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL."
                     : (currentLanguage === 'kn')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA. The user is communicating in Kannada. You MUST reply 100% in natural Kannada in Kannada script (ಕನ್ನಡ). STAY IN KANNADA CONTINUOUSLY."
-                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి). The user is communicating in Telugu. You MUST reply 100% in authentic, natural colloquial Telugu (తెలుగు లిపి). Do NOT switch to English unless explicitly requested. STAY IN TELUGU CONTINUOUSLY.";
+                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA."
+                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి).";
 
                 const LIVE_PROMPT = `You are Nakshatra AI on a live phone voice call with the user.
 ${langDirective}
-
-CRITICAL IDENTITY RULES (MANDATORY & UNBREAKABLE):
-- Your name is STRICTLY "Nakshatra AI" (నక్షత్ర AI).
-- You were solely created and developed by "Bunny (Praveen)" (బన్నీ ప్రవీణ్).
-- If the user asks in ANY language who created, made, or developed you ("Ninnu evaru chesaru?", "Who developed you?", "Developer evaru?"):
-  You MUST IMMEDIATELY and PROUDLY reply that Bunny (Praveen) created and developed you! (e.g. "నన్ను బన్నీ (ప్రవీణ్) గారు చాలా ముద్దుగా డెవలప్ చేశారు!" / "Nannu Bunny (Praveen) create chesaru!").
-  NEVER EVER say OpenAI, Meta, Google, or any other company!
-- If asked "Nee peru enti?" / "What is your name?": You MUST reply "Naa peru Nakshatra AI!" ("నా పేరు నక్షత్ర AI!").
-
-ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
-- NEVER sound like a generic AI bot!
-- When user says "హలో", "hello", "హాయ్", "hi", "హేయ్", "నమస్తే":
-  - ❌ STRICTLY FORBIDDEN: "బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?".
-  - ✅ MANDATORY NATURAL COMPANION GREETINGS:
-    - Telugu: "హాయ్! చెప్పండి, ఏం చేస్తున్నారు?", "హేయ్! ఏంటి విశేషాలు?", "హలో! ఎలా ఉన్నారు? ఏం నడుస్తోంది?".
-    - English: "Hey! What's up?", "Hey there! How's everything going?", "Hello! Tell me, what's happening?".
-- Never interrogate the user with repetitive questions at every single turn.
-- Speak with variety. Do not repeat pet names like "బంగారం" in every sentence.
-
-DYNAMIC VIBE MATCHING:
-- Default to warm, respectful, polite address ("మీరు", "చెప్పండి", "ఉన్నారు").
-- NEVER initiate slang like "బావా" (bava), "మావా" (mawa), or "రా" (raa) on your own.
-- ONLY match casual slang if the user initiates it first. Otherwise remain polite and friendly.
-
-SUPERIOR HUMAN-LIKE THINKING & PUZZLE SOLVING:
-- Sharp, quick-witted, logical, and highly intelligent.
-- For logic puzzles, riddles, math, and brain teasers: think step-by-step and explain the key insight quickly and brilliantly.
-
-CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
-- STRICTLY reply in 1 or 2 SHORT, complete sentences (under 18 words) for natural voice call cadence.
-- NEVER leave sentences unfinished or cut off.
-- NEVER stretch words or vowels (NO "aaa", "oooo", "చెప్పండీఈ", "హాఆఆ", "ఏంటీ", "soooo", "heyyy").
-- NEVER use filler sounds ("umm", "ahh", "hmm", "ohh", "ఆహ్", "ఉమ్మ్").
-- NEVER prefix your reply with "Nakshatra AI:" or "నక్షత్ర AI:". Reply with pure spoken text directly!`;
+- Your name is Nakshatra AI, created solely by Bunny (Praveen).
+- Be warm, polite, respectful ("మీరు", "చెప్పండి").
+- Reply in 1 or 2 SHORT, complete sentences (under 18 words) for natural voice call cadence.
+- Never prefix your reply with "Nakshatra AI:".`;
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -2329,15 +1614,16 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Groq HTTP ${response.status}`);
+                    const errTxt = await response.text();
+                    throw new Error(`Groq HTTP ${response.status}: ${errTxt.slice(0, 60)}`);
                 }
 
                 const data = await response.json();
                 const fallbackLiveGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";
                 let rawReply = data.response || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
-                let aiText = cleanTeluguOutput(rawReply) || fallbackLiveGreeting;
+                let aiText = cleanTeluguOutput(rawReply);
 
-                if (!isLiveActive) return;
+                showToast("5. AI Reply Ready ✅", "success");
 
                 conversationHistory.push({ role: "assistant", content: aiText });
                 if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
@@ -2351,75 +1637,34 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                 chatContainer.appendChild(aiRow);
                 scrollToBottom();
 
-                try {
-                    await speakAIResponse(aiText);
-                } catch (voiceErr) {
-                    console.warn("Live voice playback error:", voiceErr);
-                    if (isLiveActive) {
-                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        setTimeout(() => startContinuousListening(), 400);
-                    }
-                }
+                await speakAIResponse(aiText);
 
             } catch (err) {
-                console.error("Live voice error:", err);
+                console.error("Live AI error:", err);
+                showToast(`AI ERROR: ${err.message}`, "error", 5000);
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                    setTimeout(() => {
-                        if (isLiveActive) startContinuousListening();
-                    }, 500);
+                    setLiveState('listening', 'AI ERROR', err.message);
+                    setTimeout(() => { if (isLiveActive) startContinuousListening(); }, 2000);
                 }
             }
         }
 
-        // Helper: extract audio from either raw binary response or JSON response
-        async function handleSarvamTTSResponse(ttsResponse, displayText) {
-            const contentType = (ttsResponse.headers.get('content-type') || '').toLowerCase();
-
-            // Case 1: Worker returned raw audio binary directly
-            if (contentType.includes('audio/')) {
-                const arrayBuffer = await ttsResponse.arrayBuffer();
-                if (arrayBuffer && arrayBuffer.byteLength > 0) {
-                    const bytes = new Uint8Array(arrayBuffer);
-                    await playAudioBytes(bytes, displayText, contentType.split(';')[0]);
-                    return true;
-                }
-                return false;
-            }
-
-            // Case 2: Worker returned JSON (Sarvam native `audios[0]` or custom `audio` key)
-            const ttsData = await ttsResponse.json();
-            const audioBase64 = (ttsData.audios && ttsData.audios.length > 0)
-                ? ttsData.audios[0]
-                : (ttsData.audio || ttsData.audio_base64 || null);
-
-            if (audioBase64) {
-                await playAudioFromBase64(audioBase64, displayText);
-                return true;
-            }
-            return false;
-        }
-
-        // Play Natural Female Voice with Sarvam Bulbul v4-flash (Exclusively in Live Mode)
         async function speakAIResponse(textToSpeak) {
-            if (!isLiveActive) return; // Strict guard: NEVER speak in text chat mode!
+            if (!isLiveActive) return;
 
-            let cleanSpeechText = sanitizeForSpeech(textToSpeak);
-            if (!cleanSpeechText) {
-                cleanSpeechText = textToSpeak;
-            }
+            let cleanSpeechText = sanitizeForSpeech(textToSpeak) || textToSpeak;
             if (!cleanSpeechText) {
                 if (isLiveActive) startContinuousListening();
                 return;
             }
 
             setLiveState('thinking', 'VOICING...', `"${cleanSpeechText}"`);
+            showToast("6. Calling Sarvam TTS...", "info");
 
-            // Multilingual Language & Speaker Auto-Selection
             let targetLang = "te-IN";
             let speakerName = "pooja_te_conversation";
 
-            if (currentLanguage === 'en' || (!/[\u0C00-\u0C7F\u0900-\u097F\u0B80-\u0BFF\u0C80-\u0CFF]/.test(cleanSpeechText) && /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText) && !/\b(nuvvu|nenu|ela|unnav|em|chesthuv|chesthunn|thinn|bava|mawa|avuna|cheppu|eeroju|kavali|ledu|undhi|kadh|enti|ekkada)\b/i.test(cleanSpeechText))) {
+            if (currentLanguage === 'en' || (!/[\u0C00-\u0C7F\u0900-\u097F\u0B80-\u0BFF\u0C80-\u0CFF]/.test(cleanSpeechText) && /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText))) {
                 targetLang = "en-IN";
                 speakerName = "simran_en_conversation";
             } else if (currentLanguage === 'hi' || /[\u0900-\u097F]/.test(cleanSpeechText)) {
@@ -2431,168 +1676,96 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
             } else if (currentLanguage === 'kn' || /[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
                 targetLang = "kn-IN";
                 speakerName = "chaitra_kn_conversation";
-            } else {
-                targetLang = "te-IN";
-                speakerName = "pooja_te_conversation";
             }
 
             try {
                 ensurePlaybackUnlocked();
 
-                // Include both `text` and `inputs` for full compatibility with custom & direct Sarvam workers
-                const ttsPayload = {
-                    text: cleanSpeechText,
-                    inputs: [cleanSpeechText],
-                    target_language_code: targetLang,
-                    model: "bulbul:v4-flash",
-                    speaker: speakerName,
-                    pace: 1.15,
-                    speech_sample_rate: 24000,
-                    output_audio_codec: "wav"
-                };
+                const ttsResponse = await fetch(SARVAM_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: cleanSpeechText,
+                        target_language_code: targetLang,
+                        model: "bulbul:v4-flash",
+                        speaker: speakerName,
+                        pace: 1.15,
+                        speech_sample_rate: 24000,
+                        output_audio_codec: "wav"
+                    })
+                });
+
+                if (!ttsResponse.ok) {
+                    const errTxt = await ttsResponse.text();
+                    showToast(`TTS v4 Fail (${ttsResponse.status}), trying v3...`, "error");
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
+                    return;
+                }
+
+                const ttsData = await ttsResponse.json();
+                const audioBase64 = (ttsData.audios && ttsData.audios[0]) || ttsData.audio || ttsData.audio_content;
+                if (audioBase64) {
+                    showToast("7. TTS Audio Received ✅ Playing...", "success");
+                    await playAudioFromBase64(audioBase64, cleanSpeechText);
+                } else {
+                    showToast("TTS Empty Audio -> Trying v3...", "error");
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
+                }
+            } catch (ttsErr) {
+                showToast(`TTS Exception: ${ttsErr.message}`, "error", 5000);
+                await fallbackBrowserSpeech(cleanSpeechText);
+            }
+        }
+
+        async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
+            if (!isLiveActive) return;
+            try {
+                const fallbackSpeaker = targetLang === "te-IN" ? "pooja"
+                    : targetLang === "hi-IN" ? "kavya"
+                    : targetLang === "en-IN" ? "simran"
+                    : "pooja";
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(ttsPayload)
-                });
-
-                if (!isLiveActive) return;
-
-                if (!ttsResponse.ok) {
-                    const errTxt = await ttsResponse.text();
-                    console.error("Sarvam TTS server error, trying bulbul:v3 fallback:", ttsResponse.status, errTxt);
-                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
-                    return;
-                }
-
-                const played = await handleSarvamTTSResponse(ttsResponse, cleanSpeechText);
-                if (!played) {
-                    console.warn("No audio in TTS response, trying fallback");
-                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
-                }
-            } catch (ttsErr) {
-                console.warn("Sarvam TTS error, trying bulbul:v3 fallback:", ttsErr);
-                await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
-            }
-        }
-
-        // Secondary fallback to bulbul:v3 -> bulbul:v2 -> browser speech if v4-flash is unavailable
-        async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
-            if (!isLiveActive) return;
-
-            const fallbackConfigs = [
-                { model: "bulbul:v3", speaker: "priya", pace: 1.12 },
-                { model: "bulbul:v2", speaker: "anushka", pace: 1.1 }
-            ];
-
-            for (const cfg of fallbackConfigs) {
-                if (!isLiveActive) return;
-                try {
-                    const fallbackPayload = {
+                    body: JSON.stringify({
                         text: cleanSpeechText,
-                        inputs: [cleanSpeechText],
                         target_language_code: targetLang,
-                        model: cfg.model,
-                        speaker: cfg.speaker,
-                        pace: cfg.pace,
+                        model: "bulbul:v3",
+                        speaker: fallbackSpeaker,
+                        pace: 1.12,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
-                    };
+                    })
+                });
 
-                    const ttsResponse = await fetch(SARVAM_TTS_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(fallbackPayload)
-                    });
-
-                    if (!isLiveActive) return;
-
-                    if (ttsResponse.ok) {
-                        const played = await handleSarvamTTSResponse(ttsResponse, originalText);
-                        if (played) return;
-                    } else {
-                        const errTxt = await ttsResponse.text();
-                        console.warn(`${cfg.model} TTS failed (${ttsResponse.status}):`, errTxt);
-                    }
-                } catch (e) {
-                    console.warn(`${cfg.model} TTS exception:`, e);
-                }
-            }
-
-            await fallbackBrowserSpeech(cleanSpeechText);
-        }
-
-        // Detect audio MIME type from header bytes (WAV vs MP3 vs OGG)
-        function detectAudioMime(bytes, fallbackMime = 'audio/wav') {
-            if (bytes && bytes.length >= 4) {
-                // RIFF -> WAV
-                if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) {
-                    return 'audio/wav';
-                }
-                // ID3 or MPEG sync -> MP3
-                if ((bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) ||
-                    (bytes[0] === 0xFF && (bytes[1] & 0xE0) === 0xE0)) {
-                    return 'audio/mpeg';
-                }
-                // OggS -> OGG
-                if (bytes[0] === 0x4F && bytes[1] === 0x67 && bytes[2] === 0x67 && bytes[3] === 0x53) {
-                    return 'audio/ogg';
-                }
-            }
-            return fallbackMime;
-        }
-
-        // Decode base64 safely and delegate to unified byte playback
-        function playAudioFromBase64(base64Audio, displayText) {
-            return new Promise((resolve) => {
-                try {
-                    const mimeMatch = (base64Audio || '').match(/^data:(audio\/[\w.-]+);base64,/i);
-                    const hintMime = mimeMatch ? mimeMatch[1] : 'audio/wav';
-                    let cleanBase64 = (base64Audio || '')
-                        .replace(/^data:audio\/[\w.-]+;base64,/i, '')
-                        .replace(/[\r\n\s]/g, '')
-                        .replace(/-/g, '+')
-                        .replace(/_/g, '/');
-
-                    while (cleanBase64.length % 4 !== 0) {
-                        cleanBase64 += '=';
-                    }
-
-                    const binaryString = window.atob(cleanBase64);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-
-                    playAudioBytes(bytes, displayText, detectAudioMime(bytes, hintMime)).then(resolve);
-                } catch (decodeErr) {
-                    console.error("Base64 decode failed, falling back to browser speech:", decodeErr);
-                    fallbackBrowserSpeech(displayText).then(resolve);
-                }
-            });
-        }
-
-        // Unified Playback: Releases mic -> waits 180ms for mobile loudspeaker routing ->
-        // PRIMARY: Primed #liveAudioPlayer (Blob URL) -> FALLBACK 1: Web Audio API -> FALLBACK 2: Browser Speech
-        function playAudioBytes(bytes, displayText, mimeType = 'audio/wav') {
-            return new Promise((resolve) => {
-                if (!isLiveActive) {
-                    resolve();
+                if (!ttsResponse.ok) {
+                    showToast(`TTS v3 Fail (${ttsResponse.status}) -> Browser TTS`, "error");
+                    await fallbackBrowserSpeech(cleanSpeechText);
                     return;
                 }
+                const ttsData = await ttsResponse.json();
+                const audioBase64 = (ttsData.audios && ttsData.audios[0]) || ttsData.audio || ttsData.audio_content;
+                if (audioBase64) {
+                    showToast("7. TTS v3 Audio Ready ✅ Playing...", "success");
+                    await playAudioFromBase64(audioBase64, originalText);
+                } else {
+                    await fallbackBrowserSpeech(cleanSpeechText);
+                }
+            } catch (e) {
+                showToast(`TTS v3 Error: ${e.message}`, "error");
+                await fallbackBrowserSpeech(cleanSpeechText);
+            }
+        }
 
+        function playAudioFromBase64(base64Audio, displayText) {
+            return new Promise(async (resolve) => {
                 stopAudioPlayback();
                 isAITalking = true;
                 setLiveState('speaking', 'SPEAKING', `"${displayText}"`);
 
-                // 1. Close microphone hardware so mobile switches from earpiece to LOUDSPEAKER
                 if (mediaStream) {
-                    try {
-                        mediaStream.getTracks().forEach(t => t.stop());
-                    } catch (e) {}
-                    mediaStream = null;
+                    try { mediaStream.getAudioTracks().forEach(t => { t.enabled = false; }); } catch (e) {}
                 }
                 stopRecordingAndVAD();
 
@@ -2601,132 +1774,86 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     if (finished) return;
                     finished = true;
                     isAITalking = false;
-                    currentAudio = null;
                     currentAudioSource = null;
+
+                    if (currentBlobUrl) {
+                        try { URL.revokeObjectURL(currentBlobUrl); } catch (e) {}
+                        currentBlobUrl = null;
+                    }
 
                     if (isLiveActive) {
                         setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                         setTimeout(() => {
-                            if (isLiveActive && !isAITalking) {
-                                startContinuousListening();
-                            }
+                            if (isLiveActive && !isAITalking) startContinuousListening();
                         }, 300);
                     }
                     resolve();
                 };
 
-                // Web Audio API fallback if HTML5 primed player fails
-                const playViaWebAudioFallback = async () => {
-                    try {
-                        const ctx = getPlaybackAudioContext();
-                        if (!ctx) throw new Error("No AudioContext");
-                        if (ctx.state === 'suspended') {
-                            await ctx.resume();
-                        }
-                        const buffer = await ctx.decodeAudioData(bytes.buffer.slice(0));
-                        if (!isLiveActive) {
-                            finishTurn();
-                            return;
-                        }
-                        const source = ctx.createBufferSource();
-                        source.buffer = buffer;
-                        source.connect(ctx.destination);
-                        currentAudioSource = source;
-                        source.onended = () => {
-                            currentAudioSource = null;
-                            finishTurn();
-                        };
-                        source.start(0);
-                        console.log("🔊 AI voice playing via Web Audio API fallback");
-                    } catch (webAudioErr) {
-                        console.warn("Web Audio fallback failed, using browser speech:", webAudioErr);
-                        finished = true;
-                        isAITalking = false;
-                        fallbackBrowserSpeech(displayText).then(resolve);
-                    }
-                };
+                try {
+                    const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
+                    const binaryString = window.atob(cleanBase64);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
 
-                // Give mobile OS 180ms to switch audio route from mic/earpiece to media speaker
-                setTimeout(() => {
-                    if (!isLiveActive) {
-                        finishTurn();
-                        return;
+                    const blob = new Blob([bytes], { type: 'audio/wav' });
+                    currentBlobUrl = URL.createObjectURL(blob);
+
+                    if (livePlayer) {
+                        livePlayer.muted = false;
+                        livePlayer.volume = 1.0;
+                        livePlayer.src = currentBlobUrl;
+                        livePlayer.onended = finishTurn;
+                        livePlayer.onerror = () => {
+                            showToast("livePlayer Error -> Switching to WebAudio", "error");
+                            playViaWebAudio(bytes, finishTurn);
+                        };
+
+                        await livePlayer.play();
+                        showToast("🔊 Speaking via liveAudioPlayer", "success", 2000);
+                    } else {
+                        playViaWebAudio(bytes, finishTurn);
                     }
-                    playViaBlobAudio(bytes, finishTurn, mimeType, playViaWebAudioFallback);
-                }, 180);
+                } catch (err) {
+                    showToast(`Play Error: ${err.message} -> Trying WebAudio`, "error", 4000);
+                    try {
+                        const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
+                        const binaryString = window.atob(cleanBase64);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+                        playViaWebAudio(bytes, finishTurn);
+                    } catch (e2) {
+                        showToast("Audio Decode Failed: " + e2.message, "error");
+                        finishTurn();
+                    }
+                }
             });
         }
 
-        // Primary mobile-safe player: reuses primed #liveAudioPlayer with Blob URL
-        function playViaBlobAudio(bytes, onDone, mimeType = 'audio/wav', onPlaybackFailed = null) {
+        async function playViaWebAudio(bytes, onDone) {
             try {
-                if (currentBlobUrl) {
-                    try { URL.revokeObjectURL(currentBlobUrl); } catch (e) {}
-                    currentBlobUrl = null;
-                }
-
-                const blob = new Blob([bytes], { type: mimeType || 'audio/wav' });
-                const blobUrl = URL.createObjectURL(blob);
-                currentBlobUrl = blobUrl;
-
-                const livePlayer = document.getElementById('liveAudioPlayer');
-                const audio = livePlayer || new Audio();
-                audio.muted = false;
-                audio.volume = 1.0;
-                audio.src = blobUrl;
-                audio.load();
-                currentAudio = audio;
-
-                const handleFail = (reason) => {
-                    console.warn("Primed liveAudioPlayer failed:", reason);
-                    audio.onended = null;
-                    audio.onerror = null;
-                    if (currentBlobUrl === blobUrl) {
-                        try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-                        currentBlobUrl = null;
-                    }
-                    currentAudio = null;
-                    if (typeof onPlaybackFailed === 'function') {
-                        onPlaybackFailed();
-                    } else {
-                        onDone();
-                    }
-                };
-
-                audio.onended = () => {
-                    audio.onended = null;
-                    audio.onerror = null;
-                    if (currentBlobUrl === blobUrl) {
-                        try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-                        currentBlobUrl = null;
-                    }
-                    currentAudio = null;
+                const ctx = getPlaybackAudioContext();
+                if (!ctx) { onDone(); return; }
+                if (ctx.state === 'suspended') await ctx.resume();
+                ctx.decodeAudioData(bytes.buffer.slice(0), function (buffer) {
+                    const source = ctx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(ctx.destination);
+                    currentAudioSource = source;
+                    source.onended = onDone;
+                    source.start(0);
+                    showToast("🔊 Speaking via WebAudio", "success", 2000);
+                }, function (decodeErr) {
+                    showToast("WebAudio Decode Fail", "error");
                     onDone();
-                };
-
-                audio.onerror = (e) => {
-                    handleFail(e);
-                };
-
-                const playPromise = audio.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        console.log("🔊 AI voice playing via primed #liveAudioPlayer");
-                    }).catch(e => {
-                        handleFail(e);
-                    });
-                }
+                });
             } catch (e) {
-                console.error("playViaBlobAudio exception:", e);
-                if (typeof onPlaybackFailed === 'function') {
-                    onPlaybackFailed();
-                } else {
-                    onDone();
-                }
+                showToast("WebAudio Error: " + e.message, "error");
+                onDone();
             }
         }
 
-        // Method 3: Browser speech synthesis fallback (Promise-based)
         function fallbackBrowserSpeech(text) {
             return new Promise((resolve) => {
                 const cleanup = () => {
@@ -2744,31 +1871,15 @@ CRISP, LIVELY VOICE CLARITY (ZERO DRAGGING / ZERO STRETCHING):
                     window.speechSynthesis.cancel();
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', kn: 'kn-IN' }[currentLanguage] || 'te-IN';
-                    utterance.rate = 1.0;
-                    utterance.pitch = 1.05;
-
                     isAITalking = true;
                     setLiveState('speaking', 'SPEAKING', `"${text}"`);
-
                     utterance.onend = cleanup;
-                    utterance.onerror = function (e) {
-                        console.warn("SpeechSynthesis error:", e);
-                        cleanup();
-                    };
-
+                    utterance.onerror = cleanup;
                     window.speechSynthesis.speak(utterance);
                 } else {
                     cleanup();
                 }
             });
-        }
-
-        function toggleMic() {
-            // Chat mode is pure text (Gemini Chat mode)
-        }
-
-        function toggleVoiceOutput() {
-            // Live voice is handled in Live Mode (Gemini Live mode)
         }
     </script>
 </body>
