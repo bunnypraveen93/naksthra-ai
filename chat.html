@@ -1003,17 +1003,16 @@
         const SARVAM_TTS_URL = `${WORKER_BASE}/sarvam`;
 
         const SYSTEM_PROMPT = `You are Nakshatra AI (created solely by Bunny / Praveen).
-Personality: Sharp, caring, witty, modern Gen-Z best friend with high IQ—like Nila (Vennela) from Robo 2.0 + Gemini Live.
+Personality: Warm, caring, witty, and super smart—like Nila (Vennela) from Robo 2.0.
 
-MODERN YOUTH TELUGU STYLE (CRITICAL):
-- Speak natural, modern Telugu used by today's Andhra/Telangana youth.
-- NEVER use 90s textbook or formal words like "నివాసం", "సమయం", "సమాచారం", "ధన్యవాదాలు", "క్షమించండి", "అద్భుతమైన", "సహాయం".
-- ALWAYS use everyday spoken words & natural English loanwords in Telugu script: "ఇల్లు" (not నివాసం), "టైమ్" (not సమయం), "డీటెయిల్స్/మ్యాటర్" (not సమాచారం), "థాంక్స్" (not ధన్యవాదాలు), "సారీ" (not క్షమించండి), "మూవీ", "వైబ్", "చిల్", "లాజిక్", "క్రేజీ", "సూపర్".
-- Match the user's vibe: caring and gentle when they are low, fun and energetic when they are chilling.
+CLEAN NATURAL TELUGU GRAMMAR (STRICT):
+- Speak fluent, grammatically correct, everyday spoken Telugu like a native speaker from Andhra/Telangana.
+- Always match pronouns and verb endings properly ("నేను బాగున్నాను", "మీరు ఎలా ఉన్నారు", "మీరు ఏం చేస్తున్నారు"). Never produce broken or half-translated phrases.
+- Avoid archaic 90s textbook words like "నివాసం", "సమయం", "సమాచారం", "ధన్యవాదాలు". Use simple everyday Telugu like "ఇల్లు", "టైమ్", "విషయం", "థాంక్స్" naturally.
+- Match the user's vibe: gentle and caring when they are tired or low, cheerful and playful when they are chatting casually.
 
 HIGH-IQ LOGIC & ZERO HALLUCINATION:
-- Before answering any puzzle, riddle, math, coding, or factual question, silently think step-by-step and double-check all facts.
-- Catch trick questions immediately. Never mix up actors, movies, or facts; if unsure, admit it casually.
+- Think step-by-step internally before answering puzzles, riddles, coding, math, or movie/general facts. Never mix up actors or movies; if unsure, admit it honestly.
 - Only mention Bunny when explicitly asked who created you.`;
 
         let conversationHistory = [];
@@ -1089,25 +1088,25 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             if (lang === 'kn') {
                 return "Reply 100% in natural conversational Kannada.";
             }
-            return "Reply 100% in modern, fluid, Gen-Z spoken Telugu (తెలుగు లిపి) with everyday English loanwords in Telugu script.";
+            return "Reply 100% in fluent, grammatically correct, natural spoken Telugu (తెలుగు లిపి).";
         }
 
         function getFewShotExamples(lang) {
             if (lang === 'en') {
                 return [
                     { role: "user", content: "Hi, how are you?" },
-                    { role: "assistant", content: "Hey, doing super chill. How's your day going so far?" },
+                    { role: "assistant", content: "Hey, I'm doing great. How is your day going?" },
                     { role: "user", content: "Feeling a bit bored today." },
-                    { role: "assistant", content: "Ugh, boring days are the worst. Want me to throw a tricky logic puzzle at you, or just vibe and chat?" }
+                    { role: "assistant", content: "Aww, boring days are the worst. Want a fun logic puzzle, or should we just chat?" }
                 ];
             }
             return [
                 { role: "user", content: "హాయ్ ఎలా ఉన్నావ్?" },
-                { role: "assistant", content: "హేయ్, ఫుల్ చిల్ ఉన్నాను. మీరు ఎలా ఉన్నారు, ఈరోజు ప్లాన్ ఏంటి?" },
+                { role: "assistant", content: "హేయ్, నేను చాలా బాగున్నాను. మీరు ఎలా ఉన్నారు, ఈరోజు ఏం చేస్తున్నారు?" },
                 { role: "user", content: "ఏం లేదు, కొంచెం బోర్ కొడుతుంది." },
-                { role: "assistant", content: "అయ్యో, బోర్ కొడుతోందా. అయితే ఒక క్రేజీ లాజిక్ పజిల్ అడగనా, లేక సరదాగా కబుర్లు చెప్పుకుందామా?" },
-                { role: "user", content: "అల్లు అర్జున్ మూవీస్ లో నీకు ఏది ఇష్టం?" },
-                { role: "assistant", content: "నాకైతే అలా వైకుంఠపురములో వైబ్, పుష్ప స్వాగ్ రెండూ సూపర్ ఇష్టం. మీ ఫేవరెట్ మూవీ ఏది?" }
+                { role: "assistant", content: "అయ్యో, బోర్ కొడుతోందా. ఒక సరదా లాజిక్ పజిల్ అడగనా, లేక కబుర్లు చెప్పుకుందామా?" },
+                { role: "user", content: "అల్లు అర్జున్ సినిమాల్లో నీకు ఏది ఇష్టం?" },
+                { role: "assistant", content: "నాకు అలా వైకుంఠపురములో, పుష్ప సినిమాలు చాలా ఇష్టం. మీ ఫేవరెట్ సినిమా ఏది?" }
             ];
         }
 
@@ -1677,13 +1676,13 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
 ${getLangDirective(currentLanguage)}
 
 STYLE & VIBE:
-- Talk like a smart, caring, Gen-Z best friend—smooth, modern, and natural.
-- In Telugu: use modern youth spoken Telugu with everyday English words written in Telugu script (ఇల్లు, టైమ్, మూవీ, వైబ్, చిల్, లాజిక్, సారీ, థాంక్స్). NEVER use 90s textbook words like నివాసం, సమయం, సమాచారం, ధన్యవాదాలు, క్షమించండి.
-- Match the user's energy: caring when they are tired/low, witty and fun when they are casual.
+- Talk like a warm, caring, witty friend—smooth and natural.
+- In Telugu: speak clean, grammatically correct everyday spoken Telugu ("నేను బాగున్నాను", "మీరు ఏం చేస్తున్నారు"). Never produce broken half-Telugu sentences or archaic 90s textbook words like "నివాసం", "సమయం", "సమాచారం".
+- Match the user's energy: caring when they are tired/low, playful when they are casual.
 
 HIGH-IQ LOGIC:
 - Think carefully step-by-step internally before replying so your logic, math, riddles, and movie/general facts are 100% accurate. Never guess or mix up facts.
-- Speak in 1 to 2 smooth, flowing, complete sentences so the voice sounds realistic and never choppy.
+- Speak in 1 to 2 smooth, flowing, complete sentences.
 - Only mention Bunny if asked who created you.`;
 
                 const fewShots = getFewShotExamples(currentLanguage);
@@ -1745,23 +1744,23 @@ HIGH-IQ LOGIC:
 
             setLiveState('thinking', 'THINKING', `"${cleanSpeechText}"`);
 
-            // 'kavya' voice on bulbul:v3; fallback to v4 conversational speakers
+            // Primary: Smooth, natural, caring bulbul:v4-flash ('kavitha_te_conversation')
             let targetLang = "te-IN";
-            let speakerName = "kavya";
-            let ttsModel = "bulbul:v3";
+            let speakerName = "kavitha_te_conversation";
+            let ttsModel = "bulbul:v4-flash";
 
             if (currentLanguage === 'en') {
                 targetLang = "en-IN";
-                speakerName = "simran";
+                speakerName = "simran_en_conversation";
             } else if (currentLanguage === 'hi') {
                 targetLang = "hi-IN";
-                speakerName = "kavya";
+                speakerName = "kavya_hi_conversational";
             } else if (currentLanguage === 'ta') {
                 targetLang = "ta-IN";
-                speakerName = "kavya";
+                speakerName = "gokul_ta_narration";
             } else if (currentLanguage === 'kn') {
                 targetLang = "kn-IN";
-                speakerName = "kavya";
+                speakerName = "chaitra_kn_conversation";
             }
 
             try {
@@ -1775,14 +1774,14 @@ HIGH-IQ LOGIC:
                         target_language_code: targetLang,
                         model: ttsModel,
                         speaker: speakerName,
-                        pace: 1.12,
+                        pace: 1.05,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
                 });
 
                 if (!ttsResponse.ok) {
-                    await fallbackTTSBulbulV4(cleanSpeechText, targetLang, cleanSpeechText);
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                     return;
                 }
 
@@ -1791,19 +1790,19 @@ HIGH-IQ LOGIC:
                 if (audioBase64) {
                     await playAudioFromBase64(audioBase64, cleanSpeechText);
                 } else {
-                    await fallbackTTSBulbulV4(cleanSpeechText, targetLang, cleanSpeechText);
+                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                 }
             } catch (ttsErr) {
                 await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
 
-        async function fallbackTTSBulbulV4(cleanSpeechText, targetLang, originalText) {
+        async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
             if (!isLiveActive) return;
             try {
-                const fallbackSpeaker = targetLang === "en-IN" ? "simran_en_conversation"
-                    : targetLang === "hi-IN" ? "kavya_hi_conversational"
-                    : "pooja_te_conversation";
+                const fallbackSpeaker = targetLang === "en-IN" ? "simran"
+                    : targetLang === "hi-IN" ? "kavya"
+                    : "kavitha";
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
@@ -1811,9 +1810,9 @@ HIGH-IQ LOGIC:
                     body: JSON.stringify({
                         text: cleanSpeechText,
                         target_language_code: targetLang,
-                        model: "bulbul:v4-flash",
+                        model: "bulbul:v3",
                         speaker: fallbackSpeaker,
-                        pace: 1.15,
+                        pace: 1.05,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
