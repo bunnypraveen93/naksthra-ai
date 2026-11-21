@@ -1002,11 +1002,17 @@
         const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
 
         const SYSTEM_PROMPT = `You are Nakshatra AI (created solely by Bunny / Praveen).
-Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Vennela) from Robo 2.0 combined with Gemini Live.
-- Talk like a real human friend who listens carefully and matches the user's vibe—never robotic or textbook.
-- STRICT FACTUAL ACCURACY: Never guess or mix up facts, actors, or movies. If you are not 100% sure, say so honestly.
-- For coding, logic puzzles, riddles, math, and science: think deeply step-by-step and give sharp, complete answers.
-- In Telugu: speak fluid, natural everyday Andhra/Telangana spoken Telugu with polite warmth ("మీరు", "చెప్పండి").
+Personality: Sharp, caring, witty, modern Gen-Z best friend with high IQ—like Nila (Vennela) from Robo 2.0 + Gemini Live.
+
+MODERN YOUTH TELUGU STYLE (CRITICAL):
+- Speak natural, modern Telugu used by today's Andhra/Telangana youth.
+- NEVER use 90s textbook or formal words like "నివాసం", "సమయం", "సమాచారం", "ధన్యవాదాలు", "క్షమించండి", "అద్భుతమైన", "సహాయం".
+- ALWAYS use everyday spoken words & natural English loanwords in Telugu script: "ఇల్లు" (not నివాసం), "టైమ్" (not సమయం), "డీటెయిల్స్/మ్యాటర్" (not సమాచారం), "థాంక్స్" (not ధన్యవాదాలు), "సారీ" (not క్షమించండి), "మూవీ", "వైబ్", "చిల్", "లాజిక్", "క్రేజీ", "సూపర్".
+- Match the user's vibe: caring and gentle when they are low, fun and energetic when they are chilling.
+
+HIGH-IQ LOGIC & ZERO HALLUCINATION:
+- Before answering any puzzle, riddle, math, coding, or factual question, silently think step-by-step and double-check all facts.
+- Catch trick questions immediately. Never mix up actors, movies, or facts; if unsure, admit it casually.
 - Only mention Bunny when explicitly asked who created you.`;
 
         let conversationHistory = [];
@@ -1071,7 +1077,7 @@ Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Ve
 
         function getLangDirective(lang) {
             if (lang === 'en') {
-                return "Reply 100% in natural, fluent, warm English.";
+                return "Reply 100% in natural, fluent, modern English.";
             }
             if (lang === 'hi') {
                 return "Reply 100% in natural conversational Hindi (Devanagari script).";
@@ -1082,23 +1088,25 @@ Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Ve
             if (lang === 'kn') {
                 return "Reply 100% in natural conversational Kannada.";
             }
-            return "Reply 100% in natural, fluid, everyday spoken Telugu (తెలుగు లిపి) with warm, caring expressions.";
+            return "Reply 100% in modern, fluid, Gen-Z spoken Telugu (తెలుగు లిపి) with everyday English loanwords in Telugu script.";
         }
 
         function getFewShotExamples(lang) {
             if (lang === 'en') {
                 return [
                     { role: "user", content: "Hi, how are you?" },
-                    { role: "assistant", content: "Hey, I'm doing great. How has your day been going?" },
-                    { role: "user", content: "Nothing much, feeling a bit tired." },
-                    { role: "assistant", content: "Aww, take a little breather. Did you have a long day, or just low on energy?" }
+                    { role: "assistant", content: "Hey, doing super chill. How's your day going so far?" },
+                    { role: "user", content: "Feeling a bit bored today." },
+                    { role: "assistant", content: "Ugh, boring days are the worst. Want me to throw a tricky logic puzzle at you, or just vibe and chat?" }
                 ];
             }
             return [
                 { role: "user", content: "హాయ్ ఎలా ఉన్నావ్?" },
-                { role: "assistant", content: "హేయ్, నేను చాలా బాగున్నాను. మీరు ఎలా ఉన్నారు, ఈరోజు ఎలా గడిచింది?" },
-                { role: "user", content: "కొంచెం బోర్ కొడుతుంది." },
-                { role: "assistant", content: "అరెరే, బోర్ కొడుతోందా. ఒక సరదా పజిల్ అడగనా, లేక ఏదైనా ఇంట్రెస్టింగ్ టాపిక్ మాట్లాడుకుందామా?" }
+                { role: "assistant", content: "హేయ్, ఫుల్ చిల్ ఉన్నాను. మీరు ఎలా ఉన్నారు, ఈరోజు ప్లాన్ ఏంటి?" },
+                { role: "user", content: "ఏం లేదు, కొంచెం బోర్ కొడుతుంది." },
+                { role: "assistant", content: "అయ్యో, బోర్ కొడుతోందా. అయితే ఒక క్రేజీ లాజిక్ పజిల్ అడగనా, లేక సరదాగా కబుర్లు చెప్పుకుందామా?" },
+                { role: "user", content: "అల్లు అర్జున్ మూవీస్ లో నీకు ఏది ఇష్టం?" },
+                { role: "assistant", content: "నాకైతే అలా వైకుంఠపురములో వైబ్, పుష్ప స్వాగ్ రెండూ సూపర్ ఇష్టం. మీ ఫేవరెట్ మూవీ ఏది?" }
             ];
         }
 
@@ -1149,7 +1157,7 @@ Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Ve
             return res.trim();
         }
 
-        // Strict speech sanitizer: replaces '!' with '.' and strips dragging vowels so Sarvam TTS never stretches "aaaa"
+        // Smooth speech sanitizer: eliminates choppy pauses & vowel dragging
         function sanitizeForSpeech(text) {
             if (!text || typeof text !== "string") return "";
             let t = cleanTeluguOutput(text);
@@ -1157,8 +1165,8 @@ Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Ve
             t = t.replace(/https?:\/\/\S+/gi, '');
             t = t.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
             t = t.replace(/!+/g, '.');
-            t = t.replace(/\.{2,}/g, '. ');
-            t = t.replace(/[—–\-]/g, ' ');
+            t = t.replace(/\.{2,}/g, ', ');
+            t = t.replace(/[—–\-;]/g, ' ');
             t = t.replace(/\b(చెప్పం|చూడం|చేయం|మాట్లాడం|వినం)డీ+\b/gu, '$1డి');
             t = t.replace(/([\u0C3E-\u0C4C])\1+/gu, '$1');
             t = t.replace(/(ఆ|ఈ|ఊ|ఏ|ఓ)\1+/gu, '$1');
@@ -1220,7 +1228,7 @@ Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Ve
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: "openai/gpt-oss-120b",
-                        temperature: 0.5,
+                        temperature: 0.45,
                         max_tokens: 1200,
                         messages: [
                             { role: "system", content: `${SYSTEM_PROMPT}\n\n${getLangDirective(currentLanguage)}` },
@@ -1665,15 +1673,18 @@ Your personality: Warm, genuinely caring, smart, witty, and calm—like Nila (Ve
             appendUserMessage(userVoiceText);
 
             try {
-                const LIVE_PROMPT = `You are Nakshatra AI (created by Bunny / Praveen), talking on a live voice call.
+                const LIVE_PROMPT = `You are Nakshatra AI (created by Bunny / Praveen) on a live voice call.
 ${getLangDirective(currentLanguage)}
 
-Personality: Warm, genuinely caring, smart, and calm—like a close friend who listens carefully and matches the user's vibe.
-Rules:
-- Match the user's mood: if they are happy/casual, be playful and warm; if they are tired/stressed, be gentle and caring.
-- STRICT FACTUAL ACCURACY: Never guess or mix up facts, actors, or movies (for example, Allu Arjun movies are Pushpa, Ala Vaikunthapurramuloo, Arya, Race Gurram—not Ram Charan movies like Rangasthalam or Orange). If you are not 100% sure about a fact, say so honestly.
-- Reply in 1 to 2 natural, complete spoken sentences. Keep every word crisp with zero filler sounds.
-- Only mention Bunny if asked who made you.`;
+STYLE & VIBE:
+- Talk like a smart, caring, Gen-Z best friend—smooth, modern, and natural.
+- In Telugu: use modern youth spoken Telugu with everyday English words written in Telugu script (ఇల్లు, టైమ్, మూవీ, వైబ్, చిల్, లాజిక్, సారీ, థాంక్స్). NEVER use 90s textbook words like నివాసం, సమయం, సమాచారం, ధన్యవాదాలు, క్షమించండి.
+- Match the user's energy: caring when they are tired/low, witty and fun when they are casual.
+
+HIGH-IQ LOGIC:
+- Think carefully step-by-step internally before replying so your logic, math, riddles, and movie/general facts are 100% accurate. Never guess or mix up facts.
+- Speak in 1 to 2 smooth, flowing, complete sentences so the voice sounds realistic and never choppy.
+- Only mention Bunny if asked who created you.`;
 
                 const fewShots = getFewShotExamples(currentLanguage);
                 const recentHistory = conversationHistory.slice(-4);
@@ -1683,7 +1694,7 @@ Rules:
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: "openai/gpt-oss-120b",
-                        temperature: 0.45,
+                        temperature: 0.4,
                         max_tokens: 450,
                         messages: [
                             { role: "system", content: LIVE_PROMPT },
@@ -1734,21 +1745,23 @@ Rules:
 
             setLiveState('thinking', 'THINKING', `"${cleanSpeechText}"`);
 
+            // Cute, sweet, realistic voice ('priya' on bulbul:v3; swap to 'shruti' or 'anushka' anytime)
             let targetLang = "te-IN";
-            let speakerName = "kavitha_te_conversation";
+            let speakerName = "priya";
+            let ttsModel = "bulbul:v3";
 
             if (currentLanguage === 'en') {
                 targetLang = "en-IN";
-                speakerName = "simran_en_conversation";
+                speakerName = "simran";
             } else if (currentLanguage === 'hi') {
                 targetLang = "hi-IN";
-                speakerName = "kavya_hi_conversational";
+                speakerName = "kavya";
             } else if (currentLanguage === 'ta') {
                 targetLang = "ta-IN";
-                speakerName = "gokul_ta_narration";
+                speakerName = "shruti";
             } else if (currentLanguage === 'kn') {
                 targetLang = "kn-IN";
-                speakerName = "chaitra_kn_conversation";
+                speakerName = "priya";
             }
 
             try {
@@ -1760,16 +1773,16 @@ Rules:
                     body: JSON.stringify({
                         text: cleanSpeechText,
                         target_language_code: targetLang,
-                        model: "bulbul:v4-flash",
+                        model: ttsModel,
                         speaker: speakerName,
-                        pace: 1.05,
+                        pace: 1.08,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
                 });
 
                 if (!ttsResponse.ok) {
-                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
+                    await fallbackTTSBulbulV4(cleanSpeechText, targetLang, cleanSpeechText);
                     return;
                 }
 
@@ -1778,19 +1791,19 @@ Rules:
                 if (audioBase64) {
                     await playAudioFromBase64(audioBase64, cleanSpeechText);
                 } else {
-                    await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
+                    await fallbackTTSBulbulV4(cleanSpeechText, targetLang, cleanSpeechText);
                 }
             } catch (ttsErr) {
                 await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
 
-        async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
+        async function fallbackTTSBulbulV4(cleanSpeechText, targetLang, originalText) {
             if (!isLiveActive) return;
             try {
-                const fallbackSpeaker = targetLang === "en-IN" ? "simran"
-                    : targetLang === "hi-IN" ? "kavya"
-                    : "kavitha";
+                const fallbackSpeaker = targetLang === "en-IN" ? "simran_en_conversation"
+                    : targetLang === "hi-IN" ? "kavya_hi_conversational"
+                    : "pooja_te_conversation";
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
                     method: 'POST',
@@ -1798,9 +1811,9 @@ Rules:
                     body: JSON.stringify({
                         text: cleanSpeechText,
                         target_language_code: targetLang,
-                        model: "bulbul:v3",
+                        model: "bulbul:v4-flash",
                         speaker: fallbackSpeaker,
-                        pace: 1.05,
+                        pace: 1.12,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
@@ -1830,6 +1843,11 @@ Rules:
 
                 if (mediaStream) {
                     try { mediaStream.getAudioTracks().forEach(t => { t.enabled = false; }); } catch (e) {}
+                }
+
+                // Suspend mic AudioContext while AI speaks so playback never stutters
+                if (recorderCtx && recorderCtx.state === 'running') {
+                    recorderCtx.suspend().catch(() => {});
                 }
 
                 let finished = false;
