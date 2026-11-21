@@ -996,10 +996,11 @@
         }
 
         // Cloudflare Worker Endpoints
-        const API_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq";
-        const GROQ_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq-stt";
-        const SARVAM_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam-stt";
-        const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
+        const WORKER_BASE = "https://small-leaf-d4fb.bunnypraveen939.workers.dev"; //
+        const API_URL = `${WORKER_BASE}/groq`; //
+        const GROQ_STT_URL = `${WORKER_BASE}/groq-stt`; //
+        const SARVAM_STT_URL = `${WORKER_BASE}/sarvam-stt`; //
+        const SARVAM_TTS_URL = `${WORKER_BASE}/sarvam`; //
 
         const SYSTEM_PROMPT = `You are Nakshatra AI (created solely by Bunny / Praveen).
 Personality: Sharp, caring, witty, modern Gen-Z best friend with high IQ—like Nila (Vennela) from Robo 2.0 + Gemini Live.
@@ -1017,7 +1018,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
 
         let conversationHistory = [];
         let currentLanguage = 'te';
-        let liveLangMode = 'auto'; // 'auto' (Sarvam TE/EN), 'te' (locked Telugu), 'en' (locked English)
+        let liveLangMode = 'auto';
 
         function cycleLiveLangMode() {
             const label = document.getElementById('liveLangLabel');
@@ -1157,7 +1158,6 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             return res.trim();
         }
 
-        // Smooth speech sanitizer: eliminates choppy pauses & vowel dragging
         function sanitizeForSpeech(text) {
             if (!text || typeof text !== "string") return "";
             let t = cleanTeluguOutput(text);
@@ -1745,9 +1745,9 @@ HIGH-IQ LOGIC:
 
             setLiveState('thinking', 'THINKING', `"${cleanSpeechText}"`);
 
-            // Cute, sweet, realistic voice ('priya' on bulbul:v3; swap to 'shruti' or 'anushka' anytime)
+            // Fresh, young, bright voice ('anushka' on bulbul:v3; fallback to v4 pooja_te_conversation)
             let targetLang = "te-IN";
-            let speakerName = "priya";
+            let speakerName = "anushka";
             let ttsModel = "bulbul:v3";
 
             if (currentLanguage === 'en') {
@@ -1755,13 +1755,13 @@ HIGH-IQ LOGIC:
                 speakerName = "simran";
             } else if (currentLanguage === 'hi') {
                 targetLang = "hi-IN";
-                speakerName = "kavya";
+                speakerName = "anushka";
             } else if (currentLanguage === 'ta') {
                 targetLang = "ta-IN";
-                speakerName = "shruti";
+                speakerName = "anushka";
             } else if (currentLanguage === 'kn') {
                 targetLang = "kn-IN";
-                speakerName = "priya";
+                speakerName = "anushka";
             }
 
             try {
@@ -1775,7 +1775,7 @@ HIGH-IQ LOGIC:
                         target_language_code: targetLang,
                         model: ttsModel,
                         speaker: speakerName,
-                        pace: 1.08,
+                        pace: 1.12,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
@@ -1813,7 +1813,7 @@ HIGH-IQ LOGIC:
                         target_language_code: targetLang,
                         model: "bulbul:v4-flash",
                         speaker: fallbackSpeaker,
-                        pace: 1.12,
+                        pace: 1.15,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
