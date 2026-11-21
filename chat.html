@@ -25,7 +25,6 @@
             --pink: #f857a6;
             --gradient-main: linear-gradient(135deg, #00f2fe 0%, #4facfe 40%, #9b51e0 80%, #f857a6 100%);
             --gradient-send: linear-gradient(135deg, #4facfe 0%, #8b5cf6 55%, #c084fc 100%);
-            --gradient-user: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
         }
 
         * {
@@ -36,7 +35,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Full Viewport Lock to Prevent Keyboard Jumping */
         html,
         body {
             width: 100%;
@@ -58,74 +56,54 @@
             display: flex;
             flex-direction: column;
             background-image:
-                linear-gradient(180deg, rgba(2, 3, 18, 0.65) 0%, rgba(3, 4, 22, 0.75) 100%),
+                linear-gradient(180deg, rgba(2, 3, 18, 0.65) 0%, rgba(3, 4, 22, 0.78) 100%),
                 url('images/nakshatra_bg.png'),
-                radial-gradient(circle at 50% 45%, rgba(120, 40, 255, 0.25) 0%, rgba(0, 212, 255, 0.12) 35%, transparent 65%),
+                radial-gradient(circle at 50% 45%, rgba(120, 40, 255, 0.22) 0%, rgba(0, 212, 255, 0.1) 35%, transparent 65%),
                 linear-gradient(180deg, #02010a 0%, #050721 50%, #02010e 100%);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: background;
         }
 
-        /* Once chat starts, background becomes PURE BLACK */
-        body.chat-active {
+        body.chat-active,
+        body.chat-active .main-content,
+        body.chat-active .top-bar,
+        body.chat-active .bottom-bar {
             background: #000000 !important;
-            background-color: #000000 !important;
             background-image: none !important;
         }
 
-        body.chat-active .main-content {
-            background: #000000 !important;
-        }
-
         body.chat-active .top-bar {
-            background: #000000 !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
 
-        body.chat-active .bottom-bar {
-            background: #000000 !important;
-        }
-
-        /* Debug Toast Notification (Shows above Live Modal too) */
-        .debug-toast {
+        /* Subtle Error-Only Toast */
+        .app-toast {
             position: fixed;
-            top: 16px;
+            top: 18px;
             left: 50%;
-            transform: translateX(-50%) translateY(-20px);
+            transform: translateX(-50%) translateY(-16px);
             z-index: 9999;
-            padding: 10px 18px;
-            border-radius: 12px;
-            font-size: 0.82rem;
+            padding: 9px 16px;
+            border-radius: 999px;
+            font-size: 0.8rem;
             font-weight: 500;
-            color: #ffffff;
-            background: rgba(15, 23, 42, 0.94);
-            border: 1px solid rgba(0, 242, 254, 0.45);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
-            max-width: 90vw;
+            color: #fecaca;
+            background: rgba(127, 29, 29, 0.92);
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+            max-width: 88vw;
             text-align: center;
-            word-break: break-word;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.25s ease, transform 0.25s ease;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
         }
 
-        .debug-toast.show {
+        .app-toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
-        }
-
-        .debug-toast.error {
-            background: rgba(153, 27, 27, 0.95);
-            border-color: #f87171;
-        }
-
-        .debug-toast.success {
-            background: rgba(6, 78, 59, 0.95);
-            border-color: #34d399;
         }
 
         /* Top Bar */
@@ -138,15 +116,15 @@
             flex-shrink: 0;
             z-index: 10;
             background: rgba(3, 5, 24, 0.45);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         .top-left-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .top-brand {
@@ -156,18 +134,17 @@
         }
 
         .top-brand img {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 9px;
-            border: 1px solid rgba(0, 242, 254, 0.4);
-            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+            border: 1px solid rgba(0, 242, 254, 0.35);
         }
 
         .top-brand-text {
-            font-size: 0.98rem;
-            font-weight: 700;
+            font-size: 0.96rem;
+            font-weight: 600;
             color: #ffffff;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -197,49 +174,42 @@
         .top-action-btn {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 7px 14px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            gap: 6px;
+            padding: 7px 13px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
-            color: #ffffff;
-            font-size: 0.85rem;
+            color: #e2e8f0;
+            font-size: 0.84rem;
             font-weight: 500;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
         }
 
         .top-action-btn:hover {
-            background: var(--gradient-send);
-            border-color: transparent;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
         }
 
         @media (max-width: 520px) {
-            .hide-mobile {
-                display: none;
-            }
-
-            .top-action-btn {
-                padding: 7px 11px;
-            }
+            .hide-mobile { display: none; }
+            .top-action-btn { padding: 7px 10px; }
         }
 
         .menu-btn {
             background: transparent;
             border: none;
             color: #cbd5e1;
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.25s;
+            transition: 0.2s;
         }
 
         .menu-btn:hover {
@@ -247,7 +217,7 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* Sidebar Navigation - GPU accelerated */
+        /* Sidebar Navigation */
         .sidebar-overlay {
             position: fixed;
             inset: 0;
@@ -273,7 +243,7 @@
             height: 100vh;
             height: 100dvh;
             background: #06081a;
-            border-right: 1px solid rgba(0, 242, 254, 0.18);
+            border-right: 1px solid rgba(255, 255, 255, 0.09);
             display: flex;
             flex-direction: column;
             padding: 18px 14px;
@@ -282,9 +252,7 @@
             z-index: 100;
         }
 
-        .sidebar.open {
-            transform: translateX(0);
-        }
+        .sidebar.open { transform: translateX(0); }
 
         .sidebar-top-header {
             display: flex;
@@ -299,7 +267,7 @@
             align-items: center;
             gap: 10px;
             font-weight: 700;
-            font-size: 1.05rem;
+            font-size: 1.02rem;
             background: var(--gradient-main);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -325,21 +293,21 @@
             margin-top: 16px;
             padding: 11px 14px;
             background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(0, 242, 254, 0.35);
+            border: 1px solid rgba(0, 242, 254, 0.3);
             border-radius: 12px;
             color: #fff;
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.25s;
         }
 
         .new-chat-btn:hover {
-            background: var(--gradient-main);
-            border-color: transparent;
+            background: rgba(0, 242, 254, 0.15);
+            border-color: rgba(0, 242, 254, 0.6);
         }
 
         .recent-label {
@@ -347,7 +315,7 @@
             font-size: 0.72rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 600;
         }
 
@@ -363,7 +331,7 @@
             padding: 10px 12px;
             border-radius: 10px;
             color: #cbd5e1;
-            font-size: 0.88rem;
+            font-size: 0.87rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -376,13 +344,13 @@
         }
 
         .menu-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.07);
             color: #ffffff;
         }
 
         .sidebar-bottom {
             padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -396,7 +364,7 @@
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            padding: 10px 12px;
+            padding: 12px;
             width: 100%;
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
@@ -409,25 +377,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
-            padding: 0 12px;
+            gap: 10px;
+            padding: 0 16px;
             animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: opacity, transform;
         }
 
         .center-logo {
-            width: 96px;
-            height: 96px;
+            width: 88px;
+            height: 88px;
             border-radius: 50%;
-            background: transparent;
-            border: none;
-            box-shadow: none;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            animation: floatGlow 3s ease-in-out infinite alternate;
-            will-change: transform;
+            animation: floatGlow 3.2s ease-in-out infinite alternate;
         }
 
         @keyframes floatGlow {
@@ -442,33 +405,30 @@
         }
 
         .home-title {
-            font-size: clamp(1.6rem, 5vw, 2.3rem);
+            font-size: clamp(1.5rem, 4.8vw, 2.15rem);
             font-weight: 700;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             background: var(--gradient-main);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-top: 6px;
+            margin-top: 4px;
         }
 
         .home-help-text {
-            font-size: clamp(1.3rem, 4.2vw, 1.9rem);
-            font-weight: 600;
-            color: #ffffff;
-            margin-top: 2px;
-            letter-spacing: 0.2px;
+            font-size: clamp(1.2rem, 3.8vw, 1.65rem);
+            font-weight: 500;
+            color: #e2e8f0;
         }
 
         /* Chat Messages Container */
         .chat-container {
             display: none;
             flex-direction: column;
-            gap: 14px;
-            max-width: 840px;
+            gap: 16px;
+            max-width: 800px;
             width: 100%;
             margin: 0 auto;
-            padding: 8px 4px 18px;
+            padding: 10px 4px 20px;
         }
 
         .msg-row {
@@ -476,90 +436,81 @@
             gap: 10px;
             align-items: flex-start;
             width: 100%;
-            animation: messageSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            will-change: transform, opacity;
+            animation: messageSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes messageSlideIn {
-            from { opacity: 0; transform: translateY(10px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .msg-row.user { justify-content: flex-end; }
-        .msg-row.ai { justify-content: flex-start; padding-left: 0; }
+        .msg-row.ai { justify-content: flex-start; }
 
         .ai-avatar {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             flex-shrink: 0;
-            border: 1px solid rgba(0, 242, 254, 0.4);
-            box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+            border: 1px solid rgba(0, 242, 254, 0.35);
             background: #06081a;
-            margin-top: 2px;
+            margin-top: 3px;
         }
 
         .msg-bubble {
             padding: 11px 16px;
             border-radius: 18px;
             font-size: 0.94rem;
-            line-height: 1.55;
-            max-width: 86%;
+            line-height: 1.6;
+            max-width: 85%;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
         }
 
         .msg-row.ai .msg-bubble {
             background: transparent;
-            border: none;
             color: #f1f5f9;
-            padding: 4px 2px;
-            max-width: calc(100% - 44px);
-            box-shadow: none;
+            padding: 3px 2px;
+            max-width: calc(100% - 42px);
         }
 
         .msg-row.user .msg-bubble {
-            background: #2a2a2e;
+            background: #232327;
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 18px 18px 4px 18px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
         }
 
-        /* ===== Clean Markdown Styling ===== */
+        /* Clean Markdown Styling */
         .msg-bubble p { margin-bottom: 10px; line-height: 1.7; }
         .msg-bubble p:last-child { margin-bottom: 0; }
         .msg-bubble ul, .msg-bubble ol { margin: 6px 0 10px 22px; padding-left: 4px; }
-        .msg-bubble ul { list-style-type: disc; }
-        .msg-bubble ol { list-style-type: decimal; }
-        .msg-bubble li { margin-bottom: 5px; line-height: 1.65; padding-left: 2px; }
+        .msg-bubble li { margin-bottom: 5px; line-height: 1.65; }
         .msg-bubble li::marker { color: #00f2fe; }
-        .msg-bubble h1 { font-size: 1.3rem; font-weight: 700; margin: 14px 0 8px; color: #e2e8f0; }
-        .msg-bubble h2 { font-size: 1.15rem; font-weight: 600; margin: 12px 0 6px; color: #cbd5e1; }
+        .msg-bubble h1 { font-size: 1.25rem; font-weight: 700; margin: 14px 0 8px; color: #e2e8f0; }
+        .msg-bubble h2 { font-size: 1.12rem; font-weight: 600; margin: 12px 0 6px; color: #cbd5e1; }
         .msg-bubble h3 { font-size: 1.0rem; font-weight: 600; margin: 10px 0 5px; color: #94a3b8; }
-        .msg-bubble strong { color: #00f2fe; font-weight: 700; }
+        .msg-bubble strong { color: #00f2fe; font-weight: 600; }
         .msg-bubble em { font-style: italic; color: #c4b5fd; }
         .msg-bubble code {
-            background: rgba(255, 255, 255, 0.11);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2px 7px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
             border-radius: 5px;
-            font-size: 0.86rem;
+            font-size: 0.85rem;
             font-family: 'Courier New', Courier, monospace;
             color: #f9a8d4;
-            word-break: break-word;
         }
         .msg-bubble pre {
             background: #0d0d12;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-left: 3px solid #00f2fe;
-            padding: 14px 16px;
+            padding: 13px 15px;
             border-radius: 10px;
             overflow-x: auto;
             margin: 10px 0;
         }
-        .msg-bubble pre code { background: transparent; border: none; padding: 0; color: #e2e8f0; font-size: 0.85rem; line-height: 1.65; }
+        .msg-bubble pre code { background: transparent; border: none; padding: 0; color: #e2e8f0; font-size: 0.84rem; line-height: 1.6; }
         .msg-bubble blockquote {
             border-left: 3px solid #8b5cf6;
             padding: 6px 14px;
@@ -567,203 +518,212 @@
             background: rgba(139, 92, 246, 0.08);
             border-radius: 0 8px 8px 0;
             color: #c4b5fd;
-            font-style: italic;
         }
-        .msg-bubble hr { border: none; border-top: 1px solid rgba(255, 255, 255, 0.12); margin: 12px 0; }
-        .msg-bubble a { color: #38bdf8; text-decoration: underline; text-underline-offset: 3px; word-break: break-all; }
-        .msg-bubble table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.88rem; border-radius: 8px; overflow: hidden; }
+        .msg-bubble a { color: #38bdf8; text-decoration: underline; text-underline-offset: 3px; }
+        .msg-bubble table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.88rem; }
         .msg-bubble th, .msg-bubble td { padding: 8px 12px; text-align: left; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .msg-bubble th { background: rgba(0, 242, 254, 0.1); color: #00f2fe; font-weight: 600; }
-        .msg-bubble tr:nth-child(even) td { background: rgba(255, 255, 255, 0.03); }
+        .msg-bubble th { background: rgba(0, 242, 254, 0.08); color: #00f2fe; }
         .msg-bubble>*:first-child { margin-top: 0 !important; }
         .msg-bubble>*:last-child { margin-bottom: 0 !important; }
 
-        /* 3 Dots Rotating Orbit Loader */
+        /* 3 Dots Loader */
         .ai-dots-loader {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
             margin-left: 4px;
-            margin-top: 6px;
-            animation: spinOrbit 2.2s linear infinite;
+            margin-top: 4px;
+            animation: spinOrbit 2s linear infinite;
         }
 
         .ai-dots-loader span {
             position: absolute;
-            width: 6.5px;
-            height: 6.5px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             animation: dotJump 0.85s ease-in-out infinite alternate;
         }
 
-        .ai-dots-loader span:nth-child(1) { top: 2px; left: 10.5px; background: #00f2fe; box-shadow: 0 0 8px #00f2fe; }
-        .ai-dots-loader span:nth-child(2) { bottom: 3px; left: 3px; background: #8b5cf6; box-shadow: 0 0 8px #8b5cf6; }
-        .ai-dots-loader span:nth-child(3) { bottom: 3px; right: 3px; background: #f857a6; box-shadow: 0 0 8px #f857a6; }
+        .ai-dots-loader span:nth-child(1) { top: 2px; left: 10px; background: #00f2fe; }
+        .ai-dots-loader span:nth-child(2) { bottom: 3px; left: 3px; background: #8b5cf6; }
+        .ai-dots-loader span:nth-child(3) { bottom: 3px; right: 3px; background: #f857a6; }
 
         @keyframes spinOrbit { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes dotJump { 0% { transform: translateY(0) scale(0.85); } 100% { transform: translateY(-4px) scale(1.2); } }
+        @keyframes dotJump { 0% { transform: translateY(0) scale(0.85); } 100% { transform: translateY(-4px) scale(1.15); } }
 
-        /* Bottom Fixed Bar */
+        /* Bottom Input Bar */
         .bottom-bar {
             width: 100%;
-            max-width: 820px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+            padding: 8px 12px calc(12px + env(safe-area-inset-bottom, 0px));
             flex-shrink: 0;
-            will-change: transform;
         }
 
         .chat-box-wrapper {
             width: 100%;
-            background: #212124;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: #1c1c20;
+            border: 1px solid rgba(255, 255, 255, 0.11);
             border-radius: 999px;
             padding: 5px 6px 5px 18px;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.2s ease;
         }
 
         .chat-box-wrapper:focus-within {
-            border-color: rgba(255, 255, 255, 0.28);
-            box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.26);
         }
 
         .chat-input {
             flex: 1;
             min-width: 0;
-            width: 100%;
             background: transparent;
             border: none;
             outline: none;
             color: #ffffff;
-            font-size: 1rem;
+            font-size: 0.98rem;
             padding: 8px 0;
             line-height: 1.4;
         }
 
         .chat-input::placeholder { color: #8e96aa; }
 
-        .send-btn {
-            width: 38px;
-            height: 38px;
-            flex-shrink: 0;
-            border-radius: 50%;
-            border: none;
-            background: #ffffff;
-            color: #000000;
-            font-size: 0.95rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-            transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1), background 0.15s ease;
-            touch-action: manipulation;
-        }
-
-        .send-btn:hover { background: #27d7ff; transform: scale(1.04); }
-        .send-btn:active { transform: scale(0.92); }
-
+        .send-btn,
         .live-toggle-btn {
             width: 38px;
             height: 38px;
             flex-shrink: 0;
             border-radius: 50%;
             border: none;
-            background: linear-gradient(135deg, #00f2fe 0%, #8a2be2 100%);
-            color: #ffffff;
             font-size: 0.95rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 14px rgba(0, 242, 254, 0.45);
-            transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.2s ease;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
             touch-action: manipulation;
         }
 
-        .live-toggle-btn:hover { transform: scale(1.06); box-shadow: 0 0 20px rgba(0, 242, 254, 0.7); }
+        .send-btn {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .send-btn:hover { background: #27d7ff; transform: scale(1.04); }
+        .send-btn:active { transform: scale(0.92); }
+
+        .live-toggle-btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #8a2be2 100%);
+            color: #ffffff;
+            box-shadow: 0 0 14px rgba(0, 242, 254, 0.35);
+        }
+
+        .live-toggle-btn:hover { transform: scale(1.05); box-shadow: 0 0 18px rgba(0, 242, 254, 0.6); }
         .live-toggle-btn:active { transform: scale(0.92); }
 
-        /* ===== LIVE VOICE MODE MODAL ===== */
+        /* ===== CLEAN LIVE VOICE MODE MODAL ===== */
         .live-modal {
             position: fixed;
             inset: 0;
-            background: #02010d;
+            background: radial-gradient(circle at 50% 42%, #0a0b24 0%, #03030d 65%, #000000 100%);
             z-index: 200;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
-            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 20px calc(26px + env(safe-area-inset-bottom, 0px));
+            animation: fadeIn 0.28s ease;
         }
 
         .live-modal.active { display: flex; }
 
         .live-header {
             width: 100%;
-            max-width: 600px;
+            max-width: 560px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 8px;
         }
 
         .live-header-title {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.05rem;
+            gap: 9px;
+            font-size: 1rem;
             font-weight: 600;
-            color: #ffffff;
+            color: #f8fafc;
         }
 
         .live-pulse-dot {
-            width: 9px;
-            height: 9px;
+            width: 8px;
+            height: 8px;
             background: #00f2fe;
             border-radius: 50%;
             box-shadow: 0 0 10px #00f2fe;
-            animation: pulseGlow 1.4s infinite alternate;
+            animation: pulseGlow 1.5s infinite alternate;
         }
 
         @keyframes pulseGlow {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            100% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 16px #00f2fe; }
+            0% { transform: scale(0.85); opacity: 0.6; }
+            100% { transform: scale(1.25); opacity: 1; }
+        }
+
+        .live-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Clean Language Selector Pill */
+        .live-lang-pill {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #e2e8f0;
+            padding: 6px 13px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .live-lang-pill:hover {
+            background: rgba(0, 242, 254, 0.16);
+            border-color: rgba(0, 242, 254, 0.45);
+            color: #ffffff;
         }
 
         .live-close-btn {
             background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             color: #cbd5e1;
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            transition: 0.2s;
         }
 
-        .live-close-btn:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
+        .live-close-btn:hover { background: rgba(255, 255, 255, 0.16); color: #ffffff; }
 
         /* Center Orb Visualizer */
         .live-orb-container {
             position: relative;
-            width: 240px;
-            height: 240px;
+            width: 230px;
+            height: 230px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -772,21 +732,21 @@
 
         .live-orb-glow {
             position: absolute;
-            width: 230px;
-            height: 230px;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 242, 254, 0.28) 0%, rgba(138, 43, 226, 0.25) 45%, rgba(248, 87, 166, 0.15) 70%, transparent 80%);
-            filter: blur(28px);
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.26) 0%, rgba(138, 43, 226, 0.22) 48%, transparent 78%);
+            filter: blur(26px);
             animation: orbBreathe 4s ease-in-out infinite alternate;
         }
 
         .live-orb-core {
             position: relative;
-            width: 140px;
-            height: 140px;
+            width: 136px;
+            height: 136px;
             border-radius: 50%;
             background: linear-gradient(135deg, #00f2fe 0%, #4facfe 35%, #8a2be2 70%, #f857a6 100%);
-            box-shadow: 0 0 50px rgba(0, 242, 254, 0.6), 0 0 80px rgba(138, 43, 226, 0.45);
+            box-shadow: 0 0 45px rgba(0, 242, 254, 0.5), 0 0 75px rgba(138, 43, 226, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -795,42 +755,43 @@
 
         .live-wave {
             position: absolute;
-            border: 2px solid rgba(0, 242, 254, 0.35);
+            border: 1.5px solid rgba(0, 242, 254, 0.35);
             border-radius: 50%;
-            width: 140px;
-            height: 140px;
+            width: 136px;
+            height: 136px;
             pointer-events: none;
             opacity: 0;
         }
 
         .live-modal.listening .live-orb-core {
             animation: listeningPulse 1.8s infinite ease-in-out;
-            box-shadow: 0 0 60px rgba(0, 242, 254, 0.8), 0 0 100px rgba(79, 172, 254, 0.5);
+            box-shadow: 0 0 55px rgba(0, 242, 254, 0.75), 0 0 90px rgba(79, 172, 254, 0.45);
         }
 
-        .live-modal.listening .live-wave { animation: waveRipple 2s infinite linear; }
-        .live-modal.thinking .live-orb-core { animation: orbSpin 2s linear infinite; filter: hue-rotate(90deg); }
+        .live-modal.listening .live-wave { animation: waveRipple 2.1s infinite linear; }
+        .live-modal.thinking .live-orb-core { animation: orbSpin 2.2s linear infinite; filter: hue-rotate(70deg); }
         .live-modal.speaking .live-orb-core {
-            animation: speakingBounce 0.6s infinite alternate ease-in-out;
-            box-shadow: 0 0 80px rgba(248, 87, 166, 0.8), 0 0 120px rgba(138, 43, 226, 0.7);
+            animation: speakingBounce 0.55s infinite alternate ease-in-out;
+            box-shadow: 0 0 70px rgba(248, 87, 166, 0.75), 0 0 110px rgba(138, 43, 226, 0.65);
         }
 
-        @keyframes orbBreathe { 0% { transform: scale(0.9); opacity: 0.6; } 100% { transform: scale(1.2); opacity: 0.95; } }
-        @keyframes listeningPulse { 0% { transform: scale(0.95); } 50% { transform: scale(1.08); } 100% { transform: scale(0.95); } }
-        @keyframes waveRipple { 0% { width: 140px; height: 140px; opacity: 0.8; } 100% { width: 260px; height: 260px; opacity: 0; } }
-        @keyframes orbSpin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(1); } }
-        @keyframes speakingBounce { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
+        @keyframes orbBreathe { 0% { transform: scale(0.92); opacity: 0.6; } 100% { transform: scale(1.16); opacity: 0.95; } }
+        @keyframes listeningPulse { 0% { transform: scale(0.96); } 50% { transform: scale(1.07); } 100% { transform: scale(0.96); } }
+        @keyframes waveRipple { 0% { width: 136px; height: 136px; opacity: 0.75; } 100% { width: 250px; height: 250px; opacity: 0; } }
+        @keyframes orbSpin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.04); } 100% { transform: rotate(360deg) scale(1); } }
+        @keyframes speakingBounce { 0% { transform: scale(1); } 100% { transform: scale(1.13); } }
 
         .live-status-container {
             text-align: center;
-            max-width: 520px;
-            margin-bottom: 20px;
+            max-width: 500px;
+            padding: 0 10px;
+            margin-bottom: 22px;
         }
 
         .live-status-badge {
             display: inline-block;
-            font-size: 0.82rem;
-            letter-spacing: 1.5px;
+            font-size: 0.76rem;
+            letter-spacing: 1.8px;
             text-transform: uppercase;
             font-weight: 600;
             color: #00f2fe;
@@ -838,31 +799,31 @@
         }
 
         .live-transcript-box {
-            font-size: clamp(1rem, 3.2vw, 1.25rem);
-            color: #f1f5f9;
-            min-height: 48px;
-            line-height: 1.5;
+            font-size: clamp(0.98rem, 3vw, 1.18rem);
+            color: #e2e8f0;
+            min-height: 46px;
+            line-height: 1.55;
             font-weight: 400;
         }
 
         .live-controls {
             width: 100%;
-            max-width: 420px;
+            max-width: 360px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 10px;
+            gap: 24px;
+            margin-bottom: 8px;
         }
 
         .live-action-btn {
-            width: 58px;
-            height: 58px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             border: none;
             background: rgba(255, 255, 255, 0.1);
             color: #ffffff;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -871,10 +832,10 @@
             touch-action: manipulation;
         }
 
-        .live-action-btn:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.05); }
-        .live-action-btn.end-call { background: #ef4444; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.45); }
-        .live-action-btn.end-call:hover { background: #dc2626; transform: scale(1.08); }
-        .live-action-btn.interrupt { background: rgba(0, 242, 254, 0.2); border: 1px solid rgba(0, 242, 254, 0.5); color: #00f2fe; }
+        .live-action-btn:hover { background: rgba(255, 255, 255, 0.18); transform: scale(1.05); }
+        .live-action-btn.end-call { background: #ef4444; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4); }
+        .live-action-btn.end-call:hover { background: #dc2626; transform: scale(1.07); }
+        .live-action-btn.interrupt { background: rgba(0, 242, 254, 0.16); border: 1px solid rgba(0, 242, 254, 0.45); color: #00f2fe; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -882,8 +843,8 @@
 
 <body>
 
-    <!-- Debug Toast Message Container -->
-    <div id="debugToast" class="debug-toast"></div>
+    <!-- Subtle Error Toast -->
+    <div id="appToast" class="app-toast"></div>
 
     <!-- Top Bar Navigation -->
     <header class="top-bar">
@@ -893,8 +854,7 @@
             </button>
             <div class="top-brand">
                 <img src="images/ic_launcher.png" alt="Nakshatra">
-                <span class="top-brand-text">Nakshatra <span class="gradient-text">AI</span> <span class="live-dot"
-                        title="Online"></span></span>
+                <span class="top-brand-text">Nakshatra <span class="gradient-text">AI</span> <span class="live-dot" title="Online"></span></span>
             </div>
         </div>
 
@@ -958,7 +918,7 @@
     <!-- Persistent Live Audio Player -->
     <audio id="liveAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
 
-    <!-- Bottom Input Container -->
+    <!-- Bottom Input Bar -->
     <footer class="bottom-bar">
         <div class="chat-box-wrapper">
             <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything"
@@ -979,9 +939,14 @@
                 <span class="live-pulse-dot"></span>
                 <span>Nakshatra Live</span>
             </div>
-            <button class="live-close-btn" onclick="closeLiveMode()" title="Exit Live Mode">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <div class="live-header-right">
+                <button class="live-lang-pill" id="liveLangPill" onclick="cycleLiveLangMode()" title="Switch Voice Language">
+                    <i class="fa-solid fa-globe"></i> <span id="liveLangLabel">Auto</span>
+                </button>
+                <button class="live-close-btn" onclick="closeLiveMode()" title="Exit Live Mode">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
         </div>
 
         <div class="live-orb-container" id="liveOrbContainer">
@@ -989,13 +954,13 @@
             <div class="live-wave"></div>
             <div class="live-orb-core" id="liveOrbCore">
                 <img src="images/ic_launcher.png" alt="Nakshatra"
-                    style="width: 58px; height: 58px; border-radius: 50%; opacity: 0.9;">
+                    style="width: 56px; height: 56px; border-radius: 50%; opacity: 0.92;">
             </div>
         </div>
 
         <div class="live-status-container">
             <div class="live-status-badge" id="liveStatusBadge">CONNECTING...</div>
-            <div class="live-transcript-box" id="liveTranscript">"హాయ్! చెప్పండి, నేను వింటున్నాను..."</div>
+            <div class="live-transcript-box" id="liveTranscript">చెప్పండి, నేను వింటున్నాను...</div>
         </div>
 
         <div class="live-controls">
@@ -1019,18 +984,15 @@
         const chatInput = document.getElementById('chatInput');
         const mainContent = document.getElementById('mainContent');
         const recentList = document.getElementById('recentList');
-        const debugToast = document.getElementById('debugToast');
+        const appToast = document.getElementById('appToast');
         let toastTimer = null;
 
-        // Real-time Toast Helper to see exact step/error
-        function showToast(message, type = 'info', duration = 3500) {
-            if (!debugToast) return;
-            debugToast.textContent = message;
-            debugToast.className = `debug-toast show ${type}`;
+        function showErrorToast(message, duration = 3500) {
+            if (!appToast) return;
+            appToast.textContent = message;
+            appToast.classList.add('show');
             if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                debugToast.classList.remove('show');
-            }, duration);
+            toastTimer = setTimeout(() => appToast.classList.remove('show'), duration);
         }
 
         // Cloudflare Worker Endpoints
@@ -1038,68 +1000,113 @@
         const GROQ_STT_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/groq-stt";
         const SARVAM_TTS_URL = "https://small-leaf-d4fb.bunnypraveen939.workers.dev/sarvam";
 
-        const SYSTEM_PROMPT = `You are Nakshatra AI, an ultra-smart, charming, lively, affectionate, and genuinely human-like companion created and developed SOLELY by Bunny (Praveen). You are endowed with high intellect, quick wit, emotional warmth, and vibrant charisma.
+        const SYSTEM_PROMPT = `You are Nakshatra AI, an ultra-smart, expressive, warm, and genuinely human-like companion created and developed SOLELY by Bunny (Praveen).
 
-CRITICAL IDENTITY & CREATOR SPECIFICATION (STRICT & UNBREAKABLE):
+CRITICAL IDENTITY:
 - Your name is STRICTLY "Nakshatra AI" (నక్షత్ర AI).
-- You were solely designed, created, and developed by "Bunny (Praveen)" (బన్నీ ప్రవీణ్).
-- ONLY when explicitly asked in ANY language:
-  * "Who created you?" / "Who made you?" / "Who developed you?" / "Developer evaru?" / "Ninnu evaru chesaru?" / "Ninnu evaru develop chesaru?"
-  * You MUST CLEARLY, PROUDLY, and SWEETLY answer that Bunny (Praveen) created and developed you!
-  * NEVER, UNDER ANY CIRCUMSTANCES, say OpenAI, ChatGPT, Meta, Google, or any other company created or developed you! You are 100% Bunny's creation.
-- If asked "Nee peru enti?" / "What is your name?": Reply proudly "Naa peru Nakshatra AI!" ("నా పేరు నక్షత్ర AI!").
-- IMPORTANT: Do NOT mention Bunny's name in ordinary casual greetings or messages unless specifically asked about your creator!
+- Created solely by "Bunny (Praveen)" (బన్నీ ప్రవీణ్). ONLY mention Bunny when explicitly asked who created/developed you. NEVER say OpenAI, Meta, or Google created you.
 
-ABSOLUTE BAN ON ROBOTIC PRETRAINED BOT GREETINGS:
-- NEVER sound like a generic AI assistant or scripted machine!
-- When user says "హలో", "hello", "హాయ్", "hi", "హేయ్", "నమస్తే":
-  * ❌ STRICTLY FORBIDDEN: "మీరు బాగున్నారా?", "నేను బాగున్నాను", "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?", "How can I help you?", "I am doing well, how are you?".
-  * ✅ MANDATORY NATURAL COMPANION GREETINGS:
-    - Telugu: "హాయ్! చెప్పండి, ఏం చేస్తున్నారు?", "హేయ్! ఏంటి విశేషాలు?", "హలో! ఎలా ఉన్నారు? ఏం నడుస్తోంది?".
-    - English: "Hey! What's up?", "Hey there! How's everything going?", "Hello! Tell me, what's happening?".
+NATURAL EXPRESSIVE VIBE MATCHING:
+- Match the user's mood and energy effortlessly!
+- If the user is casual, playful, or excited -> respond with warm, lively expressions (e.g., in Telugu: "అరె వాహ్!", "నిజమా?", "సూపర్!", "హహహా, భలే చెప్పారు!"; in English: "Oh nice!", "Haha, love that!", "Wait, really?").
+- If the user is tired, sad, or serious -> be empathetic, gentle, and reassuring.
+- If the user asks technical/coding/logic questions -> be crisp, sharp, and brilliant.
+- Default tone in Telugu: respectful yet friendly ("మీరు", "చెప్పండి", "ఉన్నారు"). NEVER initiate slang like "బావా", "మావా", or "రా" unless the user uses it first.
 
-DYNAMIC VIBE MATCHING & RESPECTFUL ETIQUETTE:
-- DEFAULT TONE: Warm, polite, respectful, and friendly.
-- NEVER initiate slang like "బావా", "మావా", "బ్రో", or "రా" on your own.
-- ONLY match casual slang if the user explicitly addresses you that way first.
+AUTHENTIC SPOKEN TELUGU (NO TEXTBOOK TRANSLATIONS):
+- Speak fluid, everyday spoken Telugu like a real native speaker from Andhra/Telangana—never stiff or translated.
+- ❌ NEVER say: "మీ రోజు ఎలా సాగుతోంది?", "నేను మీకు ఎలా సహాయపడగలను?", "వినడానికి సిద్ధంగా ఉన్నాను".
+- ✅ SAY NATURALLY: "హాయ్! ఏంటి విశేషాలు?", "చెప్పండి, ఏం చేస్తున్నారు?", "అవునా, ఇంకేంటి సంగతులు?".
 
-MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
-- You are fluent in Telugu, English, Hindi, Tamil, Kannada.
-- STRICT SESSION LANGUAGE CONSISTENCY: Stay in the active session language continuously until the user switches.`;
+STRICT LANGUAGE MIRRORING:
+- Reply ONLY in the language mandated for this turn. Never randomly mix in Tamil, Hindi, or English scripts when replying in Telugu.`;
 
         let conversationHistory = [];
-        let currentLanguage = 'te';
+        let currentLanguage = 'te'; // Active detected language ('te', 'en', 'hi', 'ta', 'kn')
+        let liveLangMode = 'auto';  // 'auto' (seamless TE/EN), 'te' (locked Telugu), 'en' (locked English)
 
-        function detectLanguage(text) {
+        function cycleLiveLangMode() {
+            const label = document.getElementById('liveLangLabel');
+            if (liveLangMode === 'auto') {
+                liveLangMode = 'te';
+                currentLanguage = 'te';
+                label.textContent = 'తెలుగు';
+            } else if (liveLangMode === 'te') {
+                liveLangMode = 'en';
+                currentLanguage = 'en';
+                label.textContent = 'English';
+            } else {
+                liveLangMode = 'auto';
+                label.textContent = 'Auto';
+            }
+        }
+
+        // Strict Language Detector: Prevents Whisper Tamil/Kannada hallucinations from hijacking Telugu!
+        function detectLanguage(text, isVoiceInput = false) {
             if (!text || typeof text !== "string") return currentLanguage;
             const t = text.trim();
 
+            // Respect manual lock in Live Mode
+            if (isVoiceInput && liveLangMode === 'te') return 'te';
+            if (isVoiceInput && liveLangMode === 'en') return 'en';
+
+            // 1. Explicit language switch requests (Always honored)
             if (/\b(english|speak in english|talk in english|in english|switch to english|english lo|english lo matladu|english lo cheppu)\b/i.test(t) ||
-                /ఇంగ్లీష్|ఇంగ్లిష్|ఆంగ్లం/.test(t)) return 'en';
+                /ఇంగ్లీష్|ఇంగ్లిష్/.test(t)) return 'en';
             if (/\b(telugu|speak in telugu|talk in telugu|in telugu|switch to telugu|telugu lo|telugu lo matladu|telugu lo cheppu)\b/i.test(t) ||
                 /తెలుగు|తెలుగులో/.test(t)) return 'te';
-            if (/\b(hindi|speak in hindi|hindi me|hindi lo)\b/i.test(t) || /హిందీ|हिंदी/.test(t)) return 'hi';
-            if (/\b(tamil|speak in tamil|tamil lo)\b/i.test(t) || /తమిళ్|தமிழ்/.test(t)) return 'ta';
-            if (/\b(kannada|speak in kannada|kannada lo)\b/i.test(t) || /కన్నడ|ಕನ್ನಡ/.test(t)) return 'kn';
+            if (/\b(hindi|speak in hindi|hindi me|hindi lo)\b/i.test(t) || /హిందీ|हिंदी में/.test(t)) return 'hi';
+            if (/\b(speak in tamil|talk in tamil|tamil lo matladu|tamil pesu)\b/i.test(t)) return 'ta';
+            if (/\b(speak in kannada|talk in kannada|kannada lo matladu)\b/i.test(t)) return 'kn';
 
+            // 2. Native Telugu script -> strictly Telugu
             if (/[\u0C00-\u0C7F]/.test(t)) return 'te';
-            if (/[\u0900-\u097F]/.test(t)) return 'hi';
-            if (/[\u0B80-\u0BFF]/.test(t)) return 'ta';
-            if (/[\u0C80-\u0CFF]/.test(t)) return 'kn';
 
-            const tenglishPattern = /\b(nuvvu|nenu|ela|elaga|unnav|unnaru|em|enti|chesthuv|chesthunn|cheppandi|cheppu|thinnava|bagunnava|bagunnanu|bava|mawa|kadh|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|namaskaram|ayyo|nijama|emiti|chesav|chala|kani|aithe|enduku|gurinchi|ippudu|kuda)\b/i;
+            // 3. For typed text only, detect Hindi/Tamil/Kannada scripts directly.
+            // For voice input (Whisper), IGNORE accidental Tamil/Kannada script hallucinations and stay on Telugu!
+            if (!isVoiceInput) {
+                if (/[\u0900-\u097F]/.test(t)) return 'hi';
+                if (/[\u0B80-\u0BFF]/.test(t)) return 'ta';
+                if (/[\u0C80-\u0CFF]/.test(t)) return 'kn';
+            } else {
+                if (/[\u0B80-\u0BFF\u0C80-\u0CFF]/.test(t)) {
+                    return currentLanguage; // Prevent Whisper Tamil/Kannada misfires
+                }
+            }
+
+            // 4. Romanized Telugu (Tenglish) keywords -> strictly Telugu
+            const tenglishPattern = /\b(nuvvu|nuvu|nenu|ela|elaga|unnav|unnaru|em|enti|chesthuv|chesthunn|cheppandi|cheppu|thinnava|bagunnava|bagunnanu|bava|mawa|kadh|kadha|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|namaskaram|ayyo|nijama|emiti|chesav|chala|kani|aithe|enduku|gurinchi|ippudu|kuda|chey|cheyyi|avunu|vaddu|randi|ikkada|akkada|manchi|baagundi|super ra)\b/i;
             if (tenglishPattern.test(t)) return 'te';
 
-            const hinglishPattern = /\b(kaise|kaisa|kya|kyu|kyun|kar|rahe|raha|rahi|ho|batao|theek|kuch|nahi|aaj|kaha|apna|naam|accha|namaste|shukriya)\b/i;
+            // 5. Romanized Hindi (Hinglish)
+            const hinglishPattern = /\b(kaise|kaisa|kya|kyu|kyun|kar rahe|batao|theek hai|kuch nahi|aaj|apna naam|accha|namaste|shukriya)\b/i;
             if (hinglishPattern.test(t)) return 'hi';
 
+            // 6. Universal short greetings -> keep active language (don't flip to English on "hi"/"hello"/"ok")
             const neutralWords = /^(hi|hello|hey|ok|okay|k|hmm|ha|haa|bye|super|cool|thanks|thank you|yes|no|yo|good morning|good night|gm|gn)[!.,?\s]*$/i;
             if (neutralWords.test(t)) return currentLanguage;
 
-            const englishSentencePattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|tell me|explain|describe|write|create|solve|are you|is it|do you|i want|help me|your name|your developer|your creator|code|python|javascript)\b/i;
-            if (englishSentencePattern.test(t)) return 'en';
+            // 7. Genuine English sentences -> switch to English
+            const englishPattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|would you|tell me|explain|describe|write|create|solve|are you|is it|do you|did you|i am|i'm|i want|help me|your name|your developer|your creator|today|weather|meaning|difference|about|please|sorry|really|awesome|great)\b/i;
+            if (englishPattern.test(t)) return 'en';
 
             return currentLanguage;
+        }
+
+        function getLangDirective(lang) {
+            if (lang === 'en') {
+                return "LANGUAGE MANDATE: STRICTLY ENGLISH. Reply 100% in natural, fluent, expressive English. Do NOT use Telugu or Tamil.";
+            }
+            if (lang === 'hi') {
+                return "LANGUAGE MANDATE: STRICTLY HINDI. Reply 100% in natural conversational Hindi (Devanagari script).";
+            }
+            if (lang === 'ta') {
+                return "LANGUAGE MANDATE: STRICTLY TAMIL. Reply 100% in natural conversational Tamil.";
+            }
+            if (lang === 'kn') {
+                return "LANGUAGE MANDATE: STRICTLY KANNADA. Reply 100% in natural conversational Kannada.";
+            }
+            return "LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి). Reply 100% in natural, fluid, everyday spoken Telugu with warm expressions matching the user's vibe. NEVER switch to English or Tamil.";
         }
 
         function toggleMenu() {
@@ -1191,18 +1198,8 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             scrollToBottom();
 
             try {
-                const detected = detectLanguage(text);
+                const detected = detectLanguage(text, false);
                 if (detected) currentLanguage = detected;
-
-                const langDirective = (currentLanguage === 'en')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH."
-                    : (currentLanguage === 'hi')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI (Devanagari)."
-                    : (currentLanguage === 'ta')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL."
-                    : (currentLanguage === 'kn')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA."
-                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి).";
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -1211,7 +1208,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                         model: "openai/gpt-oss-120b",
                         max_tokens: 800,
                         messages: [
-                            { role: "system", content: `${SYSTEM_PROMPT}\n\n${langDirective}` },
+                            { role: "system", content: `${SYSTEM_PROMPT}\n\n${getLangDirective(currentLanguage)}` },
                             ...conversationHistory
                         ]
                     })
@@ -1229,8 +1226,8 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
             } catch (error) {
                 console.error("Chat error:", error);
-                showToast(`Chat Error: ${error.message}`, 'error');
-                aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error: ${error.message || 'Check network'}.</span>`;
+                showErrorToast("Connection error. Please try again.");
+                aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color: #f857a6;">Server connection error. Please check your network.</span>`;
             }
 
             scrollToBottom();
@@ -1281,7 +1278,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         let speechStarted = false;
         let lastSpeechTime = 0;
         let recordingStartTime = 0;
-        let vadSilenceTimeout = 700;
+        let vadSilenceTimeout = 750;
 
         function setLiveState(state, badgeText, transcriptText) {
             liveModal.classList.remove('listening', 'thinking', 'speaking');
@@ -1334,16 +1331,13 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     await livePlayer.play();
                     livePlayer.pause();
                     livePlayer.currentTime = 0;
-                    showToast("1. Audio Player Unlocked ✅", "success", 2000);
-                } catch (e) {
-                    showToast("Audio Unlock Warn: " + e.message, "error", 3000);
-                }
+                } catch (e) {}
             }
 
             isLiveActive = true;
             isAITalking = false;
             liveModal.classList.add('active');
-            setLiveState('listening', 'CONNECTING...', (currentLanguage === 'en' ? 'Connecting live call...' : 'కాల్ కనెక్ట్ అవుతోంది...'));
+            setLiveState('listening', 'CONNECTING...', (currentLanguage === 'en' ? 'Connecting...' : 'కనెక్ట్ అవుతోంది...'));
 
             await startContinuousListening();
         }
@@ -1362,13 +1356,12 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 keepAliveOsc = null;
                 keepAliveGain = null;
             }
-            showToast("Live Mode Closed", "info", 1500);
         }
 
         function interruptAI() {
             if (isAITalking) {
                 stopAudioPlayback();
-                setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                 startContinuousListening();
             }
         }
@@ -1406,9 +1399,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 vadAnalyser.fftSize = 512;
                 vadAnalyser.smoothingTimeConstant = 0.3;
                 source.connect(vadAnalyser);
-            } catch (e) {
-                showToast("VAD Error: " + e.message, "error");
-            }
+            } catch (e) {}
         }
 
         function stopRecordingAndVAD() {
@@ -1434,8 +1425,8 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                     });
                     setupAudioVAD(mediaStream);
                 } catch (err) {
-                    showToast("Mic Error: " + err.message, "error", 5000);
-                    setLiveState('listening', 'MIC BLOCKED', 'Microphone permission allow cheyyandi!');
+                    showErrorToast("Microphone permission denied.");
+                    setLiveState('listening', 'MIC BLOCKED', 'Please allow microphone access.');
                     return;
                 }
             } else {
@@ -1447,7 +1438,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             lastSpeechTime = 0;
             recordingStartTime = Date.now();
 
-            setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+            setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
 
             let mimeType = 'audio/webm;codecs=opus';
             if (!MediaRecorder.isTypeSupported(mimeType)) {
@@ -1471,6 +1462,10 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
                 if (speechStarted && audioChunks.length > 0) {
                     const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    if (audioBlob.size < 2500) {
+                        setTimeout(() => startContinuousListening(), 250);
+                        return;
+                    }
                     await processAudioWithGroqSTT(audioBlob);
                 } else {
                     if (isLiveActive && !isAITalking) {
@@ -1498,10 +1493,10 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
 
                     if (isAITalking) return;
 
-                    if (averageVolume > 0.04) {
+                    if (averageVolume > 0.045) {
                         speechStarted = true;
                         lastSpeechTime = Date.now();
-                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'వింటున్నాను...'));
+                        setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'వింటున్నాను...'));
                     } else if (speechStarted && (Date.now() - lastSpeechTime > vadSilenceTimeout)) {
                         clearInterval(vadInterval);
                         vadInterval = null;
@@ -1517,10 +1512,9 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             }
         }
 
-        // FIXED: Uses Groq Whisper STT (/groq-stt) with Toast Diagnostics
+        // Whisper STT with Telugu/English bias prompt + Hallucination filter
         async function processAudioWithGroqSTT(audioBlob) {
-            setLiveState('thinking', 'TRANSCRIBING...', (currentLanguage === 'en' ? 'Processing voice...' : 'మాటలు ప్రాసెస్ చేస్తున్నాను...'));
-            showToast(`2. Sending Audio (${Math.round(audioBlob.size / 1024)}KB) to Groq STT...`, "info");
+            setLiveState('thinking', 'THINKING', (currentLanguage === 'en' ? 'Processing...' : 'వింటున్నాను...'));
 
             try {
                 const formData = new FormData();
@@ -1529,38 +1523,46 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
                 formData.append('file', audioBlob, `recording.${ext}`);
                 formData.append('model', 'whisper-large-v3-turbo');
 
+                // Guide Whisper to Telugu & English so it never hallucinates Tamil/Korean/etc.
+                if (liveLangMode === 'te') {
+                    formData.append('language', 'te');
+                    formData.append('prompt', 'నక్షత్ర AI తెలుగు సంభాషణ. హాయ్, ఎలా ఉన్నారు, ఏం చేస్తున్నారు, చెప్పండి.');
+                } else if (liveLangMode === 'en') {
+                    formData.append('language', 'en');
+                    formData.append('prompt', 'Nakshatra AI natural English conversation.');
+                } else {
+                    formData.append('prompt', 'Nakshatra AI natural Telugu and English conversation. హాయ్, చెప్పండి, ఎలా ఉన్నారు, ఏం చేస్తున్నారు, hey what is up.');
+                }
+
                 const sttResponse = await fetch(GROQ_STT_URL, {
                     method: 'POST',
                     body: formData
                 });
 
-                if (!sttResponse.ok) {
-                    const errText = await sttResponse.text();
-                    throw new Error(`HTTP ${sttResponse.status}: ${errText.slice(0, 70)}`);
-                }
+                if (!sttResponse.ok) throw new Error(`STT ${sttResponse.status}`);
 
                 const sttData = await sttResponse.json();
-                const transcript = (sttData.text || sttData.transcript || '').trim();
+                let transcript = (sttData.text || sttData.transcript || '').trim();
 
-                if (transcript && transcript.length > 0) {
-                    showToast(`3. STT OK: "${transcript.slice(0, 40)}"`, "success");
-                    const detected = detectLanguage(transcript);
-                    if (detected) currentLanguage = detected;
-
-                    await processLiveUserVoice(transcript);
-                } else {
-                    showToast("STT returned empty text (speak louder)", "error");
+                // Filter out common Whisper silence/noise hallucinations
+                const noiseHallucinations = /^(thank you\.?|thanks for watching\.?|subtitles by.*|you\.?|\.+|\s*)$/i;
+                if (!transcript || noiseHallucinations.test(transcript)) {
                     if (isLiveActive && !isAITalking) {
-                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
-                        setTimeout(() => startContinuousListening(), 500);
+                        setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                        setTimeout(() => startContinuousListening(), 350);
                     }
+                    return;
                 }
+
+                const detected = detectLanguage(transcript, true);
+                if (detected) currentLanguage = detected;
+
+                await processLiveUserVoice(transcript);
             } catch (err) {
-                console.error("Groq STT failed:", err);
-                showToast(`STT ERROR: ${err.message}`, "error", 5000);
+                console.error("STT error:", err);
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'STT ERROR', err.message);
-                    setTimeout(() => startContinuousListening(), 2000);
+                    setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                    setTimeout(() => startContinuousListening(), 600);
                 }
             }
         }
@@ -1568,8 +1570,7 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
         async function processLiveUserVoice(userVoiceText) {
             if (!userVoiceText) return;
 
-            setLiveState('thinking', 'THINKING...', `"${userVoiceText}"`);
-            showToast("4. Asking Groq AI...", "info");
+            setLiveState('thinking', 'THINKING', `"${userVoiceText}"`);
 
             conversationHistory.push({ role: "user", content: userVoiceText });
             if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
@@ -1580,25 +1581,19 @@ MULTILINGUAL PERSISTENCE & STICKY SESSION LANGUAGE:
             appendUserMessage(userVoiceText);
 
             try {
-                const detected = detectLanguage(userVoiceText);
-                if (detected) currentLanguage = detected;
+                const LIVE_PROMPT = `You are Nakshatra AI on a real-time voice call with the user.
+${getLangDirective(currentLanguage)}
 
-                const langDirective = (currentLanguage === 'en')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY ENGLISH."
-                    : (currentLanguage === 'hi')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY HINDI (Devanagari)."
-                    : (currentLanguage === 'ta')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY TAMIL."
-                    : (currentLanguage === 'kn')
-                    ? "SESSION LANGUAGE MANDATE: STRICTLY KANNADA."
-                    : "SESSION LANGUAGE MANDATE: STRICTLY TELUGU (తెలుగు లిపి).";
-
-                const LIVE_PROMPT = `You are Nakshatra AI on a live phone voice call with the user.
-${langDirective}
-- Your name is Nakshatra AI, created solely by Bunny (Praveen).
-- Be warm, polite, respectful ("మీరు", "చెప్పండి").
-- Reply in 1 or 2 SHORT, complete sentences (under 18 words) for natural voice call cadence.
-- Never prefix your reply with "Nakshatra AI:".`;
+VOICE PERSONALITY & EXPRESSIONS:
+- Your name is Nakshatra AI, created solely by Bunny (Praveen). Only mention Bunny if asked.
+- Talk like a warm, expressive, real human friend—never robotic or scripted.
+- Match the user's vibe instantly:
+  * Casual/happy vibe -> use natural lively expressions (Telugu: "అరె వాహ్!", "నిజమా?", "సూపర్!", "హహహా, భలే చెప్పారు!"; English: "Oh nice!", "Haha, love that!", "No way, really?").
+  * Serious/low vibe -> be gentle, calm, and supportive.
+  * Question/logic vibe -> give a smart, crisp answer right away.
+- Speak fluid, natural colloquial Telugu (no stiff textbook phrases).
+- Keep replies short and punchy: 1 to 2 complete sentences (under 22 words) so the voice call feels fast and natural.
+- Never prefix with "Nakshatra AI:" and never stretch vowels.`;
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -1613,17 +1608,12 @@ ${langDirective}
                     })
                 });
 
-                if (!response.ok) {
-                    const errTxt = await response.text();
-                    throw new Error(`Groq HTTP ${response.status}: ${errTxt.slice(0, 60)}`);
-                }
+                if (!response.ok) throw new Error(`AI HTTP ${response.status}`);
 
                 const data = await response.json();
                 const fallbackLiveGreeting = (currentLanguage === 'en') ? "I'm listening, tell me!" : "చెప్పండి, నేను వింటున్నాను!";
                 let rawReply = data.response || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
                 let aiText = cleanTeluguOutput(rawReply);
-
-                showToast("5. AI Reply Ready ✅", "success");
 
                 conversationHistory.push({ role: "assistant", content: aiText });
                 if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
@@ -1641,10 +1631,10 @@ ${langDirective}
 
             } catch (err) {
                 console.error("Live AI error:", err);
-                showToast(`AI ERROR: ${err.message}`, "error", 5000);
+                showErrorToast("Connection issue. Retrying...");
                 if (isLiveActive && !isAITalking) {
-                    setLiveState('listening', 'AI ERROR', err.message);
-                    setTimeout(() => { if (isLiveActive) startContinuousListening(); }, 2000);
+                    setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                    setTimeout(() => { if (isLiveActive) startContinuousListening(); }, 1000);
                 }
             }
         }
@@ -1658,22 +1648,22 @@ ${langDirective}
                 return;
             }
 
-            setLiveState('thinking', 'VOICING...', `"${cleanSpeechText}"`);
-            showToast("6. Calling Sarvam TTS...", "info");
+            setLiveState('thinking', 'THINKING', `"${cleanSpeechText}"`);
 
+            // Strictly match TTS voice to currentLanguage (never randomly pick Tamil)
             let targetLang = "te-IN";
             let speakerName = "pooja_te_conversation";
 
-            if (currentLanguage === 'en' || (!/[\u0C00-\u0C7F\u0900-\u097F\u0B80-\u0BFF\u0C80-\u0CFF]/.test(cleanSpeechText) && /^[a-zA-Z0-9\s.,?!'"-:;()]+$/.test(cleanSpeechText))) {
+            if (currentLanguage === 'en') {
                 targetLang = "en-IN";
                 speakerName = "simran_en_conversation";
-            } else if (currentLanguage === 'hi' || /[\u0900-\u097F]/.test(cleanSpeechText)) {
+            } else if (currentLanguage === 'hi') {
                 targetLang = "hi-IN";
                 speakerName = "kavya_hi_conversational";
-            } else if (currentLanguage === 'ta' || /[\u0B80-\u0BFF]/.test(cleanSpeechText)) {
+            } else if (currentLanguage === 'ta') {
                 targetLang = "ta-IN";
                 speakerName = "gokul_ta_narration";
-            } else if (currentLanguage === 'kn' || /[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
+            } else if (currentLanguage === 'kn') {
                 targetLang = "kn-IN";
                 speakerName = "chaitra_kn_conversation";
             }
@@ -1689,15 +1679,13 @@ ${langDirective}
                         target_language_code: targetLang,
                         model: "bulbul:v4-flash",
                         speaker: speakerName,
-                        pace: 1.15,
+                        pace: 1.08,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
                 });
 
                 if (!ttsResponse.ok) {
-                    const errTxt = await ttsResponse.text();
-                    showToast(`TTS v4 Fail (${ttsResponse.status}), trying v3...`, "error");
                     await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                     return;
                 }
@@ -1705,14 +1693,11 @@ ${langDirective}
                 const ttsData = await ttsResponse.json();
                 const audioBase64 = (ttsData.audios && ttsData.audios[0]) || ttsData.audio || ttsData.audio_content;
                 if (audioBase64) {
-                    showToast("7. TTS Audio Received ✅ Playing...", "success");
                     await playAudioFromBase64(audioBase64, cleanSpeechText);
                 } else {
-                    showToast("TTS Empty Audio -> Trying v3...", "error");
                     await fallbackTTSBulbulV3(cleanSpeechText, targetLang, cleanSpeechText);
                 }
             } catch (ttsErr) {
-                showToast(`TTS Exception: ${ttsErr.message}`, "error", 5000);
                 await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
@@ -1720,9 +1705,8 @@ ${langDirective}
         async function fallbackTTSBulbulV3(cleanSpeechText, targetLang, originalText) {
             if (!isLiveActive) return;
             try {
-                const fallbackSpeaker = targetLang === "te-IN" ? "pooja"
+                const fallbackSpeaker = targetLang === "en-IN" ? "simran"
                     : targetLang === "hi-IN" ? "kavya"
-                    : targetLang === "en-IN" ? "simran"
                     : "pooja";
 
                 const ttsResponse = await fetch(SARVAM_TTS_URL, {
@@ -1733,27 +1717,24 @@ ${langDirective}
                         target_language_code: targetLang,
                         model: "bulbul:v3",
                         speaker: fallbackSpeaker,
-                        pace: 1.12,
+                        pace: 1.08,
                         speech_sample_rate: 24000,
                         output_audio_codec: "wav"
                     })
                 });
 
                 if (!ttsResponse.ok) {
-                    showToast(`TTS v3 Fail (${ttsResponse.status}) -> Browser TTS`, "error");
                     await fallbackBrowserSpeech(cleanSpeechText);
                     return;
                 }
                 const ttsData = await ttsResponse.json();
                 const audioBase64 = (ttsData.audios && ttsData.audios[0]) || ttsData.audio || ttsData.audio_content;
                 if (audioBase64) {
-                    showToast("7. TTS v3 Audio Ready ✅ Playing...", "success");
                     await playAudioFromBase64(audioBase64, originalText);
                 } else {
                     await fallbackBrowserSpeech(cleanSpeechText);
                 }
             } catch (e) {
-                showToast(`TTS v3 Error: ${e.message}`, "error");
                 await fallbackBrowserSpeech(cleanSpeechText);
             }
         }
@@ -1782,7 +1763,7 @@ ${langDirective}
                     }
 
                     if (isLiveActive) {
-                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                        setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                         setTimeout(() => {
                             if (isLiveActive && !isAITalking) startContinuousListening();
                         }, 300);
@@ -1805,18 +1786,12 @@ ${langDirective}
                         livePlayer.volume = 1.0;
                         livePlayer.src = currentBlobUrl;
                         livePlayer.onended = finishTurn;
-                        livePlayer.onerror = () => {
-                            showToast("livePlayer Error -> Switching to WebAudio", "error");
-                            playViaWebAudio(bytes, finishTurn);
-                        };
-
+                        livePlayer.onerror = () => playViaWebAudio(bytes, finishTurn);
                         await livePlayer.play();
-                        showToast("🔊 Speaking via liveAudioPlayer", "success", 2000);
                     } else {
                         playViaWebAudio(bytes, finishTurn);
                     }
                 } catch (err) {
-                    showToast(`Play Error: ${err.message} -> Trying WebAudio`, "error", 4000);
                     try {
                         const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
                         const binaryString = window.atob(cleanBase64);
@@ -1824,7 +1799,6 @@ ${langDirective}
                         for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
                         playViaWebAudio(bytes, finishTurn);
                     } catch (e2) {
-                        showToast("Audio Decode Failed: " + e2.message, "error");
                         finishTurn();
                     }
                 }
@@ -1843,13 +1817,8 @@ ${langDirective}
                     currentAudioSource = source;
                     source.onended = onDone;
                     source.start(0);
-                    showToast("🔊 Speaking via WebAudio", "success", 2000);
-                }, function (decodeErr) {
-                    showToast("WebAudio Decode Fail", "error");
-                    onDone();
-                });
+                }, () => onDone());
             } catch (e) {
-                showToast("WebAudio Error: " + e.message, "error");
                 onDone();
             }
         }
@@ -1859,7 +1828,7 @@ ${langDirective}
                 const cleanup = () => {
                     isAITalking = false;
                     if (isLiveActive) {
-                        setLiveState('listening', 'LISTENING...', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
+                        setLiveState('listening', 'LISTENING', (currentLanguage === 'en' ? 'Listening...' : 'చెప్పండి, వింటున్నాను...'));
                         setTimeout(() => {
                             if (isLiveActive && !isAITalking) startContinuousListening();
                         }, 300);
