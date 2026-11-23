@@ -1281,7 +1281,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "auto",
+                        model: "openai/gpt-oss-120b",
                         messages: payloadMessages,
                         mode: "chat",
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata"
@@ -1365,7 +1365,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "auto",
+                        model: "openai/gpt-oss-120b",
                         mode: "chat",
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
                         messages: [
@@ -1843,7 +1843,7 @@ HIGH-IQ LOGIC:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "auto",
+                        model: "openai/gpt-oss-120b",
                         mode: "live",
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
                         max_tokens: 220,
