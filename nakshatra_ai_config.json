@@ -170,7 +170,7 @@
       },
       {
         "name": "deep",
-        "model": "openai/gpt-oss-120b",
+        "model": "llama-3.3-70b-versatile",
         "use_when": ["math", "code", "multi_step_reasoning", "comparison", "long_form", "high_stakes_facts"],
         "reasoning_effort": "high"
       }

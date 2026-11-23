@@ -83,7 +83,7 @@ ABSOLUTE BAN ON CANNED BOT GREETINGS:
     tiers: [
       { name: "light", model: "llama-3.1-8b-instant" },
       { name: "standard", model: "llama-3.3-70b-versatile" },
-      { name: "deep", model: "openai/gpt-oss-120b" }
+      { name: "deep", model: "llama-3.3-70b-versatile" }
     ],
     deep_keywords: [
       "explain in detail", "step by step", "compare", "calculate", "debug", 
@@ -245,6 +245,10 @@ async function fetchSerperSnippets(query, apiKey) {
  */
 function routeTier(userText, requestedModel) {
   if (requestedModel && requestedModel !== "auto") {
+    // Sanitize non-existent or hallucinated model IDs
+    if (/gpt-oss|auto/i.test(requestedModel)) {
+      return { tier: "standard", model: NAKSHATRA_CONFIG.routing.tiers[1].model };
+    }
     return { tier: "custom", model: requestedModel };
   }
 

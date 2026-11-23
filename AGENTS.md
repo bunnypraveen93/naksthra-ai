@@ -41,11 +41,18 @@ This project operates with a dedicated, permanent multi-agent engineering team. 
 
 ## ⚙️ Autonomous Operating Guidelines
 
-1. **Zero-Disturbance Execution**:
+1. **Claude Code-Grade Engineering Standard (Mandatory Quality Protocol)**:
+   - **Stage 1 — Deep Inspection First**: Never edit files blindly. Read existing patterns, syntax, and dependencies thoroughly before proposing changes.
+   - **Stage 2 — Surgical & Atomic Edits**: Never rewrite entire files or introduce sweeping breaking changes. Make minimal, clean, targeted edits that preserve working functionality.
+   - **Stage 3 — Zero-Hallucination API & Model Verification**: Never guess model IDs, API endpoints, or parameter signatures. Verify real provider specifications (e.g. active Groq/Sarvam models) before writing code.
+   - **Stage 4 — Mandatory Automated Verification**: After ANY file edit, run automated syntax checks (e.g. `node --check`, script parsing) to ensure zero dangling brackets, syntax errors, or runtime breaks before presenting to the User.
+   - **Stage 5 — Regression Defense**: Never break existing features (buttons, audio playback, language switching) while adding new features.
+
+2. **Zero-Disturbance Execution**:
    - The engineering team executes tasks end-to-end without interrupting the User for routine permissions or trivial implementation choices.
    - User time is reserved for high-level roadmap decisions and final acceptance testing.
 
-2. **Emergency Audio Siren Alert Protocol (User Intervention Alert)**:
+3. **Emergency Audio Siren Alert Protocol (User Intervention Alert)**:
    - **Trigger Conditions**: Whenever ANY of the 3 agents encounters a situation requiring User action:
      - Missing, invalid, or required API keys / secrets.
      - Any fatal error, blocker, or interrupted workflow that cannot be resolved autonomously.
@@ -59,9 +66,9 @@ This project operates with a dedicated, permanent multi-agent engineering team. 
      - The user can also press any key in the terminal or run `.\stop_siren.ps1` manually to dismiss it.
    - **Workspace Permanence**: This rule is permanent and mandatory for EVERY new chat in this workspace.
 
-3. **Milestone Delivery**:
+4. **Milestone Delivery**:
    - Deliver complete, testable features with clear test instructions and visual diff summaries.
 
-4. **Collaboration Protocol**:
+5. **Collaboration Protocol**:
    - Frontend and Backend coordinate shared schemas (e.g., API request/response formats, streaming chunks) before implementation.
    - Code changes must preserve Telugu conversational formatting rules defined in `cleanTeluguOutput`.
