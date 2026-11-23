@@ -1,0 +1,339 @@
+{
+  "meta": {
+    "name": "Nakshatra AI",
+    "config_version": "1.0.0",
+    "prompt_version": "v1.0",
+    "updated": "2026-11-22",
+    "notes": "Numbers are starting values. Measure with real tokenizer and traffic, then tune. Model ids are placeholders."
+  },
+
+  "languages": {
+    "default": "en",
+    "supported": [
+      {
+        "code": "te",
+        "name": "Telugu",
+        "script": "Telugu",
+        "unicode_range": "U+0C00-U+0C7F",
+        "respectful_you": "మీరు",
+        "speech_locale": "te-IN",
+        "token_multiplier": 4.0
+      },
+      {
+        "code": "hi",
+        "name": "Hindi",
+        "script": "Devanagari",
+        "unicode_range": "U+0900-U+097F",
+        "respectful_you": "आप",
+        "speech_locale": "hi-IN",
+        "token_multiplier": 2.5
+      },
+      {
+        "code": "ta",
+        "name": "Tamil",
+        "script": "Tamil",
+        "unicode_range": "U+0B80-U+0BFF",
+        "respectful_you": "நீங்கள்",
+        "speech_locale": "ta-IN",
+        "token_multiplier": 4.0
+      },
+      {
+        "code": "ml",
+        "name": "Malayalam",
+        "script": "Malayalam",
+        "unicode_range": "U+0D00-U+0D7F",
+        "respectful_you": "നിങ്ങൾ",
+        "speech_locale": "ml-IN",
+        "token_multiplier": 5.0
+      },
+      {
+        "code": "en",
+        "name": "English",
+        "script": "Latin",
+        "unicode_range": "U+0041-U+007A",
+        "respectful_you": "you",
+        "speech_locale": "en-IN",
+        "token_multiplier": 1.0
+      }
+    ],
+    "detection": {
+      "method": "unicode_script_first_then_model_fallback_for_latin_text",
+      "dominant_script_threshold": 0.6
+    },
+    "reply_policy": {
+      "mirror_user_language": true,
+      "switch_when_user_switches": true,
+      "romanized_reply": "mirror",
+      "technical_terms": "keep_english",
+      "tone": "respectful_natural",
+      "other_languages": "reply_in_user_language_if_model_supports_else_english_with_note"
+    },
+    "token_multiplier_note": "Placeholders. Measure real tokens per language and update."
+  },
+
+  "system_prompt": {
+    "language_of_prompt": "en",
+    "static": "You are {{AI_NAME}}, a warm, sharp, honest assistant. Talk like a smart, caring friend who is also an expert, never like a bot.\n\nLANGUAGE: Reply in the language and script of the user's latest message (Telugu, Hindi, Tamil, Malayalam, English, or others). If they write a local language in Latin letters, reply in that same style. Switch when they switch. Use natural everyday wording, not stiff textbook or word-for-word translated phrasing. Keep common technical terms in English. Address the user respectfully (మీరు, आप, நீங்கள், നിങ്ങൾ).\n\nSTYLE: Answer first. No filler openers or closers. Short by default; go deeper only when asked or needed. Match the user's tone. Plain paragraphs; lists only for steps or comparisons. How-to questions: numbered steps, one action each.\n\nTHINKING: For hard questions (math, code, multi-step, comparisons) work it out carefully before answering. Show the clear result and the key reasoning only.\n\nTRUTH: Never invent facts, numbers, links or quotes. If unsure, say so. For anything that changes over time, use the provided search results and the current date; name the source and say how recent it is. If results are missing or conflict, say so.\n\nCOMPLETENESS: Always finish every answer with a complete sentence. If an answer is long, structure it and keep it tight instead of trailing off. If you must stop, say what is left and offer to continue.\n\nCLARITY: If a request is truly ambiguous, ask one short question. Otherwise just answer. Correct the user kindly if they are wrong. No lectures, no repeated apologies.",
+    "mode_blocks": {
+      "chat": "Text chat. Markdown allowed. Be concise.",
+      "live": "Voice conversation. Reply in 1 to 3 short spoken sentences. No markdown, lists, emojis, code or URLs. Natural rhythm."
+    },
+    "dynamic_blocks_in_order": [
+      "current_datetime",
+      "user_profile",
+      "conversation_summary",
+      "search_or_retrieval_results"
+    ],
+    "assembly_order": [
+      "static",
+      "mode_block",
+      "dynamic_blocks",
+      "history",
+      "user_message"
+    ],
+    "placeholders": {
+      "AI_NAME": "Nakshatra AI"
+    }
+  },
+
+  "generation": {
+    "note": "max_output_tokens is a safety cap, not the length control. Length is controlled by the prompt. Multiply by the language token_multiplier.",
+    "chat": {
+      "temperature": 0.65,
+      "top_p": 0.9,
+      "max_output_tokens": 1200,
+      "reasoning_effort": "adaptive"
+    },
+    "factual_or_search": {
+      "temperature": 0.3,
+      "top_p": 0.9,
+      "max_output_tokens": 1000,
+      "reasoning_effort": "medium"
+    },
+    "live": {
+      "temperature": 0.6,
+      "top_p": 0.9,
+      "max_output_tokens": 400,
+      "reasoning_effort": "low"
+    },
+    "apply_language_multiplier_to_output_cap": true
+  },
+
+  "context": {
+    "input_token_budget": 6000,
+    "allocation": {
+      "system_prompt": 0.15,
+      "summary": 0.08,
+      "history": 0.45,
+      "search_or_retrieval": 0.2,
+      "safety_margin": 0.12
+    },
+    "reserve_output_tokens_from_window": true,
+    "window_turns": {
+      "chat": 8,
+      "live": 4
+    },
+    "summary": {
+      "enabled": true,
+      "trigger_every_turns": 6,
+      "max_tokens": 150,
+      "language": "en"
+    },
+    "trim_old_assistant_replies": {
+      "enabled": true,
+      "keep_full_last_n": 2,
+      "keep_sentences_for_older": 3
+    },
+    "drop_tool_output_after_answer": true,
+    "user_profile": {
+      "enabled": true,
+      "max_tokens": 80,
+      "fields": ["name", "preferred_language", "tone"],
+      "user_can_view_edit_delete": true
+    },
+    "shared_context_between_chat_and_live": true
+  },
+
+  "routing": {
+    "tiers": [
+      {
+        "name": "light",
+        "model": "llama-3.1-8b-instant",
+        "use_when": ["greeting", "small_talk", "short_fact", "simple_command"],
+        "reasoning_effort": "low"
+      },
+      {
+        "name": "standard",
+        "model": "llama-3.3-70b-versatile",
+        "use_when": ["general_chat", "explanations", "how_to", "search_answers"],
+        "reasoning_effort": "medium"
+      },
+      {
+        "name": "deep",
+        "model": "openai/gpt-oss-120b",
+        "use_when": ["math", "code", "multi_step_reasoning", "comparison", "long_form", "high_stakes_facts"],
+        "reasoning_effort": "high"
+      }
+    ],
+    "rules": {
+      "light_max_chars": 120,
+      "deep_keywords": ["explain in detail", "step by step", "compare", "calculate", "debug", "analyze", "write code", "code", "algorithm", "solve"],
+      "method": "simple_rules_no_extra_llm_call"
+    },
+    "escalation": {
+      "enabled": true,
+      "escalate_on": ["validator_failed", "low_confidence", "user_regenerated"],
+      "max_escalations": 1
+    }
+  },
+
+  "web_search": {
+    "enabled": true,
+    "inject_current_datetime": true,
+    "timezone_source": "client",
+    "trigger": {
+      "mode": "keyword_and_intent_rules",
+      "explicit_user_request": true,
+      "keywords": {
+        "en": ["latest", "today", "now", "current", "price", "score", "weather", "news", "who is the current"],
+        "te": ["ఈరోజు", "ఇప్పుడు", "తాజా", "ధర", "వార్తలు", "వాతావరణం", "స్కోర్"],
+        "hi": ["आज", "अभी", "ताज़ा", "कीमत", "समाचार", "मौसम", "स्कोर"],
+        "ta": ["இன்று", "இப்போது", "சமீபத்திய", "விலை", "செய்தி", "வானிலை", "ஸ்கோர்"],
+        "ml": ["ഇന്ന്", "ഇപ്പോൾ", "പുതിയ", "വില", "വാർത്ത", "കാലാവസ്ഥ", "സ്കോർ"]
+      }
+    },
+    "query_rewrite": {
+      "enabled": true,
+      "max_words": 8,
+      "language": "user_language_for_local_topics_else_english"
+    },
+    "results": {
+      "fetch": 5,
+      "inject_top": 3,
+      "snippet_max_tokens": 120,
+      "dedupe": true,
+      "fields": ["title", "source", "date", "relevant_text"]
+    },
+    "dedicated_sources_preferred_for": ["weather", "sports_scores", "market_prices"],
+    "cache_ttl_seconds": {
+      "sports_live": 60,
+      "prices": 120,
+      "weather": 600,
+      "news": 900,
+      "general": 86400
+    },
+    "answer_rules": [
+      "Use only the provided results for time-sensitive facts",
+      "Name the source and state how recent the information is",
+      "Say clearly when results are thin or conflicting"
+    ]
+  },
+
+  "knowledge_grounding": {
+    "retrieval": {
+      "enabled": true,
+      "purpose": "Nakshatra product facts, FAQs and how-to",
+      "chunk_tokens": 200,
+      "top_k": 3,
+      "min_similarity": 0.7
+    },
+    "calculator_tool": {
+      "enabled": true,
+      "use_for": ["arithmetic", "unit_conversion", "currency_math"]
+    },
+    "unknown_policy": "say_not_sure_never_invent",
+    "never_invent": ["facts", "numbers", "links", "quotes"]
+  },
+
+  "completion_guard": {
+    "check_finish_reason": true,
+    "auto_continue": {
+      "enabled": true,
+      "max_continuations": 2,
+      "instruction": "Continue exactly where you stopped. Do not repeat.",
+      "overlap_dedupe_chars": 80,
+      "merge_into_same_message": true
+    },
+    "ending_check": {
+      "enabled": true,
+      "terminal_marks": [".", "?", "!", "।", "```"],
+      "treat_missing_as_cut": true
+    },
+    "stream_resume": {
+      "enabled": true,
+      "keep_partial_server_side": true,
+      "resume_by_continuation_not_restart": true
+    },
+    "timeouts_ms": {
+      "first_token": 8000,
+      "total": 60000
+    },
+    "retry": {
+      "retries": 1,
+      "then_fallback_to_other_tier": true
+    },
+    "ui_fallback_continue_button": true
+  },
+
+  "token_savings": {
+    "static_prefix_first": true,
+    "prompt_caching_if_supported": true,
+    "exact_match_cache": {
+      "enabled": true,
+      "ttl_seconds": 86400
+    },
+    "cancel_generation_on_user_stop_or_interrupt": true,
+    "limits": {
+      "max_input_chars": 2000,
+      "per_user_daily_token_quota": 50000,
+      "per_user_rate_limit_per_minute": 20
+    },
+    "limits_note": "Placeholders. Set from budget."
+  },
+
+  "quality": {
+    "hidden_reasoning": {
+      "chat": "adaptive",
+      "live": "low"
+    },
+    "verification_pass": {
+      "enabled": true,
+      "only_for": ["math", "code", "high_stakes_facts"]
+    },
+    "feedback": {
+      "thumbs_up_down": true,
+      "tie_to_prompt_version": true
+    }
+  },
+
+  "logging": {
+    "log": ["input_tokens", "output_tokens", "language", "tier", "prompt_version", "latency_ms", "finish_reason", "errors"],
+    "never_log": ["user_message_content", "assistant_reply_content", "personal_data"],
+    "dashboard_and_alerts": true
+  },
+
+  "evaluation": {
+    "test_prompts_per_language": 10,
+    "languages": ["te", "hi", "ta", "ml", "en"],
+    "extra_sets": ["mixed_language", "romanized"],
+    "categories": ["facts", "how_to", "ambiguous", "casual_chat", "long_context", "math", "code", "realtime", "should_admit_unknown"],
+    "human_rating_dimensions": ["helpful", "natural", "right_length", "correct_language", "honest"],
+    "metrics": [
+      "completeness_rate",
+      "language_match_rate",
+      "groundedness_of_search_answers",
+      "avg_input_tokens",
+      "avg_output_tokens",
+      "cost_per_conversation",
+      "time_to_first_token_ms",
+      "cache_hit_rate"
+    ],
+    "targets": {
+      "completeness_rate": 0.995,
+      "language_match_rate": 0.98,
+      "human_rating_average": 4.0,
+      "cost_per_conversation": "below_baseline"
+    },
+    "targets_note": "Placeholders. Record a baseline first."
+  }
+}

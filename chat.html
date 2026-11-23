@@ -11,7 +11,7 @@
     <!-- Google Fonts & Font Awesome Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -31,10 +31,42 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Malayalam', 'Noto Sans Kannada', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
+        .continue-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #00f2fe;
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .continue-pill-btn:hover {
+            background: rgba(0, 242, 254, 0.2);
+            border-color: rgba(0, 242, 254, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .continue-pill-btn:active {
+            transform: scale(0.97);
+        }
+
+        .continue-pill-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Full Viewport Lock to Prevent Keyboard Jumping */
         html,
         body {
             width: 100%;
@@ -1055,16 +1087,28 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             if (!isVoiceInput) {
                 if (/[\u0900-\u097F]/.test(t)) return 'hi';
                 if (/[\u0B80-\u0BFF]/.test(t)) return 'ta';
+                if (/[\u0D00-\u0D7F]/.test(t)) return 'ml';
                 if (/[\u0C80-\u0CFF]/.test(t)) return 'kn';
             } else {
-                if (/[\u0B80-\u0BFF\u0C80-\u0CFF]/.test(t)) return currentLanguage;
+                if (/[\u0B80-\u0BFF\u0C80-\u0CFF\u0D00-\u0D7F]/.test(t)) return currentLanguage;
+            }
+            // Malayalam switch
+            if (/\b(malayalam|speak in malayalam|in malayalam|switch to malayalam|malayalam lo|malayalam parayu|respond in malayalam)\b/i.test(t) ||
+                /మలయాళం|മലയാളം/.test(t)) {
+                return 'ml';
             }
 
-            const tenglishPattern = /\b(nuvvu|nuvu|nenu|ela|elaga|unnav|unnaru|em|enti|chesthuv|chesthunn|cheppandi|cheppu|thinnava|bagunnava|bagunnanu|bava|mawa|kadh|kadha|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|namaskaram|ayyo|nijama|emiti|chesav|chala|kani|aithe|enduku|gurinchi|ippudu|kuda|chey|cheyyi|avunu|vaddu|randi|ikkada|akkada|manchi|baagundi|super ra)\b/i;
+            const tenglishPattern = /\b(nuvvu|nuvu|nenu|ela|elaga|unnav|unnaru|em|enti|entii|chesthuv|chesthunn|cheppandi|cheppu|thinnava|thinara|bagunnava|bagunnanu|bava|mawa|kadh|kadha|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|namaskaram|ayyo|nijama|emiti|chesav|chala|kani|aithe|enduku|gurinchi|ippudu|kuda|chey|cheyyi|avunu|vaddu|randi|ikkada|akkada|manchi|baagundi|super ra)\b/i;
             if (tenglishPattern.test(t)) return 'te';
 
-            const hinglishPattern = /\b(kaise|kaisa|kya|kyu|kyun|kar rahe|batao|theek hai|kuch nahi|aaj|apna naam|accha|namaste|shukriya)\b/i;
+            const hinglishPattern = /\b(kaise|kaisa|kya|kyu|kyun|kar|rahe|raha|rahi|ho|batao|theek|theek hai|kuch|nahi|aaj|kaha|apna|naam|accha|achha|namaste|shukriya)\b/i;
             if (hinglishPattern.test(t)) return 'hi';
+
+            const manglishPattern = /\b(nanni|sugamano|entha|evide|varum|kando|ariyilla|namaskaram|enthoke|vishesham)\b/i;
+            if (manglishPattern.test(t)) return 'ml';
+
+            const tanglishPattern = /\b(eppadi|irukenga|irukka|enna|solreenga|solunga|pannreenga|sapteengala|vanakkam|nandri)\b/i;
+            if (tanglishPattern.test(t)) return 'ta';
 
             const neutralWords = /^(hi|hello|hey|ok|okay|k|hmm|ha|haa|bye|super|cool|thanks|thank you|yes|no|yo|good morning|good night|gm|gn)[!.,?\s]*$/i;
             if (neutralWords.test(t)) return currentLanguage;
@@ -1079,6 +1123,20 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             if (lang === 'en') {
                 return "Reply 100% in natural, fluent, modern English.";
             }
+            if (lang === 'hi') {
+                return "Reply 100% in natural conversational Hindi (Devanagari script).";
+            }
+            if (lang === 'ta') {
+                return "Reply 100% in natural conversational Tamil.";
+            }
+            if (lang === 'ml') {
+                return "Reply 100% in natural conversational Malayalam (മലയാളം).";
+            }
+            if (lang === 'kn') {
+                return "Reply 100% in natural conversational Kannada.";
+            }
+            return "Reply 100% in fluent, grammatically correct, natural spoken Telugu (తెలుగు లిపి).";
+        }
             if (lang === 'hi') {
                 return "Reply 100% in natural conversational Hindi (Devanagari script).";
             }
@@ -1180,6 +1238,97 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             });
         }
 
+        function manageConversationHistory(history, maxTurns = 8) {
+            const maxMsgs = maxTurns * 2;
+            let trimmed = history.slice(-maxMsgs);
+            let assistantCount = 0;
+            for (let i = trimmed.length - 1; i >= 0; i--) {
+                if (trimmed[i].role === "assistant") {
+                    assistantCount++;
+                    if (assistantCount > 2) {
+                        const sentences = trimmed[i].content.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g) || [trimmed[i].content];
+                        if (sentences.length > 3) {
+                            trimmed[i].content = sentences.slice(0, 3).join(" ").trim() + "...";
+                        }
+                    }
+                }
+            }
+            return trimmed;
+        }
+
+        function mergeContinuationText(original, continuation, maxOverlap = 80) {
+            if (!continuation) return original;
+            const o = original.trimEnd();
+            const c = continuation.trimStart();
+            for (let len = Math.min(maxOverlap, o.length, c.length); len > 3; len--) {
+                const endSlice = o.slice(-len);
+                const startSlice = c.slice(0, len);
+                if (endSlice === startSlice) {
+                    return o + c.slice(len);
+                }
+            }
+            return o + " " + c;
+        }
+
+        function isReplyCutOff(text) {
+            if (!text || typeof text !== "string") return false;
+            const t = text.trim();
+            if (t.endsWith("```")) return false;
+            return !/[.?!।]$/.test(t);
+        }
+
+        async function handleContinueClick(btn, bubble, currentReplyText) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Continuing...`;
+
+            try {
+                const payloadMessages = [
+                    ...conversationHistory,
+                    { role: "assistant", content: currentReplyText },
+                    { role: "user", content: "Continue exactly where you stopped. Do not repeat." }
+                ];
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "auto",
+                        messages: payloadMessages,
+                        mode: "chat",
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata"
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const continuation = cleanTeluguOutput(data.response || data.reply || data.choices?.[0]?.message?.content || "");
+
+                if (continuation) {
+                    const merged = mergeContinuationText(currentReplyText, continuation);
+                    bubble.innerHTML = marked.parse(merged);
+
+                    if (conversationHistory.length > 0 && conversationHistory[conversationHistory.length - 1].role === "assistant") {
+                        conversationHistory[conversationHistory.length - 1].content = merged;
+                    }
+
+                    const stillCut = (data.meta && data.meta.finish_reason === "length") || isReplyCutOff(merged);
+                    if (stillCut) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-play"></i> Continue again`;
+                        btn.onclick = () => handleContinueClick(btn, bubble, merged);
+                    } else {
+                        btn.remove();
+                    }
+                } else {
+                    btn.remove();
+                }
+            } catch (err) {
+                console.error("Continue failed:", err);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Retry Continue`;
+            }
+        }
+
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
@@ -1195,7 +1344,8 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             handleInputChange();
 
             conversationHistory.push({ role: "user", content: text });
-            if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+            // Sliding window: 8 turns with smart trimming of older assistant replies
+            conversationHistory = manageConversationHistory(conversationHistory, 8);
 
             if (chatContainer.children.length === 1) {
                 const item = document.createElement('div');
@@ -1220,15 +1370,15 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                 if (detected) currentLanguage = detected;
 
                 const fewShots = getFewShotExamples(currentLanguage);
-                const recentHistory = conversationHistory.slice(-4);
+                const recentHistory = conversationHistory.slice(-8);
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "openai/gpt-oss-120b",
-                        temperature: 0.45,
-                        max_tokens: 1200,
+                        model: "auto",
+                        mode: "chat",
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
                         messages: [
                             { role: "system", content: `${SYSTEM_PROMPT}\n\n${getLangDirective(currentLanguage)}` },
                             ...fewShots,
@@ -1244,9 +1394,21 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                 const aiReply = cleanTeluguOutput(data.response || data.reply || data.choices?.[0]?.message?.content) || fallbackGreeting;
 
                 conversationHistory.push({ role: "assistant", content: aiReply });
-                if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+                conversationHistory = manageConversationHistory(conversationHistory, 8);
 
-                aiRow.querySelector('.msg-bubble').innerHTML = marked.parse(aiReply);
+                // Render clean Markdown (Pure text chat - Gemini Chat mode)
+                const bubble = aiRow.querySelector('.msg-bubble');
+                bubble.innerHTML = marked.parse(aiReply);
+
+                // UI Safety Net: Continue button if cut-off or length limit hit (Section 9 & 14)
+                const isCut = (data.meta && data.meta.finish_reason === "length") || isReplyCutOff(aiReply);
+                if (isCut && aiReply.length > 50) {
+                    const continueBtn = document.createElement('button');
+                    continueBtn.className = 'continue-pill-btn';
+                    continueBtn.innerHTML = `<i class="fa-solid fa-play"></i> Continue response`;
+                    continueBtn.onclick = () => handleContinueClick(continueBtn, bubble, aiReply);
+                    aiRow.appendChild(continueBtn);
+                }
             } catch (error) {
                 console.error("Chat error:", error);
                 showErrorToast("Connection error. Please try again.");
@@ -1692,9 +1854,10 @@ HIGH-IQ LOGIC:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "openai/gpt-oss-120b",
-                        temperature: 0.4,
-                        max_tokens: 450,
+                        model: "auto",
+                        mode: "live",
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+                        max_tokens: 220,
                         messages: [
                             { role: "system", content: LIVE_PROMPT },
                             ...fewShots,
@@ -1710,8 +1873,9 @@ HIGH-IQ LOGIC:
                 let rawReply = data.response || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
                 let aiText = cleanTeluguOutput(rawReply);
 
+                // Add to history (4 turns for live voice mode)
                 conversationHistory.push({ role: "assistant", content: aiText });
-                if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+                conversationHistory = manageConversationHistory(conversationHistory, 4);
 
                 const aiRow = document.createElement('div');
                 aiRow.className = 'msg-row ai';
@@ -1758,7 +1922,10 @@ HIGH-IQ LOGIC:
             } else if (currentLanguage === 'ta') {
                 targetLang = "ta-IN";
                 speakerName = "gokul_ta_narration";
-            } else if (currentLanguage === 'kn') {
+            } else if (currentLanguage === 'ml' || /[\u0D00-\u0D7F]/.test(cleanSpeechText)) {
+                targetLang = "ml-IN";
+                speakerName = "sangeetha_ml_conversational";
+            } else if (currentLanguage === 'kn' || /[\u0C80-\u0CFF]/.test(cleanSpeechText)) {
                 targetLang = "kn-IN";
                 speakerName = "chaitra_kn_conversation";
             }

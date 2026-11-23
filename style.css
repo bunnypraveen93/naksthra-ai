@@ -2,7 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Malayalam', 'Noto Sans Kannada', sans-serif;
 }
 
 body {
@@ -810,7 +810,7 @@ footer {
     outline: none;
     color: #ffffff;
     font-size: 0.95rem;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Malayalam', 'Noto Sans Kannada', sans-serif;
     line-height: 1.45;
     resize: none;
     height: 24px;
