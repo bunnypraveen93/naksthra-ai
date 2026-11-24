@@ -343,10 +343,22 @@ function mergeContinuation(original, continuation, maxOverlap = 80) {
 }
 
 /**
- * Output Cleaning and Vocal Polish
+ * Output Cleaning and Vocal Polish (Preserves markdown code blocks and newlines)
  */
 function cleanTeluguOutput(text) {
   if (!text || typeof text !== "string") return text;
+  
+  // Protect markdown code blocks completely
+  const codeBlockRegex = /(```[\s\S]*?```)/g;
+  const parts = text.split(codeBlockRegex);
+
+  return parts.map(part => {
+    if (part.startsWith('```')) return part;
+    return cleanTeluguSegment(part);
+  }).join('');
+}
+
+function cleanTeluguSegment(text) {
   let t = text;
 
   // 0. Strip role prefixes (e.g. "నక్షత్ర AI: ...", "Nakshatra AI: ...")
@@ -413,25 +425,32 @@ function cleanTeluguOutput(text) {
   t = t.replace(/!{2,}/g, '!');
   t = t.replace(/\?{2,}/g, '?');
 
-  // 9. Multi-distance word deduplication
-  const words = t.split(/\s+/);
-  const deduplicated = [];
-  for (let i = 0; i < words.length; i++) {
-    const curClean = words[i].replace(/[.,!?;:()"'`~]/g, '').toLowerCase();
-    const prevClean = (i > 0) ? words[i - 1].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
-    const prev2Clean = (i > 1) ? words[i - 2].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
-    if (curClean && curClean === prevClean) continue;
-    if (curClean && curClean === prev2Clean && /^(హా|హ|మరి|సరే|ha|haa|mari|yes|and)$/i.test(prevClean)) continue;
-    deduplicated.push(words[i]);
-  }
-  let res = deduplicated.join(' ').trim();
+  // 9. Preserve newlines and markdown structure: deduplicate within prose lines only
+  const lines = t.split('\n');
+  const cleanedLines = lines.map(line => {
+    if (!line.trim() || /^(\s*[-*+]|\s*\d+\.|\s*#|\s*>|\s*\|)/.test(line)) {
+      return line;
+    }
+    const words = line.split(/[^\S\r\n]+/);
+    const deduplicated = [];
+    for (let i = 0; i < words.length; i++) {
+      const curClean = words[i].replace(/[.,!?;:()"'`~]/g, '').toLowerCase();
+      const prevClean = (i > 0) ? words[i - 1].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
+      const prev2Clean = (i > 1) ? words[i - 2].replace(/[.,!?;:()"'`~]/g, '').toLowerCase() : '';
+      if (curClean && curClean === prevClean) continue;
+      if (curClean && curClean === prev2Clean && /^(హా|హ|మరి|సరే|ha|haa|mari|yes|and)$/i.test(prevClean)) continue;
+      deduplicated.push(words[i]);
+    }
+    let lineRes = deduplicated.join(' ').trim();
+    lineRes = lineRes.replace(/\s+(నేను|మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
+    return lineRes;
+  });
 
-  // 10. Strip trailing incomplete connector words
-  res = res.replace(/\s+(నేను|మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
+  let res = cleanedLines.join('\n').trim();
   res = res.replace(/[,;:\-\s]+$/, '');
   
-  // Guarantee clean terminal punctuation if not code
-  if (res && !/[.!?।`]$/.test(res)) {
+  // Guarantee clean terminal punctuation if not code or markdown
+  if (res && !/[.!?।`#\->|]$/.test(res)) {
     res += '.';
   }
 
