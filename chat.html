@@ -126,19 +126,20 @@
             gap: 9px;
         }
         .top-brand img {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            border: 1px solid rgba(0,242,254,0.3);
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            border: 1.5px solid rgba(0,242,254,0.4);
+            box-shadow: 0 0 10px rgba(0,242,254,0.25);
         }
         .top-brand-text {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #fff;
-            letter-spacing: 0.2px;
+            font-size: 1.3rem; /* Increased size prominent & bold */
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.4px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
         .gradient-text {
             background: var(--gradient-main);
@@ -380,72 +381,7 @@
             color: var(--text-secondary);
         }
 
-        .home-suggestions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            width: 100%;
-            margin-top: 22px;
-        }
-        @media (max-width: 600px) {
-            .home-suggestions {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-        }
-        .suggestion-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: var(--radius-card);
-            padding: 13px 15px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .suggestion-card:hover {
-            background: rgba(255,255,255,0.06);
-            border-color: rgba(0,242,254,0.35);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-        }
-        .suggestion-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 9px;
-            background: rgba(0,242,254,0.1);
-            color: var(--cyan);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.95rem;
-            flex-shrink: 0;
-        }
-        .suggestion-card:nth-child(2) .suggestion-icon {
-            background: rgba(138,43,226,0.12);
-            color: #c084fc;
-        }
-        .suggestion-card:nth-child(3) .suggestion-icon {
-            background: rgba(248,87,166,0.12);
-            color: #f472b6;
-        }
-        .suggestion-card:nth-child(4) .suggestion-icon {
-            background: rgba(34,197,94,0.12);
-            color: #4ade80;
-        }
-        .suggestion-title {
-            font-size: 0.92rem;
-            font-weight: 600;
-            color: #f1f5f9;
-            margin-bottom: 2px;
-        }
-        .suggestion-desc {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            line-height: 1.35;
-        }
+        
 
         /* ---- CHAT CONTAINER & MESSAGES ---- */
         .chat-container {
@@ -531,27 +467,46 @@
             overflow-wrap: break-word;
         }
 
-        /* ---- AI REPLY MARKDOWN — CLEAN CHATGPT / CLAUDE STYLE ---- */
+        /* ---- AI REPLY MARKDOWN — CLEAN BULLETS & TEXT ALIGNMENT ---- */
+        .msg-bubble {
+            text-align: left;
+        }
         .msg-bubble p {
-            margin-bottom: 14px;
-            line-height: 1.78;
+            margin: 0 0 14px 0;
+            line-height: 1.8;
             font-size: var(--font-base);
-            color: #e4e4f0;
+            color: #ececf1;
+            text-align: left;
+            word-wrap: break-word;
         }
         .msg-bubble p:last-child { margin-bottom: 0; }
 
         .msg-bubble ul, .msg-bubble ol {
             margin: 10px 0 16px 0;
-            padding-left: 24px;
+            padding-left: 22px;
+            text-align: left;
         }
         .msg-bubble li {
             margin-bottom: 8px;
-            line-height: 1.72;
+            line-height: 1.75;
             font-size: var(--font-base);
-            color: #dcdcea;
+            color: #e2e8f0;
+            text-align: left;
         }
-        .msg-bubble ul li::marker { color: var(--cyan); }
-        .msg-bubble ol li::marker { color: var(--cyan); font-weight: 600; }
+        .msg-bubble ul > li {
+            list-style-type: disc;
+        }
+        .msg-bubble ol > li {
+            list-style-type: decimal;
+        }
+        .msg-bubble li::marker {
+            color: var(--cyan);
+            font-weight: 700;
+        }
+        .msg-bubble ul ul, .msg-bubble ol ol, .msg-bubble ul ol, .msg-bubble ol ul {
+            margin: 6px 0 6px 0;
+            padding-left: 20px;
+        }
 
         .msg-bubble h1 {
             font-size: 1.45rem;
@@ -560,18 +515,21 @@
             color: #ffffff;
             border-bottom: 1px solid rgba(255,255,255,0.08);
             padding-bottom: 6px;
+            text-align: left;
         }
         .msg-bubble h2 {
-            font-size: 1.25rem;
+            font-size: 1.22rem;
             font-weight: 650;
             margin: 18px 0 10px;
             color: #f1f5f9;
+            text-align: left;
         }
         .msg-bubble h3 {
-            font-size: 1.1rem;
+            font-size: 1.08rem;
             font-weight: 600;
             margin: 14px 0 8px;
             color: #c4b5fd;
+            text-align: left;
         }
 
         .msg-bubble strong { color: #ffffff; font-weight: 650; }
@@ -595,6 +553,7 @@
             margin: 16px 0;
             overflow: hidden;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            text-align: left;
         }
         .code-card-header {
             display: flex;
@@ -637,6 +596,7 @@
             overflow-x: auto;
             font-size: 0.92rem;
             line-height: 1.6;
+            text-align: left;
         }
         .code-card pre code {
             font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
@@ -654,6 +614,7 @@
             border-radius: 0 8px 8px 0;
             color: #c4b5fd;
             font-style: italic;
+            text-align: left;
         }
         .msg-bubble a {
             color: #38bdf8;
@@ -665,6 +626,7 @@
             border-collapse: collapse;
             margin: 14px 0;
             font-size: 0.92rem;
+            text-align: left;
         }
         .msg-bubble th, .msg-bubble td {
             padding: 10px 14px;
@@ -757,9 +719,9 @@
         /* ---- BOTTOM INPUT BAR (CHATGPT AUTO-EXPANDING TEXTAREA) ---- */
         .bottom-bar {
             width: 100%;
-            max-width: 820px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+            padding: 8px 16px calc(14px + env(safe-area-inset-bottom, 0px));
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
@@ -768,19 +730,21 @@
         }
         .chat-box-wrapper {
             width: 100%;
-            background: var(--bg-input);
+            background: #181820;
             border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 24px;
-            padding: 8px 10px 8px 18px;
+            border-radius: 26px;
+            padding: 8px 12px 8px 18px;
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+            min-height: 52px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-sizing: border-box;
         }
         .chat-box-wrapper:focus-within {
-            border-color: rgba(0,242,254,0.45);
-            box-shadow: 0 0 0 1px rgba(0,242,254,0.15), 0 4px 24px rgba(0,0,0,0.6);
+            border-color: rgba(0,242,254,0.5);
+            box-shadow: 0 0 0 1px rgba(0,242,254,0.2), 0 4px 24px rgba(0,0,0,0.65);
         }
         .chat-input {
             flex: 1;
@@ -788,59 +752,71 @@
             background: transparent;
             border: none;
             outline: none;
-            color: var(--text-primary);
-            font-size: 1.02rem;
+            color: #f1f5f9;
+            font-size: 1.05rem;
             line-height: 1.5;
             resize: none;
-            max-height: 180px;
-            padding: 6px 0;
+            height: 26px;
+            max-height: 140px;
+            padding: 0;
+            margin: 0;
             overflow-y: auto;
+            box-sizing: border-box;
+            display: block;
         }
-        .chat-input::placeholder { color: #5a5a6e; font-size: 0.98rem; }
+        .chat-input::placeholder {
+            color: #64748b;
+            font-size: 1.0rem;
+        }
         .chat-input-actions {
             display: flex;
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
-            padding-bottom: 2px;
         }
-        .send-btn, .live-toggle-btn {
-            width: 38px;
-            height: 38px;
+        .live-toggle-btn, .send-btn {
+            width: 36px;
+            height: 36px;
             flex-shrink: 0;
             border-radius: 50%;
             border: none;
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.14s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+            transition: transform 0.16s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
             touch-action: manipulation;
         }
+        .live-toggle-btn {
+            background: rgba(0,242,254,0.12);
+            color: var(--cyan);
+            border: 1px solid rgba(0,242,254,0.25);
+        }
+        .live-toggle-btn:hover {
+            background: rgba(0,242,254,0.22);
+            transform: scale(1.06);
+        }
         .send-btn {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
             color: #64748b;
+            opacity: 0.5;
+            cursor: default;
         }
         .send-btn.active {
             background: #ffffff;
-            color: #0b0c10;
-            box-shadow: 0 0 12px rgba(255,255,255,0.3);
+            color: #0d0d12;
+            opacity: 1;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
         }
-        .send-btn.active:hover { background: #e0f8ff; transform: scale(1.06); }
-        .send-btn.active:active { transform: scale(0.92); }
-
-        .live-toggle-btn {
-            background: linear-gradient(135deg, #00f2fe 0%, #8a2be2 100%);
-            color: #fff;
-            box-shadow: 0 0 12px rgba(0,242,254,0.3);
+        .send-btn.active:hover {
+            background: #e2f8ff;
+            transform: scale(1.08);
         }
-        .live-toggle-btn:hover { transform: scale(1.06); box-shadow: 0 0 20px rgba(0,242,254,0.55); }
-        .live-toggle-btn:active { transform: scale(0.92); }
-
         .bottom-disclaimer {
             font-size: 0.72rem;
-            color: #555566;
+            color: #64748b;
             text-align: center;
             letter-spacing: 0.2px;
         }
@@ -1148,39 +1124,7 @@
             </div>
             <h1 class="home-title">Nakshatra AI</h1>
             <p class="home-help-text">How can I help you today?</p>
-
-            <div class="home-suggestions">
-                <button class="suggestion-card" onclick="useSuggestion('Explain quantum computing in simple terms')">
-                    <div class="suggestion-icon"><i class="fa-solid fa-lightbulb"></i></div>
-                    <div class="suggestion-text">
-                        <div class="suggestion-title">Explain simply</div>
-                        <div class="suggestion-desc">Quantum computing in plain words</div>
-                    </div>
-                </button>
-                <button class="suggestion-card" onclick="useSuggestion('Write a clean Python function with comments')">
-                    <div class="suggestion-icon"><i class="fa-solid fa-code"></i></div>
-                    <div class="suggestion-text">
-                        <div class="suggestion-title">Write code</div>
-                        <div class="suggestion-desc">Clean Python script with explanations</div>
-                    </div>
-                </button>
-                <button class="suggestion-card" onclick="useSuggestion('నాకు ఒక మంచి తెలుగు నీతి కథ చెప్పండి')">
-                    <div class="suggestion-icon"><i class="fa-solid fa-book-open"></i></div>
-                    <div class="suggestion-text">
-                        <div class="suggestion-title">తెలుగు కథ</div>
-                        <div class="suggestion-desc">ఒక మంచి స్ఫూర్తిదాయక కథ</div>
-                    </div>
-                </button>
-                <button class="suggestion-card" onclick="useSuggestion('Give me 5 creative ideas for a tech startup in 2026')">
-                    <div class="suggestion-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <div class="suggestion-text">
-                        <div class="suggestion-title">Brainstorm ideas</div>
-                        <div class="suggestion-desc">Creative tech startup concepts</div>
-                    </div>
-                </button>
-            </div>
         </div>
-
 
         <div class="chat-container" id="chatContainer"></div>
     </main>
@@ -1192,7 +1136,7 @@
     <!-- Bottom Input Bar (ChatGPT Auto-Expanding Multiline) -->
     <footer class="bottom-bar">
         <div class="chat-box-wrapper">
-            <textarea id="chatInput" class="chat-input" rows="1" placeholder="Message Nakshatra AI... (Shift+Enter for newline)"
+            <textarea id="chatInput" class="chat-input" rows="1" placeholder="Ask anything..."
                 onkeydown="handleInputKey(event)" oninput="handleInputChange()"></textarea>
             <div class="chat-input-actions">
                 <button class="live-toggle-btn" id="liveToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
@@ -1823,6 +1767,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             chatContainer.style.display = 'none';
             homeScreen.style.display = 'flex';
             chatInput.value = '';
+            handleInputChange();
             conversationHistory = [];
             if (sidebar.classList.contains('open')) toggleMenu();
         }
@@ -1835,9 +1780,19 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
         const livePlayer = document.getElementById('liveAudioPlayer');
 
         function handleInputChange() {
-            const hasText = chatInput.value.trim().length > 0;
-            liveToggleBtn.style.display = hasText ? 'none' : 'flex';
-            sendBtn.style.display = hasText ? 'flex' : 'none';
+            const el = chatInput;
+            // Smooth resize without jumping/glitching
+            el.style.height = '26px';
+            const scrollH = el.scrollHeight;
+            if (scrollH > 32) {
+                el.style.height = Math.min(scrollH, 140) + 'px';
+            }
+            const hasText = el.value.trim().length > 0;
+            if (hasText) {
+                sendBtn.classList.add('active');
+            } else {
+                sendBtn.classList.remove('active');
+            }
         }
 
         // ===== DIRECT PURE PCM WAV RECORDER STATE =====
