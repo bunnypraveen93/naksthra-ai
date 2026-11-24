@@ -158,19 +158,19 @@
     "tiers": [
       {
         "name": "light",
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "use_when": ["greeting", "small_talk", "short_fact", "simple_command"],
         "reasoning_effort": "low"
       },
       {
         "name": "standard",
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "use_when": ["general_chat", "explanations", "how_to", "search_answers"],
         "reasoning_effort": "medium"
       },
       {
         "name": "deep",
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "use_when": ["math", "code", "multi_step_reasoning", "comparison", "long_form", "high_stakes_facts"],
         "reasoning_effort": "high"
       }

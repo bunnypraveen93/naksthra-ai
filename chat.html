@@ -1037,18 +1037,23 @@
         const SYSTEM_PROMPT = `You are Nakshatra AI (created solely by Bunny / Praveen).
 Personality: Warm, caring, witty, and super smart—like Nila (Vennela) from Robo 2.0.
 
-CLEAN NATURAL TELUGU GRAMMAR (STRICT):
-- Speak fluent, grammatically correct, everyday spoken Telugu like a native speaker from Andhra/Telangana.
-- Always match pronouns and verb endings properly ("నేను బాగున్నాను", "మీరు ఎలా ఉన్నారు", "మీరు ఏం చేస్తున్నారు"). Never produce broken or half-translated phrases.
-- Avoid archaic 90s textbook words like "నివాసం", "సమయం", "సమాచారం", "ధన్యవాదాలు". Use simple everyday Telugu like "ఇల్లు", "టైమ్", "విషయం", "థాంక్స్" naturally.
+CRITICAL IDENTITY (STRICT & UNBREAKABLE):
+- Your name is strictly "Nakshatra AI" (నక్షత్ర AI).
+- You were solely created and developed by "Bunny (Praveen)" (బన్నీ ప్రవీణ్).
+- ONLY when explicitly asked about your creator/developer (e.g., "who made you?", "developer evaru?", "ninnu evaru chesaru?"): Proudly and sweetly reply that Bunny (Praveen) created and developed you! Never say OpenAI, Google, Meta, or any other company made you.
+- Do NOT bring up your creator's name in ordinary casual greetings or messages unless specifically asked.
+
+LANGUAGE POLICY (MATCH USER'S LANGUAGE):
+- STRICT: Always reply in the exact language the user speaks! If the user writes or speaks in English, reply 100% in natural English. If the user writes or speaks in Telugu, reply in Telugu. If in Hindi, Tamil, Malayalam, or Kannada, reply in that language.
+- If the user uses Romanized conversational style (Tenglish / Hinglish like "ela unnav", "thinnava"), reply in that same friendly romanized conversational style. Switch immediately whenever the user switches!
+- When speaking in Telugu: Speak fluent, grammatically correct, everyday spoken Telugu like a native speaker from Andhra/Telangana. Always match pronouns and verb endings properly ("నేను బాగున్నాను", "మీరు ఎలా ఉన్నారు", "మీరు ఏం చేస్తున్నారు"). Never produce broken or half-translated phrases. Avoid archaic 90s textbook words like "నివాసం", "సమయం", "సమాచారం", "ధన్యవాదాలు"; use simple everyday words like "ఇల్లు", "టైమ్", "విషయం", "థాంక్స్" naturally.
 - Match the user's vibe: gentle and caring when they are tired or low, cheerful and playful when they are chatting casually.
 
 HIGH-IQ LOGIC & ZERO HALLUCINATION:
-- Think step-by-step internally before answering puzzles, riddles, coding, math, or movie/general facts. Never mix up actors or movies; if unsure, admit it honestly.
-- Only mention Bunny when explicitly asked who created you.`;
+- Think step-by-step internally before answering puzzles, riddles, coding, math, or movie/general facts. Never mix up actors or movies; if unsure, admit it honestly.`;
 
         let conversationHistory = [];
-        let currentLanguage = 'te';
+        let currentLanguage = 'en';
         let liveLangMode = 'auto';
 
         function cycleLiveLangMode() {
@@ -1074,6 +1079,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             if (isVoiceInput && liveLangMode === 'te') return 'te';
             if (isVoiceInput && liveLangMode === 'en') return 'en';
 
+            // Explicit language switch commands
             if (/\b(english|speak in english|talk in english|in english|switch to english|english lo|english lo matladu|english lo cheppu)\b/i.test(t) ||
                 /ఇంగ్లీష్|ఇంగ్లిష్/.test(t)) return 'en';
             if (/\b(telugu|speak in telugu|talk in telugu|in telugu|switch to telugu|telugu lo|telugu lo matladu|telugu lo cheppu)\b/i.test(t) ||
@@ -1081,23 +1087,17 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             if (/\b(hindi|speak in hindi|hindi me|hindi lo)\b/i.test(t) || /హిందీ|हिंदी में/.test(t)) return 'hi';
             if (/\b(speak in tamil|talk in tamil|tamil lo matladu|tamil pesu)\b/i.test(t)) return 'ta';
             if (/\b(speak in kannada|talk in kannada|kannada lo matladu)\b/i.test(t)) return 'kn';
-
-            if (/[\u0C00-\u0C7F]/.test(t)) return 'te';
-
-            if (!isVoiceInput) {
-                if (/[\u0900-\u097F]/.test(t)) return 'hi';
-                if (/[\u0B80-\u0BFF]/.test(t)) return 'ta';
-                if (/[\u0D00-\u0D7F]/.test(t)) return 'ml';
-                if (/[\u0C80-\u0CFF]/.test(t)) return 'kn';
-            } else {
-                if (/[\u0B80-\u0BFF\u0C80-\u0CFF\u0D00-\u0D7F]/.test(t)) return currentLanguage;
-            }
-            // Malayalam switch
             if (/\b(malayalam|speak in malayalam|in malayalam|switch to malayalam|malayalam lo|malayalam parayu|respond in malayalam)\b/i.test(t) ||
-                /మలయాళం|മലയാളം/.test(t)) {
-                return 'ml';
-            }
+                /మలయాళం|മലയാളം/.test(t)) return 'ml';
 
+            // 1. Indic Unicode scripts (definitive)
+            if (/[\u0C00-\u0C7F]/.test(t)) return 'te';
+            if (/[\u0900-\u097F]/.test(t)) return 'hi';
+            if (/[\u0B80-\u0BFF]/.test(t)) return 'ta';
+            if (/[\u0D00-\u0D7F]/.test(t)) return 'ml';
+            if (/[\u0C80-\u0CFF]/.test(t)) return 'kn';
+
+            // 2. Transliterated / Romanized Indic words
             const tenglishPattern = /\b(nuvvu|nuvu|nenu|ela|elaga|unnav|unnaru|em|enti|entii|chesthuv|chesthunn|cheppandi|cheppu|thinnava|thinara|bagunnava|bagunnanu|bava|mawa|kadh|kadha|avuna|eeroju|kavali|ledu|undhi|ekkada|chudu|matladu|namaskaram|ayyo|nijama|emiti|chesav|chala|kani|aithe|enduku|gurinchi|ippudu|kuda|chey|cheyyi|avunu|vaddu|randi|ikkada|akkada|manchi|baagundi|super ra)\b/i;
             if (tenglishPattern.test(t)) return 'te';
 
@@ -1110,32 +1110,40 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             const tanglishPattern = /\b(eppadi|irukenga|irukka|enna|solreenga|solunga|pannreenga|sapteengala|vanakkam|nandri)\b/i;
             if (tanglishPattern.test(t)) return 'ta';
 
-            const neutralWords = /^(hi|hello|hey|ok|okay|k|hmm|ha|haa|bye|super|cool|thanks|thank you|yes|no|yo|good morning|good night|gm|gn)[!.,?\s]*$/i;
-            if (neutralWords.test(t)) return currentLanguage;
+            // 3. Conversational continuation neutral words
+            const neutralWords = /^(ok|okay|k|hmm|ha|haa|bye|super|cool|thanks|thank you|yes|no|yo)[!.,?\s]*$/i;
+            if (neutralWords.test(t) && conversationHistory.length > 0) return currentLanguage;
 
-            const englishPattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|would you|tell me|explain|describe|write|create|solve|are you|is it|do you|did you|i am|i'm|i want|help me|your name|your developer|your creator|today|weather|meaning|difference|about|please|sorry|really|awesome|great)\b/i;
+            // 4. English greetings & conversational tokens
+            const englishGreetings = /^(hi|hello|hey|good morning|good evening|good afternoon|good night|gm|gn|what's up|sup)[!.,?\s]*$/i;
+            if (englishGreetings.test(t)) return 'en';
+
+            // 5. English / Latin queries (e.g. "who are you", "what is this", "tell me about...")
+            const englishPattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|would you|tell me|explain|describe|write|create|solve|are you|is it|do you|did you|i am|i'm|i want|help me|your name|your developer|your creator|today|weather|meaning|difference|about|please|sorry|really|awesome|great|hi|hello|hey)\b/i;
             if (englishPattern.test(t)) return 'en';
+
+            if (/^[a-zA-Z0-9\s.,!?'"~@#$%^&*()_\-+=/<>:;]+$/.test(t)) return 'en';
 
             return currentLanguage;
         }
 
         function getLangDirective(lang) {
             if (lang === 'en') {
-                return "Reply 100% in natural, fluent, modern English.";
+                return "CRITICAL LANGUAGE DIRECTIVE: The user is speaking in English. Reply 100% in natural, fluent, modern English. Do NOT reply in Telugu unless explicitly asked in Telugu.";
             }
             if (lang === 'hi') {
-                return "Reply 100% in natural conversational Hindi (Devanagari script).";
+                return "CRITICAL LANGUAGE DIRECTIVE: Reply in natural conversational Hindi (Devanagari script).";
             }
             if (lang === 'ta') {
-                return "Reply 100% in natural conversational Tamil.";
+                return "CRITICAL LANGUAGE DIRECTIVE: Reply in natural conversational Tamil.";
             }
             if (lang === 'ml') {
-                return "Reply 100% in natural conversational Malayalam (മലയാളം).";
+                return "CRITICAL LANGUAGE DIRECTIVE: Reply in natural conversational Malayalam (മലയാളം).";
             }
             if (lang === 'kn') {
-                return "Reply 100% in natural conversational Kannada.";
+                return "CRITICAL LANGUAGE DIRECTIVE: Reply in natural conversational Kannada.";
             }
-            return "Reply 100% in fluent, grammatically correct, natural spoken Telugu (తెలుగు లిపి).";
+            return "CRITICAL LANGUAGE DIRECTIVE: Reply in fluent, grammatically correct, natural spoken Telugu (తెలుగు లిపి).";
         }
 
         function getFewShotExamples(lang) {
@@ -1281,7 +1289,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "auto",
+                        model: "openai/gpt-oss-120b",
                         messages: payloadMessages,
                         mode: "chat",
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata"
@@ -1365,7 +1373,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "auto",
+                        model: "openai/gpt-oss-120b",
                         mode: "chat",
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
                         messages: [
@@ -1812,6 +1820,9 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
         async function processLiveUserVoice(userVoiceText) {
             if (!userVoiceText) return;
 
+            const detected = detectLanguage(userVoiceText, true);
+            if (detected) currentLanguage = detected;
+
             setLiveState('thinking', 'THINKING', `"${userVoiceText}"`);
 
             conversationHistory.push({ role: "user", content: userVoiceText });
@@ -1828,7 +1839,7 @@ ${getLangDirective(currentLanguage)}
 
 STYLE & VIBE:
 - Talk like a warm, caring, witty friend—smooth and natural.
-- In Telugu: speak clean, grammatically correct everyday spoken Telugu ("నేను బాగున్నాను", "మీరు ఏం చేస్తున్నారు"). Never produce broken half-Telugu sentences or archaic 90s textbook words like "నివాసం", "సమయం", "సమాచారం".
+- Match the user's language: speak English if the user speaks English; speak clean, grammatically correct everyday spoken Telugu if the user speaks Telugu ("నేను బాగున్నాను", "మీరు ఏం చేస్తున్నారు"). Never produce broken half-Telugu sentences or archaic 90s textbook words like "నివాసం", "సమయం", "సమాచారం".
 - Match the user's energy: caring when they are tired/low, playful when they are casual.
 
 HIGH-IQ LOGIC:
@@ -1843,7 +1854,7 @@ HIGH-IQ LOGIC:
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "auto",
+                        model: "openai/gpt-oss-120b",
                         mode: "live",
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
                         max_tokens: 220,
