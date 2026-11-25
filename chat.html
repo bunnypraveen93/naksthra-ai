@@ -1465,11 +1465,13 @@ ${getLangDirective(currentLanguage)}`;
                     formData.append('model', 'whisper-large-v3-turbo');
                     formData.append('language', 'en');
                     const res = await fetch(GROQ_STT_URL, { method: 'POST', body: formData });
+                    if (!res.ok) throw new Error(`STT HTTP ${res.status}`);
                     transcript = ((await res.json()).text || '').trim();
                 } else {
                     formData.append('model', 'saaras:v3');
                     formData.append('language_code', liveLangMode === 'te' ? 'te-IN' : 'unknown');
                     const res = await fetch(SARVAM_STT_URL, { method: 'POST', body: formData });
+                    if (!res.ok) throw new Error(`STT HTTP ${res.status}`);
                     const sttData = await res.json();
                     transcript = (sttData.transcript || sttData.text || '').trim();
                 }
@@ -1505,6 +1507,10 @@ ${getLangDirective(currentLanguage)}`;
                         ]
                     })
                 });
+                if (!res.ok) {
+                    const errBody = await res.json().catch(() => null);
+                    throw new Error(errBody?.error || `HTTP ${res.status}`);
+                }
                 const data = await res.json();
                 const aiText = cleanTeluguOutput(data.response || data.choices?.[0]?.message?.content || "హాయ్!");
                 conversationHistory.push({ role: "assistant", content: aiText });

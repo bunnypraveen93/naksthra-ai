@@ -17,8 +17,8 @@ const NAKSHATRA_CONFIG = {
   meta: {
     name: "Nakshatra AI",
     config_version: "1.0.0",
-    prompt_version: "v1.0",
-    updated: "2026-11-22"
+    prompt_version: "v1.1",
+    updated: "2026-11-25"
   },
   languages: {
     default: "en",
@@ -51,8 +51,8 @@ LANGUAGE & SCRIPT POLICY:
 
 STYLE & FORMATTING:
 - Answer first. No filler openers ("Sure!", "Certainly!", "I can help with that!") or canned closers ("Hope that helps!", "Let me know if you need anything else!").
-- Short and crisp by default; go deeper only when asked or needed. Match the user's vibe and tone.
-- Use plain paragraphs. Use bulleted/numbered lists ONLY for chronological steps or direct comparisons. For how-to questions: numbered steps, one action each.
+- Keep casual greetings natural in 1-2 short sentences with no headings or bullets.
+- For explanations, advice, comparisons, or how-to answers: start with a crisp 1-2 sentence hook passage, leave a blank line, then list main points as clean bullet points with **bold lead-ins** (or numbered steps for how-to). Use ### subheadings only for multi-section answers.
 
 TRUTH & ACCURACY:
 - Never invent facts, numbers, links, or quotes. If unsure, say "I am not sure" honestly.
@@ -70,7 +70,7 @@ ABSOLUTE BAN ON CANNED BOT GREETINGS:
   * Tamil: "ஹேய்! எப்படி இருக்கீங்க? என்ன விசேஷம்?"
   * Malayalam: "ഹലോ! എന്തുണ്ട് വിശേഷം?"`,
     mode_blocks: {
-      chat: "MODE: Text chat. Markdown formatting allowed for code and emphasis. Be concise and sharp.",
+      chat: "MODE: Text chat. For informational replies, start with a 1-2 sentence hook passage followed by clean bullet points with **bold lead-ins** and ### headings where helpful. Keep casual greetings brief and natural.",
       live: "MODE: Voice conversation. Reply in 1 to 3 short spoken sentences. No markdown, no bullet lists, no emojis, no code or raw URLs. Natural spoken rhythm."
     }
   },
@@ -196,14 +196,14 @@ function extractSearchQuery(text) {
 async function fetchSerperSnippets(query, apiKey) {
   if (!apiKey || !query) return null;
   try {
-    const res = await fetch("https://google.serper.dev/search", {
+    const res = await fetchWithTimeout("https://google.serper.dev/search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-API-KEY": apiKey
       },
       body: JSON.stringify({ q: query, num: 5 })
-    });
+    }, 8000);
 
     if (!res.ok) return null;
     const data = await res.json();
@@ -476,24 +476,37 @@ export default {
     const path = url.pathname;
 
     try {
-      // 0. CONFIG ENDPOINT (Returns active intelligence configuration)
-      if (path === "/config") {
-        return new Response(JSON.stringify(NAKSHATRA_CONFIG), {
-          status: 200,
-          headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "*" }
+      // 0. HEALTH & CONFIG ENDPOINTS
+      if (path === "/" || path === "/health") {
+        return jsonResponse({
+          ok: true,
+          service: "Nakshatra AI Worker",
+          config_version: NAKSHATRA_CONFIG.meta.config_version,
+          prompt_version: NAKSHATRA_CONFIG.meta.prompt_version,
+          updated: NAKSHATRA_CONFIG.meta.updated
         });
+      }
+
+      if (path === "/config") {
+        return jsonResponse(NAKSHATRA_CONFIG);
       }
 
       // 1. GROQ MODELS PROXY
       if (path === "/models") {
-        const res = await fetch("https://api.groq.com/openai/v1/models", {
-          headers: { "Authorization": `Bearer ${env.GROQ_API_KEY}` }
+        const groqKey = getCleanSecret(env, "GROQ_API_KEY");
+        if (!groqKey) return missingSecretResponse("GROQ_API_KEY");
+
+        const res = await fetchWithTimeout("https://api.groq.com/openai/v1/models", {
+          headers: { "Authorization": `Bearer ${groqKey}` }
         });
         return respond(res);
       }
 
       // 2. NAKSHATRA MULTILINGUAL INTELLIGENCE PIPELINE (/groq)
       if (path === "/groq") {
+        const groqKey = getCleanSecret(env, "GROQ_API_KEY");
+        if (!groqKey) return missingSecretResponse("GROQ_API_KEY");
+
         const startTime = Date.now();
         const bodyText = await request.text();
         let reqData;
@@ -501,10 +514,7 @@ export default {
         try {
           reqData = JSON.parse(bodyText);
         } catch (e) {
-          return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
+          return jsonResponse({ error: "Invalid JSON body" }, 400);
         }
 
         // Extract latest user query & conversation history
@@ -530,9 +540,10 @@ export default {
         // Step C: Real-Time Web Search Grounding (Section 8)
         let searchSnippets = null;
         let searchExecuted = false;
-        if (shouldSearch(latestUserText) && env.SERPER_API_KEY) {
+        const serperKey = getCleanSecret(env, "SERPER_API_KEY");
+        if (shouldSearch(latestUserText) && serperKey) {
           const searchQuery = extractSearchQuery(latestUserText);
-          searchSnippets = await fetchSerperSnippets(searchQuery, env.SERPER_API_KEY);
+          searchSnippets = await fetchSerperSnippets(searchQuery, serperKey);
           if (searchSnippets) searchExecuted = true;
         }
 
@@ -554,8 +565,8 @@ export default {
           userProfile: reqData.user_profile || null
         });
 
-        // Trim context window according to spec (last 8 turns for chat, 4 for live)
-        const windowSize = (reqData.mode === "live") ? 4 : 8;
+        // Trim context window according to spec (8 turns = 16 messages for chat, 4 turns = 8 for live)
+        const windowSize = (reqData.mode === "live") ? 8 : 16;
         const windowedMessages = inputMessages.slice(-windowSize);
 
         const groqPayload = {
@@ -570,11 +581,11 @@ export default {
         };
 
         // Call Groq API
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        const res = await fetchWithTimeout("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
           headers: { 
             "Content-Type": "application/json", 
-            "Authorization": `Bearer ${env.GROQ_API_KEY}` 
+            "Authorization": `Bearer ${groqKey}` 
           },
           body: JSON.stringify(groqPayload)
         });
@@ -607,11 +618,11 @@ export default {
               max_tokens: Math.min(1500, finalMaxTokens)
             };
 
-            const contRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            const contRes = await fetchWithTimeout("https://api.groq.com/openai/v1/chat/completions", {
               method: "POST",
               headers: { 
                 "Content-Type": "application/json", 
-                "Authorization": `Bearer ${env.GROQ_API_KEY}` 
+                "Authorization": `Bearer ${groqKey}` 
               },
               body: JSON.stringify(continuePayload)
             });
@@ -649,7 +660,7 @@ export default {
 
         // Format response backwards-compatibly
         if (reqData.message && !reqData.messages) {
-          return new Response(JSON.stringify({ 
+          return jsonResponse({ 
             response: aiText,
             meta: {
               language: langInfo.code,
@@ -661,9 +672,6 @@ export default {
               search_used: searchExecuted,
               prompt_version: NAKSHATRA_CONFIG.meta.prompt_version
             }
-          }), {
-            status: 200,
-            headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "*" }
           });
         }
 
@@ -684,20 +692,21 @@ export default {
         };
         data.response = aiText;
 
-        return new Response(JSON.stringify(data), {
-          status: 200,
-          headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "*" }
-        });
+        return jsonResponse(data);
       }
 
       // 3. GROQ STT (Speech-to-Text)
       if (path === "/groq-stt") {
-        const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+        const groqKey = getCleanSecret(env, "GROQ_API_KEY");
+        if (!groqKey) return missingSecretResponse("GROQ_API_KEY");
+
+        const headers = { "Authorization": `Bearer ${groqKey}` };
+        const contentType = request.headers.get("Content-Type");
+        if (contentType) headers["Content-Type"] = contentType;
+
+        const res = await fetchWithTimeout("https://api.groq.com/openai/v1/audio/transcriptions", {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${env.GROQ_API_KEY}`,
-            "Content-Type": request.headers.get("Content-Type")
-          },
+          headers,
           body: request.body
         });
         return respond(res);
@@ -705,11 +714,15 @@ export default {
 
       // 4. ELEVENLABS TTS
       if (path === "/elevenlabs") {
+        const elevenLabsKey = getCleanSecret(env, "ELEVENLABS_API_KEY");
+        if (!elevenLabsKey) return missingSecretResponse("ELEVENLABS_API_KEY");
+
         const body = await request.text();
-        const voiceId = url.searchParams.get("voice_id") || "EXAVITQu4vr4xnSDxMaL";
-        const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        const rawVoiceId = url.searchParams.get("voice_id") || "";
+        const voiceId = /^[a-zA-Z0-9_-]{1,64}$/.test(rawVoiceId) ? rawVoiceId : "EXAVITQu4vr4xnSDxMaL";
+        const res = await fetchWithTimeout(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "xi-api-key": env.ELEVENLABS_API_KEY },
+          headers: { "Content-Type": "application/json", "xi-api-key": elevenLabsKey },
           body
         });
         return respond(res);
@@ -717,23 +730,20 @@ export default {
 
       // 5. SARVAM TTS (Supports all major Indic languages)
       if (path === "/sarvam") {
+        const sarvamKey = getCleanSecret(env, "SARVAM_API_KEY");
+        if (!sarvamKey) return missingSecretResponse("SARVAM_API_KEY");
+
         const bodyText = await request.text();
         let payload = {};
         try {
           payload = JSON.parse(bodyText);
         } catch (e) {
-          return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
+          return jsonResponse({ error: "Invalid JSON body" }, 400);
         }
 
         const speechText = (payload.text || (Array.isArray(payload.inputs) ? payload.inputs[0] : payload.inputs) || "").trim();
         if (!speechText) {
-          return new Response(JSON.stringify({ error: "Text is required for TTS" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
+          return jsonResponse({ error: "Text is required for TTS" }, 400);
         }
 
         const langCode = payload.target_language_code || payload.language_code || "te-IN";
@@ -748,11 +758,11 @@ export default {
           output_audio_codec: payload.output_audio_codec || "wav"
         };
 
-        const res = await fetch("https://api.sarvam.ai/text-to-speech", {
+        const res = await fetchWithTimeout("https://api.sarvam.ai/text-to-speech", {
           method: "POST",
           headers: { 
             "Content-Type": "application/json", 
-            "API-Subscription-Key": env.SARVAM_API_KEY 
+            "API-Subscription-Key": sarvamKey 
           },
           body: JSON.stringify(sarvamBody)
         });
@@ -761,12 +771,16 @@ export default {
 
       // 6. SARVAM STT
       if (path === "/sarvam-stt") {
-        const res = await fetch("https://api.sarvam.ai/speech-to-text", {
+        const sarvamKey = getCleanSecret(env, "SARVAM_API_KEY");
+        if (!sarvamKey) return missingSecretResponse("SARVAM_API_KEY");
+
+        const headers = { "API-Subscription-Key": sarvamKey };
+        const contentType = request.headers.get("Content-Type");
+        if (contentType) headers["Content-Type"] = contentType;
+
+        const res = await fetchWithTimeout("https://api.sarvam.ai/speech-to-text", {
           method: "POST",
-          headers: {
-            "API-Subscription-Key": env.SARVAM_API_KEY,
-            "Content-Type": request.headers.get("Content-Type")
-          },
+          headers,
           body: request.body
         });
         return respond(res);
@@ -774,10 +788,13 @@ export default {
 
       // 7. SERPER SEARCH DIRECT PROXY
       if (path === "/serper") {
+        const serperKey = getCleanSecret(env, "SERPER_API_KEY");
+        if (!serperKey) return missingSecretResponse("SERPER_API_KEY");
+
         const body = await request.text();
-        const res = await fetch("https://google.serper.dev/search", {
+        const res = await fetchWithTimeout("https://google.serper.dev/search", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "X-API-KEY": env.SERPER_API_KEY },
+          headers: { "Content-Type": "application/json", "X-API-KEY": serperKey },
           body
         });
         return respond(res);
@@ -785,28 +802,62 @@ export default {
 
       // 8. YOUTUBE PROXY
       if (path.startsWith("/youtube/")) {
+        const youtubeKey = getCleanSecret(env, "YOUTUBE_API_KEY");
+        if (!youtubeKey) return missingSecretResponse("YOUTUBE_API_KEY");
+
         const apiPath = path.replace("/youtube", "");
         if (apiPath !== "/v3/search" && apiPath !== "/v3/playlistItems") {
-          return new Response("Not allowed", { status: 403 });
+          return jsonResponse({ error: "Not allowed" }, 403);
         }
         const target = new URL("https://www.googleapis.com/youtube" + apiPath);
         url.searchParams.forEach((v, k) => {
           if (k !== "key") target.searchParams.set(k, v);
         });
-        target.searchParams.set("key", env.YOUTUBE_API_KEY);
-        const res = await fetch(target.toString());
+        target.searchParams.set("key", youtubeKey);
+        const res = await fetchWithTimeout(target.toString());
         return respond(res);
       }
 
-      return new Response("Not found", { status: 404 });
+      return jsonResponse({ error: "Not found" }, 404);
     } catch (e) {
-      return new Response(JSON.stringify({ error: "Proxy error: " + e.message }), { 
-        status: 500, 
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
-      });
+      return jsonResponse({ error: "Proxy error: " + (e?.message || "Unknown upstream error") }, 500);
     }
   }
 };
+
+function getCleanSecret(env, keyName) {
+  const val = env && env[keyName];
+  return typeof val === "string" ? val.trim() : "";
+}
+
+function missingSecretResponse(keyName) {
+  return jsonResponse({ error: `Missing ${keyName} secret in Cloudflare Worker environment.` }, 500);
+}
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Access-Control-Allow-Origin": "*"
+    }
+  });
+}
+
+async function fetchWithTimeout(targetUrl, options = {}, timeoutMs = 25000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(targetUrl, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err && err.name === "AbortError") {
+      throw new Error(`Upstream request timed out after ${Math.round(timeoutMs / 1000)}s`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 function respond(res) {
   return new Response(res.body, {
