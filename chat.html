@@ -837,8 +837,11 @@ CHATGPT-STYLE RESPONSE STRUCTURE (STRICT):
 
         function escapeHtmlPlain(str) {
             return String(str)
-                .replace(/&/g, '&').replace(/</g, '<')
-                .replace(/>/g, '>').replace(/"/g, '"').replace(/'/g, ''');
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         function normalizeMarkdownForRender(text) {
@@ -995,7 +998,7 @@ CHATGPT-STYLE RESPONSE STRUCTURE (STRICT):
         }
 
         function handleInputKey(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
+            if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
                 event.preventDefault();
                 sendMessage();
             }
@@ -1168,7 +1171,11 @@ CHATGPT-STYLE RESPONSE STRUCTURE (STRICT):
 
         async function sendMessage() {
             const text = chatInput.value.trim();
-            if (!text || isSendingMessage) return;
+            if (!text) {
+                chatInput.focus();
+                return;
+            }
+            if (isSendingMessage) return;
 
             isSendingMessage = true;
             sendBtn.disabled = true;
@@ -1176,9 +1183,7 @@ CHATGPT-STYLE RESPONSE STRUCTURE (STRICT):
 
             document.body.classList.add('chat-active');
             homeScreen.classList.add('leaving');
-            setTimeout(() => {
-                if (document.body.classList.contains('chat-active')) homeScreen.style.display = 'none';
-            }, 220);
+            homeScreen.style.display = 'none';
             chatContainer.style.display = 'flex';
 
             appendUserMessage(text);
@@ -1199,6 +1204,9 @@ CHATGPT-STYLE RESPONSE STRUCTURE (STRICT):
             chatContainer.appendChild(aiRow);
             scrollToBottom();
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+
             try {
                 const detected = detectLanguage(text, false);
                 if (detected) currentLanguage = detected;
@@ -1214,6 +1222,7 @@ ${getLangDirective(currentLanguage)}`;
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal,
                     body: JSON.stringify({
                         model: "openai/gpt-oss-120b",
                         mode: "chat",
@@ -1228,7 +1237,10 @@ ${getLangDirective(currentLanguage)}`;
                     })
                 });
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                if (!response.ok) {
+                    const errBody = await response.json().catch(() => null);
+                    throw new Error(errBody?.error || `HTTP ${response.status}`);
+                }
                 const data = await response.json();
                 const fallback = currentLanguage === 'en' ? "Hey, what's on your mind?" : "హాయ్! ఏంటి విశేషాలు?";
                 const aiReply = cleanTeluguOutput(data.response || data.reply || data.choices?.[0]?.message?.content) || fallback;
@@ -1247,13 +1259,20 @@ ${getLangDirective(currentLanguage)}`;
                     continueBtn.innerHTML = `<i class="fa-solid fa-play"></i> Continue response`;
                     continueBtn.onclick = () => handleContinueClick(continueBtn, bubble, aiReply);
                     const wrap = aiRow.querySelector('.ai-content-wrap');
-                    wrap.insertBefore(continueBtn, wrap.querySelector('.msg-actions-bar'));
+                    const actionsBar = wrap ? wrap.querySelector('.msg-actions-bar') : null;
+                    if (wrap && actionsBar) {
+                        wrap.insertBefore(continueBtn, actionsBar);
+                    }
                 }
             } catch (error) {
                 console.error("Chat error:", error);
-                showErrorToast("Connection error. Please try again.");
-                aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color:#f857a6;">Server connection error. Please check your network.</span>`;
+                const errMsg = error?.name === 'AbortError'
+                    ? 'Request timed out. Please try again.'
+                    : (error?.message || 'Server connection error. Please check your network.');
+                showErrorToast(errMsg);
+                aiRow.querySelector('.msg-bubble').innerHTML = `<span style="color:#f857a6;">${escapeHtmlPlain(errMsg)}</span>`;
             } finally {
+                clearTimeout(timeoutId);
                 isSendingMessage = false;
                 sendBtn.disabled = false;
                 scrollToBottom();
@@ -1544,7 +1563,14 @@ ${getLangDirective(currentLanguage)}`;
                     livePlayer.onended = finish;
                     livePlayer.onerror = finish;
                     await livePlayer.play();
-                } catch (err) { finish(); }
+                } catch (err) {
+                    console.warn("Live audio playback fallback:", err);
+                    if (done) return;
+                    done = true;
+                    if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+                    await fallbackBrowserSpeech(displayText);
+                    resolve();
+                }
             });
         }
 
