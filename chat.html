@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -11,44 +11,48 @@
     <!-- Google Fonts & Font Awesome Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Marked.js for Clean Markdown Output -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Markdown Rendering Stack: Marked.js + DOMPurify + Highlight.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <style>
         :root {
-            --cyan: #00f2fe;
-            --purple: #8a2be2;
-            --pink: #f857a6;
-            --bg: #0d0d12;
-            --bg-surface: #17171f;
-            --bg-sidebar: #101016;
-            --bg-input: #1a1a24;
-            --bg-user-bubble: #282834;
+            --cyan: #38bdf8;
+            --purple: #6366f1;
+            --violet: #a855f7;
+            --pink: #ec4899;
+            --bg-cosmic: radial-gradient(circle at 50% 35%, #111842 0%, #06091c 55%, #02030a 100%);
+            --bg: #000000;
+            --bg-surface: #14151c;
+            --bg-sidebar: #0a0b10;
+            --bg-input: #14151c;
+            --bg-user-bubble: #1e1f22;
             --border: rgba(255,255,255,0.08);
             --border-hover: rgba(255,255,255,0.18);
-            --text-primary: #f0f0f6;
-            --text-secondary: #9aa0b0;
-            --text-muted: #626274;
-            --gradient-main: linear-gradient(135deg, #00f2fe 0%, #4facfe 40%, #9b51e0 80%, #f857a6 100%);
-            --gradient-send: linear-gradient(135deg, #4facfe 0%, #8b5cf6 55%, #c084fc 100%);
-            --radius-bubble: 20px;
-            --radius-card: 14px;
-            --font-base: 1.05rem; /* ~16.8px - larger, crisp, highly readable like ChatGPT */
+            --text-primary: #ececf1;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --gradient-main: linear-gradient(135deg, #38bdf8 0%, #6366f1 50%, #a855f7 100%);
+            --gradient-send: linear-gradient(135deg, #38bdf8 0%, #6366f1 50%, #a855f7 100%);
+            --radius-bubble: 22px;
+            --radius-card: 16px;
+            --font-base: 1rem;
             --font-sm: 0.92rem;
             --font-xs: 0.8rem;
+            --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', 'Noto Sans Telugu', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Malayalam', 'Noto Sans Kannada', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Poppins', 'Noto Sans Telugu', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -60,18 +64,23 @@
             position: fixed;
             top: 0;
             left: 0;
-            background-color: var(--bg);
+            background: radial-gradient(circle at 50% 35%, #111842 0%, #06091c 55%, #02030a 100%);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
             overscroll-behavior: none;
+            transition: background 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         body {
             color: var(--text-primary);
             display: flex;
             flex-direction: column;
-            background: var(--bg);
+            background: transparent;
+        }
+
+        body.chat-active {
+            background: #000000 !important;
         }
 
         /* ---- TOAST ---- */
@@ -110,10 +119,15 @@
             justify-content: space-between;
             flex-shrink: 0;
             z-index: 10;
-            background: rgba(13,13,18,0.92);
+            background: rgba(6, 9, 28, 0.75);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            transition: background 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+        }
+        body.chat-active .top-bar {
+            background: rgba(0, 0, 0, 0.85);
+            border-bottom-color: rgba(255, 255, 255, 0.05);
         }
         .top-left-group {
             display: flex;
@@ -133,7 +147,7 @@
             box-shadow: 0 0 10px rgba(0,242,254,0.25);
         }
         .top-brand-text {
-            font-size: 1.3rem; /* Increased size prominent & bold */
+            font-size: 1.25rem;
             font-weight: 700;
             color: #ffffff;
             letter-spacing: 0.4px;
@@ -186,7 +200,7 @@
         .menu-btn {
             background: transparent;
             border: none;
-            color: #94a3b8;
+            color: #d1d5db;
             width: 36px;
             height: 36px;
             border-radius: 9px;
@@ -195,7 +209,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.18s;
+            transition: color 0.18s ease, background 0.18s ease, opacity 0.18s ease;
         }
         .menu-btn:hover {
             color: #fff;
@@ -340,8 +354,9 @@
             overscroll-behavior-y: contain;
         }
 
-        /* ---- HOME SCREEN & PROMPT SUGGESTIONS ---- */
+        /* ---- HOME SCREEN & PROMPT SUGGESTIONS (COSMIC DARK THEME) ---- */
         .home-center {
+            position: relative;
             margin: auto;
             text-align: center;
             display: flex;
@@ -350,48 +365,158 @@
             gap: 10px;
             padding: 24px 20px;
             width: 100%;
-            max-width: 720px;
-            animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 680px;
+            animation: homeFadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1), transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .center-logo {
-            width: 76px;
-            height: 76px;
-            border-radius: 50%;
-            overflow: hidden;
-            animation: floatGlow 3.5s ease-in-out infinite alternate;
-            box-shadow: 0 0 32px rgba(0,242,254,0.25), 0 0 64px rgba(138,43,226,0.18);
+        .home-center.leaving {
+            opacity: 0;
+            transform: translateY(-16px) scale(0.98);
+            pointer-events: none;
         }
-        .center-logo img { width: 100%; height: 100%; object-fit: cover; }
-        @keyframes floatGlow {
-            0% { transform: translateY(0px); box-shadow: 0 0 24px rgba(0,242,254,0.2); }
-            100% { transform: translateY(-7px); box-shadow: 0 0 44px rgba(0,242,254,0.4); }
-        }
-        .home-title {
-            font-size: clamp(1.8rem, 5vw, 2.4rem);
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            background: var(--gradient-main);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-top: 4px;
-        }
-        .home-help-text {
-            font-size: clamp(1.05rem, 3.2vw, 1.25rem);
-            font-weight: 400;
-            color: var(--text-secondary);
+        @keyframes homeFadeUp {
+            from { opacity: 0; transform: translateY(14px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        
+        .center-cosmic-glow {
+            position: absolute;
+            top: 2%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 190px;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.28) 0%, rgba(56, 189, 248, 0.12) 50%, transparent 72%);
+            filter: blur(36px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .center-logo {
+            position: relative;
+            z-index: 1;
+            width: 68px;
+            height: 68px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.35);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: #0d0f22;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+        }
+        .center-logo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 38px rgba(99, 102, 241, 0.45);
+        }
+        .center-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+        .home-brand-title {
+            position: relative;
+            z-index: 1;
+            font-size: 1.12rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            color: #ffffff;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+        .home-brand-title em {
+            font-style: italic;
+            background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .home-greeting {
+            position: relative;
+            z-index: 1;
+            margin-top: 6px;
+            text-align: center;
+        }
+        .greeting-main {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+        .greeting-sub {
+            font-size: 1.15rem;
+            font-weight: 400;
+            color: #cbd5e1;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* Quick Action Suggestion Cards */
+        .suggestion-cards-grid {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 520px;
+            margin-top: 20px;
+        }
+        .suggestion-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: rgba(24, 28, 56, 0.62);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+            will-change: transform;
+            animation: cardEntrance 0.3s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .suggestion-card:nth-child(1) { animation-delay: 60ms; }
+        .suggestion-card:nth-child(2) { animation-delay: 120ms; }
+        .suggestion-card:nth-child(3) { animation-delay: 180ms; }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .suggestion-card:hover, .suggestion-card:active {
+            transform: translateY(-2px);
+            background: rgba(30, 36, 72, 0.75);
+            border-color: rgba(139, 92, 246, 0.45);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+        }
+        .suggestion-icon {
+            font-size: 1.15rem;
+            color: #818cf8;
+            flex-shrink: 0;
+            width: 20px;
+            text-align: center;
+        }
+        .suggestion-label {
+            font-size: 0.98rem;
+            font-weight: 500;
+            color: #ffffff;
+            letter-spacing: 0.2px;
+        }
 
         /* ---- CHAT CONTAINER & MESSAGES ---- */
         .chat-container {
             display: none;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
             max-width: 820px;
             width: 100%;
             margin: 0 auto;
-            padding: 20px 18px 30px;
+            padding: 24px 20px 120px;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%);
         }
 
         .msg-row {
@@ -399,11 +524,11 @@
             gap: 14px;
             align-items: flex-start;
             width: 100%;
-            padding: 12px 0;
-            animation: fadeUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            padding: 10px 0;
+            animation: msgFadeUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(8px); }
+        @keyframes msgFadeUp {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -413,38 +538,38 @@
         }
         .msg-row.ai {
             justify-content: flex-start;
-            padding: 14px 0 16px;
+            padding: 14px 0 20px;
         }
 
         .ai-avatar {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             flex-shrink: 0;
-            border: 1.5px solid rgba(0,242,254,0.35);
-            background: #111118;
+            border: 1.5px solid rgba(99, 102, 241, 0.4);
+            background: #0d0f1e;
             margin-top: 2px;
             object-fit: cover;
-            box-shadow: 0 0 12px rgba(0,242,254,0.2);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
         }
 
-        /* USER bubble */
+        /* USER message bubble (Clean Gray Pill) */
         .msg-row.user .msg-bubble {
-            background: var(--bg-user-bubble);
-            color: var(--text-primary);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px 20px 4px 20px;
+            background: #1e1f22;
+            color: #f3f4f6;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 22px 22px 6px 22px;
             padding: 12px 18px;
             max-width: 80%;
-            font-size: var(--font-base);
-            line-height: 1.65;
+            font-size: 0.98rem;
+            line-height: 1.55;
             word-wrap: break-word;
             overflow-wrap: break-word;
             white-space: pre-wrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
         }
         @media (max-width: 520px) {
-            .msg-row.user .msg-bubble { max-width: 92%; }
+            .msg-row.user .msg-bubble { max-width: 88%; }
         }
 
         /* AI content wrap */
@@ -455,116 +580,162 @@
             flex-direction: column;
         }
 
-        /* AI bubble — no box, full width, breathing room like ChatGPT & Claude */
+        /* ---- CHATGPT-STYLE CLEAN EDITORIAL MARKDOWN ---- */
         .msg-row.ai .msg-bubble {
-            background: transparent;
-            color: var(--text-primary);
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #e2e8f0;
             padding: 2px 0 4px 0;
             width: 100%;
-            font-size: var(--font-base);
-            line-height: 1.75;
+            font-size: 1rem;
+            line-height: 1.72;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            text-align: left;
         }
 
-        /* ---- AI REPLY MARKDOWN — CLEAN BULLETS & TEXT ALIGNMENT ---- */
-        .msg-bubble {
-            text-align: left;
-        }
         .msg-bubble p {
-            margin: 0 0 14px 0;
-            line-height: 1.8;
-            font-size: var(--font-base);
-            color: #ececf1;
+            margin: 0 0 1em 0;
+            line-height: 1.72;
+            font-size: 1rem;
+            color: #e2e8f0;
             text-align: left;
             word-wrap: break-word;
+        }
+
+        /* Top Small Intro Passage (ChatGPT Opening Summary) */
+        .msg-row.ai .msg-bubble > p.ai-hook-passage {
+            font-size: 1.03rem;
+            line-height: 1.72;
+            color: #f8fafc;
+            font-weight: 450;
+            margin-bottom: 1.2em;
+            padding-bottom: 0.9em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
         .msg-bubble p:last-child { margin-bottom: 0; }
 
-        .msg-bubble ul, .msg-bubble ol {
-            margin: 10px 0 16px 0;
-            padding-left: 22px;
-            text-align: left;
-        }
-        .msg-bubble li {
-            margin-bottom: 8px;
-            line-height: 1.75;
-            font-size: var(--font-base);
-            color: #e2e8f0;
-            text-align: left;
-        }
-        .msg-bubble ul > li {
-            list-style-type: disc;
-        }
-        .msg-bubble ol > li {
-            list-style-type: decimal;
-        }
-        .msg-bubble li::marker {
-            color: var(--cyan);
-            font-weight: 700;
-        }
-        .msg-bubble ul ul, .msg-bubble ol ol, .msg-bubble ul ol, .msg-bubble ol ul {
-            margin: 6px 0 6px 0;
-            padding-left: 20px;
-        }
-
+        /* Clean Section Headings (ChatGPT Hierarchy) */
         .msg-bubble h1 {
-            font-size: 1.45rem;
+            font-size: 1.38rem;
             font-weight: 700;
-            margin: 22px 0 12px;
+            letter-spacing: -0.015em;
+            margin: 1.5em 0 0.6em;
             color: #ffffff;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 6px;
-            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.09);
+            padding-bottom: 8px;
+            line-height: 1.35;
         }
         .msg-bubble h2 {
-            font-size: 1.22rem;
-            font-weight: 650;
-            margin: 18px 0 10px;
-            color: #f1f5f9;
-            text-align: left;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin: 1.45em 0 0.55em;
+            color: #ffffff;
+            line-height: 1.38;
         }
         .msg-bubble h3 {
             font-size: 1.08rem;
-            font-weight: 600;
-            margin: 14px 0 8px;
-            color: #c4b5fd;
+            font-weight: 700;
+            letter-spacing: -0.005em;
+            margin: 1.35em 0 0.5em;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.4;
+        }
+        .msg-bubble h3::before {
+            content: "";
+            display: inline-block;
+            width: 3px;
+            height: 1.05em;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #38bdf8, #818cf8);
+            flex-shrink: 0;
+        }
+        .msg-bubble h4 {
+            font-size: 1.01rem;
+            font-weight: 650;
+            margin: 1.1em 0 0.4em;
+            color: #f1f5f9;
+            line-height: 1.4;
+        }
+
+        /* Crisp Bullet & Numbered Lists */
+        .msg-bubble ul, .msg-bubble ol {
+            margin: 0.45em 0 1.2em 0;
+            padding-left: 1.45em;
             text-align: left;
+        }
+        .msg-bubble ul ul, .msg-bubble ol ul, .msg-bubble ul ol, .msg-bubble ol ol {
+            margin: 0.4em 0 0.35em 0;
+            padding-left: 1.25em;
+        }
+        .msg-bubble li {
+            margin-bottom: 0.58em;
+            padding-left: 0.2em;
+            line-height: 1.7;
+            font-size: 0.99rem;
+            color: #dbe3ef;
+            text-align: left;
+        }
+        .msg-bubble li:last-child { margin-bottom: 0; }
+        .msg-bubble li > p {
+            margin: 0 0 0.4em 0;
+        }
+        .msg-bubble li > p:last-child { margin-bottom: 0; }
+        .msg-bubble ul > li { list-style-type: disc; }
+        .msg-bubble ul ul > li { list-style-type: circle; }
+        .msg-bubble ol > li { list-style-type: decimal; }
+        .msg-bubble ul > li::marker {
+            color: #38bdf8;
+            font-weight: 700;
+            font-size: 1.05em;
+        }
+        .msg-bubble ol > li::marker {
+            color: #818cf8;
+            font-weight: 700;
+        }
+        .msg-bubble li strong {
+            color: #ffffff;
+            font-weight: 650;
         }
 
         .msg-bubble strong { color: #ffffff; font-weight: 650; }
         .msg-bubble em { font-style: italic; color: #cbd5e1; }
 
         .msg-bubble code:not(pre code) {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            padding: 2px 7px;
+            background: #161821;
+            border: 1px solid rgba(255,255,255,0.09);
+            padding: 2px 6px;
             border-radius: 6px;
-            font-size: 0.9rem;
-            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
-            color: #f472b6;
+            font-size: 0.88rem;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            color: #93c5fd;
         }
 
-        /* Code Card (ChatGPT / Claude style) */
+        /* Code Card */
         .code-card {
-            background: #14141c;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 10px;
+            background: #0d0e14;
+            border: 1px solid #1f2230;
+            border-radius: 12px;
             margin: 16px 0;
             overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45);
             text-align: left;
         }
         .code-card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 14px;
-            background: #1e1e28;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 8px 16px;
+            background: #161822;
+            border-bottom: 1px solid #1f2230;
             font-size: 0.78rem;
             color: #94a3b8;
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -580,6 +751,7 @@
             padding: 4px 8px;
             border-radius: 5px;
             transition: all 0.16s ease;
+            font-family: inherit;
         }
         .code-card-copy-btn:hover {
             color: #ffffff;
@@ -599,7 +771,7 @@
             text-align: left;
         }
         .code-card pre code {
-            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+            font-family: 'JetBrains Mono', monospace;
             background: transparent;
             padding: 0;
             border: none;
@@ -607,35 +779,47 @@
         }
 
         .msg-bubble blockquote {
-            border-left: 3px solid var(--purple);
-            padding: 8px 16px;
+            border-left: 3px solid #6366f1;
+            padding: 10px 16px;
             margin: 14px 0;
-            background: rgba(138,43,226,0.07);
-            border-radius: 0 8px 8px 0;
+            background: rgba(99, 102, 241, 0.08);
+            border-radius: 0 10px 10px 0;
             color: #c4b5fd;
-            font-style: italic;
+            font-style: normal;
             text-align: left;
+        }
+        .msg-bubble hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            margin: 1.4em 0;
         }
         .msg-bubble a {
             color: #38bdf8;
             text-decoration: underline;
             text-underline-offset: 3px;
         }
+        .table-scroll-wrap {
+            width: 100%;
+            overflow-x: auto;
+            margin: 14px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
         .msg-bubble table {
             width: 100%;
             border-collapse: collapse;
-            margin: 14px 0;
+            margin: 0;
             font-size: 0.92rem;
             text-align: left;
         }
         .msg-bubble th, .msg-bubble td {
             padding: 10px 14px;
             text-align: left;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.08);
         }
         .msg-bubble th {
-            background: rgba(0,242,254,0.08);
-            color: var(--cyan);
+            background: rgba(56, 189, 248, 0.09);
+            color: #7dd3fc;
             font-weight: 600;
         }
         .msg-bubble > *:first-child { margin-top: 0 !important; }
@@ -646,7 +830,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-top: 8px;
+            margin-top: 10px;
             padding-left: 2px;
             opacity: 0.85;
             transition: opacity 0.2s ease;
@@ -716,10 +900,10 @@
         }
         .continue-pill-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* ---- BOTTOM INPUT BAR (CHATGPT AUTO-EXPANDING TEXTAREA) ---- */
+        /* ---- FLOATING BOTTOM INPUT BAR & BRAND ACTION BUTTON ---- */
         .bottom-bar {
             width: 100%;
-            max-width: 800px;
+            max-width: 820px;
             margin: 0 auto;
             padding: 8px 16px calc(14px + env(safe-area-inset-bottom, 0px));
             flex-shrink: 0;
@@ -727,24 +911,27 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
+            z-index: 20;
         }
         .chat-box-wrapper {
             width: 100%;
-            background: #181820;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 26px;
-            padding: 8px 12px 8px 18px;
+            border-radius: 9999px;
+            background: #14151c;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            padding: 6px 8px 6px 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            min-height: 52px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            gap: 12px;
+            min-height: 54px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: border-color 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
             box-sizing: border-box;
         }
         .chat-box-wrapper:focus-within {
-            border-color: rgba(0,242,254,0.5);
-            box-shadow: 0 0 0 1px rgba(0,242,254,0.2), 0 4px 24px rgba(0,0,0,0.65);
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 8px 36px rgba(0, 0, 0, 0.7);
         }
         .chat-input {
             flex: 1;
@@ -753,7 +940,7 @@
             border: none;
             outline: none;
             color: #f1f5f9;
-            font-size: 1.05rem;
+            font-size: 1rem;
             line-height: 1.5;
             resize: none;
             height: 26px;
@@ -763,10 +950,11 @@
             overflow-y: auto;
             box-sizing: border-box;
             display: block;
+            font-family: inherit;
         }
         .chat-input::placeholder {
-            color: #64748b;
-            font-size: 1.0rem;
+            color: #8b90a0;
+            font-size: 0.98rem;
         }
         .chat-input-actions {
             display: flex;
@@ -774,45 +962,52 @@
             gap: 8px;
             flex-shrink: 0;
         }
-        .live-toggle-btn, .send-btn {
-            width: 36px;
-            height: 36px;
+        .mic-toggle-btn {
+            width: 38px;
+            height: 38px;
             flex-shrink: 0;
             border-radius: 50%;
             border: none;
-            font-size: 0.95rem;
+            background: transparent;
+            color: #ffffff;
+            font-size: 1.05rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.16s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+            transition: background 0.18s ease, transform 0.18s ease;
             touch-action: manipulation;
         }
-        .live-toggle-btn {
-            background: rgba(0,242,254,0.12);
-            color: var(--cyan);
-            border: 1px solid rgba(0,242,254,0.25);
-        }
-        .live-toggle-btn:hover {
-            background: rgba(0,242,254,0.22);
+        .mic-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
             transform: scale(1.06);
         }
         .send-btn {
-            background: rgba(255,255,255,0.08);
-            color: #64748b;
-            opacity: 0.5;
-            cursor: default;
-        }
-        .send-btn.active {
-            background: #ffffff;
-            color: #0d0d12;
-            opacity: 1;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #38bdf8 0%, #6366f1 50%, #a855f7 100%);
+            box-shadow: 0 0 18px rgba(124, 58, 237, 0.45);
+            color: #ffffff;
+            font-size: 1.05rem;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
+            touch-action: manipulation;
         }
-        .send-btn.active:hover {
-            background: #e2f8ff;
-            transform: scale(1.08);
+        .send-btn i {
+            transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .send-btn:active {
+            transform: scale(0.92);
+        }
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 24px rgba(124, 58, 237, 0.65);
         }
         .bottom-disclaimer {
             font-size: 0.72rem;
@@ -832,7 +1027,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 24px 20px calc(32px + env(safe-area-inset-bottom, 0px));
-            animation: fadeUp 0.28s ease;
+            animation: homeFadeUp 0.28s ease;
         }
         .live-modal.active { display: flex; }
 
@@ -1052,7 +1247,7 @@
             border: 1px solid rgba(0,242,254,0.4);
             color: var(--cyan);
         }
-</style>
+    </style>
 </head>
 
 <body>
@@ -1119,11 +1314,31 @@
     <!-- Main Dynamic Content -->
     <main class="main-content" id="mainContent">
         <div class="home-center" id="homeScreen">
+            <div class="center-cosmic-glow"></div>
             <div class="center-logo">
                 <img src="images/ic_launcher.png" alt="Nakshatra AI">
             </div>
-            <h1 class="home-title">Nakshatra AI</h1>
-            <p class="home-help-text">How can I help you today?</p>
+            <div class="home-brand-title">NAKSHATRA <em>AI</em></div>
+            <div class="home-greeting">
+                <h1 class="greeting-main">Hello,</h1>
+                <p class="greeting-sub">How can I help you today?</p>
+            </div>
+
+            <!-- Quick Action Suggestion Cards -->
+            <div class="suggestion-cards-grid">
+                <div class="suggestion-card" onclick="selectSuggestion('Write something creative for me in Telugu')">
+                    <i class="fa-solid fa-pen-nib suggestion-icon"></i>
+                    <span class="suggestion-label">Write something...</span>
+                </div>
+                <div class="suggestion-card" onclick="selectSuggestion('Help me solve a challenging problem step-by-step')">
+                    <i class="fa-solid fa-wand-magic-sparkles suggestion-icon"></i>
+                    <span class="suggestion-label">Solve a problem...</span>
+                </div>
+                <div class="suggestion-card" onclick="selectSuggestion('Give me innovative project ideas and inspiration')">
+                    <i class="fa-solid fa-lightbulb suggestion-icon"></i>
+                    <span class="suggestion-label">Give me ideas...</span>
+                </div>
+            </div>
         </div>
 
         <div class="chat-container" id="chatContainer"></div>
@@ -1132,18 +1347,17 @@
     <!-- Persistent Live Audio Player -->
     <audio id="liveAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
 
-    <!-- Bottom Input Bar -->
-    <!-- Bottom Input Bar (ChatGPT Auto-Expanding Multiline) -->
+    <!-- Floating Bottom Input Bar -->
     <footer class="bottom-bar">
         <div class="chat-box-wrapper">
-            <textarea id="chatInput" class="chat-input" rows="1" placeholder="Ask anything..."
+            <textarea id="chatInput" class="chat-input" rows="1" placeholder="Ask Nakshatra AI..."
                 onkeydown="handleInputKey(event)" oninput="handleInputChange()"></textarea>
             <div class="chat-input-actions">
-                <button class="live-toggle-btn" id="liveToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
-                    <i class="fa-solid fa-wave-square"></i>
+                <button class="mic-toggle-btn" id="micToggleBtn" onclick="openLiveMode()" title="Live Voice Mode">
+                    <i class="fa-solid fa-microphone"></i>
                 </button>
-                <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
-                    <i class="fa-solid fa-arrow-up"></i>
+                <button class="send-btn" id="sendBtn" onclick="handleSendOrVoice()" title="Action">
+                    <i class="fa-solid fa-wave-square" id="sendBtnIcon"></i>
                 </button>
             </div>
         </div>
@@ -1151,7 +1365,6 @@
             Nakshatra AI can make mistakes. Verify important information.
         </div>
     </footer>
-
 
     <!-- Live Voice Mode Overlay Screen -->
     <div class="live-modal" id="liveModal">
@@ -1196,51 +1409,139 @@
     </div>
 
     <script>
-                marked.setOptions({
-            breaks: true,
-            gfm: true,
-            highlight: function (code, lang) {
-                if (window.hljs) {
-                    try {
-                        if (lang && hljs.getLanguage(lang)) {
-                            return hljs.highlight(code, { language: lang }).value;
-                        }
-                        return hljs.highlightAuto(code).value;
-                    } catch (e) {
-                        return code;
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+        }
+
+        function escapeHtmlPlain(str) {
+            return String(str)
+                .replace(/&/g, '&')
+                .replace(/</g, '<')
+                .replace(/>/g, '>')
+                .replace(/"/g, '"')
+                .replace(/'/g, ''');
+        }
+
+        function normalizeMarkdownForRender(text) {
+            if (!text || typeof text !== 'string') return '';
+            const codeBlocks = [];
+            let normalized = text.replace(/\r\n/g, '\n').replace(/(```[\s\S]*?```)/g, (match) => {
+                const id = `__NKS_CODE_${codeBlocks.length}__`;
+                codeBlocks.push(match);
+                return id;
+            });
+
+            // Fix missing spaces after heading markers (#Heading -> # Heading)
+            normalized = normalized.replace(/^(#{1,6})([^\s#])/gm, '$1 $2');
+
+            // Normalize Unicode bullet symbols to standard Markdown hyphens
+            normalized = normalized.replace(/^(\s*)[•◦▪▸‣●]\s+/gm, '$1- ');
+
+            // Promote standalone bold title lines (e.g. "**Key Benefits:**") into clean ### headings
+            normalized = normalized.replace(/^\*\*([^*\n]{2,65}):?\*\*\s*$/gm, '### $1');
+
+            // Ensure clean blank lines around headings and before bullet/numbered lists
+            const lines = normalized.split('\n');
+            const out = [];
+            for (let i = 0; i < lines.length; i++) {
+                const cur = lines[i];
+                const prev = out.length > 0 ? out[out.length - 1] : '';
+                const isHeading = /^\s*#{1,6}\s+/.test(cur);
+                const isListItem = /^\s*(?:[-*+]|\d+\.)\s+/.test(cur);
+                const prevIsBlank = !prev.trim();
+                const prevIsHeading = /^\s*#{1,6}\s+/.test(prev);
+                const prevIsListItem = /^\s*(?:[-*+]|\d+\.)\s+/.test(prev);
+
+                if (i > 0 && !prevIsBlank) {
+                    if (isHeading || (isListItem && !prevIsListItem && !prevIsHeading)) {
+                        out.push('');
+                    } else if (prevIsHeading && cur.trim()) {
+                        out.push('');
                     }
                 }
-                return code;
+                out.push(cur);
             }
-        });
+
+            normalized = out.join('\n').replace(/\n{3,}/g, '\n\n');
+            normalized = normalized.replace(/__NKS_CODE_(\d+)__/g, (_, idx) => codeBlocks[Number(idx)] ?? '');
+            return normalized.trim();
+        }
 
         function renderMarkdownClean(text) {
             if (!text) return '';
             try {
-                const rawHtml = marked.parse(text);
-                const temp = document.createElement('div');
-                temp.innerHTML = rawHtml;
+                const normalized = normalizeMarkdownForRender(text);
+                const rawHtml = (typeof marked !== 'undefined')
+                    ? marked.parse(normalized)
+                    : `<p>${escapeHtmlPlain(normalized).replace(/\n/g, '<br>')}</p>`;
+                const safeHtml = (typeof DOMPurify !== 'undefined')
+                    ? DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } })
+                    : rawHtml;
 
-                // Enhance code blocks into ChatGPT/Claude style cards
+                const temp = document.createElement('div');
+                temp.innerHTML = safeHtml;
+
+                // Highlight top intro passage when followed by headings or bullet lists
+                const firstEl = temp.firstElementChild;
+                if (firstEl && firstEl.tagName === 'P' && firstEl.nextElementSibling) {
+                    const nextTag = firstEl.nextElementSibling.tagName;
+                    if (/^(UL|OL|H[1-4])$/.test(nextTag)) {
+                        firstEl.classList.add('ai-hook-passage');
+                    }
+                }
+
+                // Wrap tables cleanly for horizontal mobile scrolling
+                temp.querySelectorAll('table').forEach(table => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'table-scroll-wrap';
+                    table.parentNode.insertBefore(wrap, table);
+                    wrap.appendChild(table);
+                });
+
+                // Open external links safely in new tab
+                temp.querySelectorAll('a').forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    if (/^https?:\/\//i.test(href)) {
+                        a.setAttribute('target', '_blank');
+                        a.setAttribute('rel', 'noopener noreferrer');
+                    } else if (!href.startsWith('#')) {
+                        a.removeAttribute('href');
+                    }
+                });
+
+                // Enhance code blocks into ChatGPT/Claude style cards + syntax highlighting
                 temp.querySelectorAll('pre').forEach(pre => {
                     const code = pre.querySelector('code');
                     let lang = 'code';
                     if (code) {
-                        const classes = Array.from(code.classList);
-                        const langClass = classes.find(c => c.startsWith('language-'));
+                        const langClass = Array.from(code.classList).find(c => c.startsWith('language-'));
                         if (langClass) lang = langClass.replace('language-', '');
+                        if (window.hljs) {
+                            try {
+                                hljs.highlightElement(code);
+                            } catch (e) {}
+                        }
                     }
 
                     const card = document.createElement('div');
                     card.className = 'code-card';
-                    card.innerHTML = `
-                        <div class="code-card-header">
-                            <span>${lang}</span>
-                            <button class="code-card-copy-btn" onclick="copyCodeFromCard(this)" title="Copy Code">
-                                <i class="fa-regular fa-copy"></i> <span>Copy</span>
-                            </button>
-                        </div>
-                    `;
+                    const header = document.createElement('div');
+                    header.className = 'code-card-header';
+                    const langSpan = document.createElement('span');
+                    langSpan.textContent = lang;
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'code-card-copy-btn';
+                    copyBtn.type = 'button';
+                    copyBtn.title = 'Copy Code';
+                    copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> <span>Copy</span>`;
+                    copyBtn.setAttribute('onclick', 'copyCodeFromCard(this)');
+                    header.appendChild(langSpan);
+                    header.appendChild(copyBtn);
+                    card.appendChild(header);
+
                     pre.parentNode.insertBefore(card, pre);
                     card.appendChild(pre);
                 });
@@ -1248,8 +1549,36 @@
                 return temp.innerHTML;
             } catch (err) {
                 console.error("Markdown parse error:", err);
-                return text;
+                return `<p>${escapeHtmlPlain(text).replace(/\n/g, '<br>')}</p>`;
             }
+        }
+
+        function createAIMessageRow(initialHtml = '<div class="ai-dots-loader"><span></span><span></span><span></span></div>') {
+            const aiRow = document.createElement('div');
+            aiRow.className = 'msg-row ai';
+            aiRow.innerHTML = `
+                <img src="images/ic_launcher.png" class="ai-avatar" alt="Nakshatra">
+                <div class="ai-content-wrap">
+                    <div class="msg-bubble">${initialHtml}</div>
+                </div>
+            `;
+            return aiRow;
+        }
+
+        function attachAIMessageActions(aiRow) {
+            const wrap = aiRow ? aiRow.querySelector('.ai-content-wrap') : null;
+            if (!wrap || wrap.querySelector('.msg-actions-bar')) return;
+            const bar = document.createElement('div');
+            bar.className = 'msg-actions-bar';
+            bar.innerHTML = `
+                <button class="msg-action-btn" type="button" onclick="copyReplyText(this)" title="Copy response">
+                    <i class="fa-regular fa-copy"></i> <span>Copy</span>
+                </button>
+                <button class="msg-action-btn" type="button" onclick="speakMessageBubble(this)" title="Listen">
+                    <i class="fa-solid fa-volume-high"></i> <span>Listen</span>
+                </button>
+            `;
+            wrap.appendChild(bar);
         }
 
         function copyCodeFromCard(btn) {
@@ -1366,7 +1695,15 @@ LANGUAGE POLICY (MATCH USER'S LANGUAGE):
 - Match the user's vibe: gentle and caring when they are tired or low, cheerful and playful when they are chatting casually.
 
 HIGH-IQ LOGIC & ZERO HALLUCINATION:
-- Think step-by-step internally before answering puzzles, riddles, coding, math, or movie/general facts. Never mix up actors or movies; if unsure, admit it honestly.`;
+- Think step-by-step internally before answering puzzles, riddles, coding, math, or movie/general facts. Never mix up actors or movies; if unsure, admit it honestly.
+
+CHATGPT-STYLE RESPONSE STRUCTURE (STRICT):
+- For casual greetings or 1-line small talk ("hi", "hello", "ela unnav", "thinnava"): keep it warm, brief, and conversational (1-2 natural sentences, NO headings or bullets).
+- For ALL informational, explanation, advice, comparison, how-to, or multi-point replies, ALWAYS follow this exact ChatGPT-style layout:
+  1. Top Small Passage: Start immediately with a crisp 1–2 sentence intro summary explaining the core answer clearly. Zero filler ("Sure!", "Certainly!", "Here is...").
+  2. Clear Headings (### Heading): Leave a blank line, then organize main sections with short, clear Markdown headings (### Section Title).
+  3. Main Points in Bullet Points (- **Keyword:**): Under each heading, present clean bullet points starting with a **bold lead-in** followed by a concise 1–2 line explanation (use numbered lists 1., 2., 3. for step-by-step instructions).
+  4. Clean Spacing: Always leave a blank line between the top passage, headings, and bullet lists. Never write a dense wall of text.`;
 
         let conversationHistory = [];
         let currentLanguage = 'en';
@@ -1434,7 +1771,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             const englishGreetings = /^(hi|hello|hey|good morning|good evening|good afternoon|good night|gm|gn|what's up|sup)[!.,?\s]*$/i;
             if (englishGreetings.test(t)) return 'en';
 
-            // 5. English / Latin queries (e.g. "who are you", "what is this", "tell me about...")
+            // 5. English / Latin queries
             const englishPattern = /\b(what|how|why|who|when|where|which|can you|could you|will you|would you|tell me|explain|describe|write|create|solve|are you|is it|do you|did you|i am|i'm|i want|help me|your name|your developer|your creator|today|weather|meaning|difference|about|please|sorry|really|awesome|great|hi|hello|hey)\b/i;
             if (englishPattern.test(t)) return 'en';
 
@@ -1462,22 +1799,34 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             return "CRITICAL LANGUAGE DIRECTIVE: Reply in fluent, grammatically correct, natural spoken Telugu (తెలుగు లిపి).";
         }
 
-        function getFewShotExamples(lang) {
+        function getFewShotExamples(lang, mode = 'chat') {
             if (lang === 'en') {
-                return [
+                const casual = [
                     { role: "user", content: "Hi, how are you?" },
-                    { role: "assistant", content: "Hey, I'm doing great. How is your day going?" },
-                    { role: "user", content: "Feeling a bit bored today." },
-                    { role: "assistant", content: "Aww, boring days are the worst. Want a fun logic puzzle, or should we just chat?" }
+                    { role: "assistant", content: "Hey, I'm doing great. How is your day going?" }
+                ];
+                if (mode === 'live') return casual;
+                return [
+                    ...casual,
+                    { role: "user", content: "Why is sleep important?" },
+                    {
+                        role: "assistant",
+                        content: "Quality sleep is essential because it recharges your brain, repairs your body, and keeps your daily energy steady.\n\n### Key Benefits\n\n- **Brain Focus:** Deep sleep clears mental fatigue and strengthens memory retention.\n- **Physical Recovery:** Your body repairs tissues and boosts immunity overnight.\n- **Emotional Balance:** Consistent rest reduces stress and keeps your mood stable.\n\n### Quick Tips\n\n- **Fixed Schedule:** Sleep and wake up around the same time daily.\n- **Screen Break:** Avoid bright screens 30 minutes before bed."
+                    }
                 ];
             }
-            return [
+            const casualTe = [
                 { role: "user", content: "హాయ్ ఎలా ఉన్నావ్?" },
-                { role: "assistant", content: "హేయ్, నేను చాలా బాగున్నాను. మీరు ఎలా ఉన్నారు, ఈరోజు ఏం చేస్తున్నారు?" },
-                { role: "user", content: "ఏం లేదు, కొంచెం బోర్ కొడుతుంది." },
-                { role: "assistant", content: "అయ్యో, బోర్ కొడుతోందా. ఒక సరదా లాజిక్ పజిల్ అడగనా, లేక కబుర్లు చెప్పుకుందామా?" },
-                { role: "user", content: "అల్లు అర్జున్ సినిమాల్లో నీకు ఏది ఇష్టం?" },
-                { role: "assistant", content: "నాకు అలా వైకుంఠపురములో, పుష్ప సినిమాలు చాలా ఇష్టం. మీ ఫేవరెట్ సినిమా ఏది?" }
+                { role: "assistant", content: "హేయ్, నేను చాలా బాగున్నాను. మీరు ఎలా ఉన్నారు, ఈరోజు ఏం చేస్తున్నారు?" }
+            ];
+            if (mode === 'live') return casualTe;
+            return [
+                ...casualTe,
+                { role: "user", content: "నిద్ర ఎందుకు ముఖ్యం?" },
+                {
+                    role: "assistant",
+                    content: "మంచి నిద్ర మన మెదడుకు విశ్రాంతినిచ్చి, శరీరాన్ని రిపేర్ చేసి రోజంతా చురుకుగా ఉండేలా ఎనర్జీని ఇస్తుంది.\n\n### ప్రధాన లాభాలు\n\n- **మెదడు చురుకుదనం:** గాఢ నిద్ర అలసటను తగ్గించి జ్ఞాపకశక్తిని పెంచుతుంది.\n- **రోగనిరోధక శక్తి:** రాత్రిపూట శరీరం కణాలను రిపేర్ చేసుకుని ఆరోగ్యాన్ని కాపాడుతుంది.\n- **మానసిక ప్రశాంతత:** సరిపడా నిద్ర వల్ల ఒత్తిడి తగ్గి మూడ్ ఫ్రెష్‌గా ఉంటుంది.\n\n### మంచి నిద్ర కోసం టిప్స్\n\n- **టైమ్ పాటించండి:** రోజూ ఒకే టైమ్‌కి పడుకుని లేవడం అలవాటు చేసుకోండి.\n- **ఫోన్ దూరంగా ఉంచండి:** పడుకునే 30 నిమిషాల ముందు స్క్రీన్ చూడటం తగ్గించండి."
+                }
             ];
         }
 
@@ -1493,7 +1842,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
 
         function cleanTeluguOutput(text) {
             if (!text || typeof text !== "string") return text;
-            
+
             // Protect markdown code blocks completely
             const codeBlockRegex = /(```[\s\S]*?```)/g;
             const parts = text.split(codeBlockRegex);
@@ -1506,6 +1855,16 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
 
         function cleanTeluguSegment(text) {
             let t = text;
+
+            // Protect inline code and URLs from punctuation/stutter normalization
+            const protectedTokens = [];
+            const stashToken = (match) => {
+                const id = `__NKS_TOK_${protectedTokens.length}__`;
+                protectedTokens.push(match);
+                return id;
+            };
+            t = t.replace(/`[^`\n]+`|https?:\/\/[^\s)<>\]"']+/g, stashToken);
+
             t = t.replace(/^(నక్షత్ర\s*(AI)?|Nakshatra\s*(AI)?|Assistant|AI|Bot)\s*[:：\-–]\s*/i, '');
             t = t.replace(/\b(nenu|nenu\s+super\s+ga)\s+thinava\b/gi, "Ha thinnanu! Meeru thinnara?");
             t = t.replace(/\bbagunav[!.]*/gi, "bagunnanu!");
@@ -1523,14 +1882,14 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             t = t.replace(/(ఆ|ఈ|ఊ|ఏ|ఓ)\1+/gu, '$1');
             t = t.replace(/([ా-ౌ])(ఆ|ఈ|ఊ|ఏ|ఓ)/gu, '$1');
             t = t.replace(/[\u0400-\u04FF\u4E00-\u9FFF\u0600-\u06FF]/g, '');
-            t = t.replace(/([a-zA-Z])\1{2,}/g, '$1');
+            t = t.replace(/([a-zA-Z])\1{3,}/g, '$1');
             t = t.replace(/\.{2,}/g, '. ');
 
-            // PRESERVE NEWLINES: Process line by line so markdown paragraphs, lists & headers stay intact!
+            // PRESERVE NEWLINES: Process line by line so markdown paragraphs, lists & headers stay intact
             const lines = t.split('\n');
             const cleanedLines = lines.map(line => {
-                if (!line.trim() || /^(\s*[-*+]|\s*\d+\.|\s*#|\s*>|\s*\|)/.test(line)) {
-                    return line;
+                if (!line.trim() || /^(\s*[-*+•◦▪▸‣●]|\s*\d+\.|\s*#|\s*>|\s*\||\s*---)/.test(line)) {
+                    return line.trimEnd();
                 }
                 const words = line.split(/[^\S\r\n]+/);
                 const deduplicated = [];
@@ -1544,8 +1903,21 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             });
 
             let res = cleanedLines.join('\n').trim();
-            res = res.replace(/[,;:\-\s]+$/, '');
-            if (res && !/[.!?।`#\->|]$/.test(res)) res += '.';
+            res = res.replace(/__NKS_TOK_(\d+)__/g, (_, idx) => protectedTokens[Number(idx)] ?? '');
+
+            const lastLine = (res.split('\n').pop() || '').trim();
+            if (!/^(-{3,}|\*{3,}|_{3,})$/.test(lastLine)) {
+                res = res.replace(/[,;:\s]+$/, '');
+            }
+
+            const finalLastLine = (res.split('\n').pop() || '').trim();
+            if (
+                res &&
+                !/^(#{1,6}\s|-{3,}|\*{3,}|_{3,}|\|)/.test(finalLastLine) &&
+                !/[.!?।…`"')\]*>|]$/.test(finalLastLine)
+            ) {
+                res += '.';
+            }
             return res.trim();
         }
 
@@ -1601,14 +1973,17 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                     return o + c.slice(len);
                 }
             }
-            return o + " " + c;
+            return o + "\n\n" + c;
         }
 
         function isReplyCutOff(text) {
             if (!text || typeof text !== "string") return false;
             const t = text.trim();
             if (t.endsWith("```")) return false;
-            return !/[.?!।]$/.test(t);
+            const lastLine = (t.split("\n").pop() || "").trim();
+            if (/^(#{1,6}\s|-{3,}|\*{3,}|_{3,}|\|)/.test(lastLine)) return false;
+            const strippedTail = t.replace(/[*_`"' )\]>]+$/g, "");
+            return !/[.?!।…]$/.test(strippedTail);
         }
 
         async function handleContinueClick(btn, bubble, currentReplyText) {
@@ -1619,7 +1994,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                 const payloadMessages = [
                     ...conversationHistory,
                     { role: "assistant", content: currentReplyText },
-                    { role: "user", content: "Continue exactly where you stopped. Do not repeat." }
+                    { role: "user", content: "Continue exactly where you stopped using the same clean headings and bullet format. Do not repeat." }
                 ];
 
                 const response = await fetch(API_URL, {
@@ -1670,7 +2045,12 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             ensurePlaybackUnlocked();
 
             document.body.classList.add('chat-active');
-            homeScreen.style.display = 'none';
+            homeScreen.classList.add('leaving');
+            setTimeout(() => {
+                if (document.body.classList.contains('chat-active')) {
+                    homeScreen.style.display = 'none';
+                }
+            }, 250);
             chatContainer.style.display = 'flex';
 
             appendUserMessage(text);
@@ -1678,24 +2058,21 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             handleInputChange();
 
             conversationHistory.push({ role: "user", content: text });
-            // Sliding window: 8 turns with smart trimming of older assistant replies
             conversationHistory = manageConversationHistory(conversationHistory, 8);
 
             if (chatContainer.children.length === 1) {
                 const item = document.createElement('div');
                 item.className = 'menu-item';
-                item.innerHTML = `<i class="fa-regular fa-message"></i> ${text.substring(0, 22)}`;
+                const icon = document.createElement('i');
+                icon.className = 'fa-regular fa-message';
+                const label = document.createElement('span');
+                label.textContent = text.substring(0, 22);
+                item.appendChild(icon);
+                item.appendChild(label);
                 recentList.prepend(item);
             }
 
-            const aiRow = document.createElement('div');
-            aiRow.className = 'msg-row ai';
-            aiRow.innerHTML = `
-                <img src="images/ic_launcher.png" class="ai-avatar" alt="Nakshatra">
-                <div class="msg-bubble">
-                    <div class="ai-dots-loader"><span></span><span></span><span></span></div>
-                </div>
-            `;
+            const aiRow = createAIMessageRow();
             chatContainer.appendChild(aiRow);
             scrollToBottom();
 
@@ -1703,8 +2080,17 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                 const detected = detectLanguage(text, false);
                 if (detected) currentLanguage = detected;
 
-                const fewShots = getFewShotExamples(currentLanguage);
+                const fewShots = getFewShotExamples(currentLanguage, 'chat');
                 const recentHistory = conversationHistory.slice(-8);
+
+                // Strict ChatGPT-style formatting directive (works even if worker strips system messages)
+                const formatDirective = `[CHATGPT-STYLE FORMATTING RULES — APPLY TO EVERY INFORMATIONAL REPLY]
+1. Top Small Passage: Start with a clean 1–2 sentence intro summary. No filler ("Sure!", "Here is...").
+2. Clear Headings: Leave a blank line and use "### Heading Title" to organize main sections.
+3. Bullet Points: Under each heading, use clean "- **Bold Point:** short explanation" bullets (or numbered steps 1., 2., 3. for guides).
+4. Clean Spacing: Always separate paragraphs, headings, and lists with blank lines. Never write a wall of text.
+5. Casual Greetings (hi, hello, ela unnav): Reply naturally in 1–2 short sentences without headings or bullets.
+${getLangDirective(currentLanguage)}`;
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -1715,6 +2101,8 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
                         messages: [
                             { role: "system", content: `${SYSTEM_PROMPT}\n\n${getLangDirective(currentLanguage)}` },
+                            { role: "user", content: formatDirective },
+                            { role: "assistant", content: "Understood. I will structure all informational answers like ChatGPT: a brief intro passage at the top, followed by clear ### headings and scannable bullet points with bold lead-ins." },
                             ...fewShots,
                             ...recentHistory
                         ]
@@ -1730,18 +2118,25 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
                 conversationHistory.push({ role: "assistant", content: aiReply });
                 conversationHistory = manageConversationHistory(conversationHistory, 8);
 
-                // Render clean Markdown (Pure text chat - Gemini Chat mode)
+                // Render clean ChatGPT-style Markdown
                 const bubble = aiRow.querySelector('.msg-bubble');
-                bubble.innerHTML = marked.parse(aiReply);
+                bubble.innerHTML = renderMarkdownClean(aiReply);
+                attachAIMessageActions(aiRow);
 
-                // UI Safety Net: Continue button if cut-off or length limit hit (Section 9 & 14)
+                // UI Safety Net: Continue button if cut-off or length limit hit
                 const isCut = (data.meta && data.meta.finish_reason === "length") || isReplyCutOff(aiReply);
                 if (isCut && aiReply.length > 50) {
                     const continueBtn = document.createElement('button');
                     continueBtn.className = 'continue-pill-btn';
                     continueBtn.innerHTML = `<i class="fa-solid fa-play"></i> Continue response`;
                     continueBtn.onclick = () => handleContinueClick(continueBtn, bubble, aiReply);
-                    aiRow.appendChild(continueBtn);
+                    const wrap = aiRow.querySelector('.ai-content-wrap');
+                    const actionsBar = wrap ? wrap.querySelector('.msg-actions-bar') : null;
+                    if (wrap && actionsBar) {
+                        wrap.insertBefore(continueBtn, actionsBar);
+                    } else {
+                        (wrap || aiRow).appendChild(continueBtn);
+                    }
                 }
             } catch (error) {
                 console.error("Chat error:", error);
@@ -1765,6 +2160,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             document.body.classList.remove('chat-active');
             chatContainer.innerHTML = '';
             chatContainer.style.display = 'none';
+            homeScreen.classList.remove('leaving');
             homeScreen.style.display = 'flex';
             chatInput.value = '';
             handleInputChange();
@@ -1772,8 +2168,10 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             if (sidebar.classList.contains('open')) toggleMenu();
         }
 
-        const liveToggleBtn = document.getElementById('liveToggleBtn');
+        const liveToggleBtn = document.getElementById('liveToggleBtn') || document.getElementById('micToggleBtn');
+        const micToggleBtn = document.getElementById('micToggleBtn');
         const sendBtn = document.getElementById('sendBtn');
+        const sendBtnIcon = document.getElementById('sendBtnIcon');
         const liveModal = document.getElementById('liveModal');
         const liveStatusBadge = document.getElementById('liveStatusBadge');
         const liveTranscript = document.getElementById('liveTranscript');
@@ -1781,18 +2179,40 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
 
         function handleInputChange() {
             const el = chatInput;
-            // Smooth resize without jumping/glitching
             el.style.height = '26px';
             const scrollH = el.scrollHeight;
             if (scrollH > 32) {
                 el.style.height = Math.min(scrollH, 140) + 'px';
             }
             const hasText = el.value.trim().length > 0;
+            const icon = document.getElementById('sendBtnIcon');
             if (hasText) {
-                sendBtn.classList.add('active');
+                sendBtn.classList.add('typing');
+                sendBtn.setAttribute('title', 'Send Message');
+                if (icon) {
+                    icon.className = 'fa-solid fa-arrow-up';
+                }
             } else {
-                sendBtn.classList.remove('active');
+                sendBtn.classList.remove('typing');
+                sendBtn.setAttribute('title', 'Voice / Action');
+                if (icon) {
+                    icon.className = 'fa-solid fa-wave-square';
+                }
             }
+        }
+
+        function handleSendOrVoice() {
+            if (chatInput.value.trim().length > 0) {
+                sendMessage();
+            } else {
+                openLiveMode();
+            }
+        }
+
+        function selectSuggestion(promptText) {
+            chatInput.value = promptText;
+            handleInputChange();
+            sendMessage();
         }
 
         // ===== DIRECT PURE PCM WAV RECORDER STATE =====
@@ -2177,6 +2597,7 @@ HIGH-IQ LOGIC & ZERO HALLUCINATION:
             if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
 
             document.body.classList.add('chat-active');
+            homeScreen.classList.add('leaving');
             homeScreen.style.display = 'none';
             chatContainer.style.display = 'flex';
             appendUserMessage(userVoiceText);
@@ -2195,7 +2616,7 @@ HIGH-IQ LOGIC:
 - Speak in 1 to 2 smooth, flowing, complete sentences.
 - Only mention Bunny if asked who created you.`;
 
-                const fewShots = getFewShotExamples(currentLanguage);
+                const fewShots = getFewShotExamples(currentLanguage, 'live');
                 const recentHistory = conversationHistory.slice(-4);
 
                 const response = await fetch(API_URL, {
@@ -2221,16 +2642,11 @@ HIGH-IQ LOGIC:
                 let rawReply = data.response || data.reply || data.choices?.[0]?.message?.content || fallbackLiveGreeting;
                 let aiText = cleanTeluguOutput(rawReply);
 
-                // Add to history (4 turns for live voice mode)
                 conversationHistory.push({ role: "assistant", content: aiText });
                 conversationHistory = manageConversationHistory(conversationHistory, 4);
 
-                const aiRow = document.createElement('div');
-                aiRow.className = 'msg-row ai';
-                aiRow.innerHTML = `
-                    <img src="images/ic_launcher.png" class="ai-avatar" alt="Nakshatra">
-                    <div class="msg-bubble">${marked.parse(aiText)}</div>
-                `;
+                const aiRow = createAIMessageRow(renderMarkdownClean(aiText));
+                attachAIMessageActions(aiRow);
                 chatContainer.appendChild(aiRow);
                 scrollToBottom();
 
@@ -2256,7 +2672,6 @@ HIGH-IQ LOGIC:
 
             setLiveState('thinking', 'THINKING', `"${cleanSpeechText}"`);
 
-            // Primary: Smooth, natural, caring bulbul:v4-flash ('kavitha_te_conversation')
             let targetLang = "te-IN";
             let speakerName = "kavitha_te_conversation";
             let ttsModel = "bulbul:v4-flash";
@@ -2359,7 +2774,6 @@ HIGH-IQ LOGIC:
                     try { mediaStream.getAudioTracks().forEach(t => { t.enabled = false; }); } catch (e) {}
                 }
 
-                // Suspend mic AudioContext while AI speaks so playback never stutters
                 if (recorderCtx && recorderCtx.state === 'running') {
                     recorderCtx.suspend().catch(() => {});
                 }
@@ -2409,7 +2823,7 @@ HIGH-IQ LOGIC:
                         const cleanBase64 = (base64Audio || '').replace(/^data:audio\/\w+;base64,/, '').replace(/[\r\n\s]/g, '');
                         const binaryString = window.atob(cleanBase64);
                         const bytes = new Uint8Array(binaryString.length);
-                        for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+                        for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
                         playViaWebAudio(bytes, finishTurn);
                     } catch (e2) {
                         finishTurn();
