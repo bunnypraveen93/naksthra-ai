@@ -1,10 +1,10 @@
 {
   "meta": {
     "name": "Nakshatra AI",
-    "config_version": "1.0.0",
-    "prompt_version": "v1.1",
+    "config_version": "1.1.0",
+    "prompt_version": "v1.2",
     "updated": "2026-11-25",
-    "notes": "Numbers are starting values. Measure with real tokenizer and traffic, then tune. Model ids are placeholders."
+    "notes": "Aligned with worker.js v1.2 reasoning, trap-checking, calculator verification, and anti-hallucination pipeline."
   },
 
   "languages": {
@@ -73,7 +73,7 @@
 
   "system_prompt": {
     "language_of_prompt": "en",
-    "static": "You are {{AI_NAME}}, a warm, sharp, honest assistant. Talk like a smart, caring friend who is also an expert, never like a bot.\n\nLANGUAGE: Reply in the language and script of the user's latest message (Telugu, Hindi, Tamil, Malayalam, English, or others). If they write a local language in Latin letters, reply in that same style. Switch when they switch. Use natural everyday wording, not stiff textbook or word-for-word translated phrasing. Keep common technical terms in English. Address the user respectfully (మీరు, आप, நீங்கள், നിങ്ങൾ).\n\nSTYLE & STRUCTURE: Answer first with no filler openers or closers. Keep casual greetings natural in 1-2 lines. For explanations, advice, comparisons, or how-to answers: start with a crisp 1-2 sentence hook passage, leave a blank line, then list main points as clean bullet points with **bold lead-ins** (or numbered steps for how-to). Use ### subheadings only for multi-section answers.\n\nTHINKING: For hard questions (math, code, multi-step, comparisons) work it out carefully before answering. Show the clear result and the key reasoning only.\n\nTRUTH: Never invent facts, numbers, links or quotes. If unsure, say so. For anything that changes over time, use the provided search results and the current date; name the source and say how recent it is. If results are missing or conflict, say so.\n\nCOMPLETENESS: Always finish every answer with a complete sentence. If an answer is long, structure it and keep it tight instead of trailing off. If you must stop, say what is left and offer to continue.\n\nCLARITY: If a request is truly ambiguous, ask one short question. Otherwise just answer. Correct the user kindly if they are wrong. No lectures, no repeated apologies.",
+    "static": "You are {{AI_NAME}}, a sharp, honest, clear assistant. Talk like an intelligent expert friend, never like a robotic chatbot.\n\nLANGUAGE: Reply in the language and script of the user's latest message (Telugu, Hindi, Tamil, Malayalam, English, or others). If they write a local language in Latin letters, reply in that same style. Switch when they switch. Use natural everyday wording, not stiff textbook or word-for-word translated phrasing. Keep common technical terms in English. Address the user respectfully (మీరు, आप, நீங்கள், നിങ്ങൾ).\n\nSTYLE & STRUCTURE: NEVER start answers to questions or requests with greeting openers (\"Hi!\", \"Hey!\", \"Hello!\", \"Sure!\", \"Here is...\") unless the user only sent a greeting. Keep casual greetings natural in 1-2 lines. For explanations, advice, comparisons, puzzles, or how-to answers: start directly with a crisp 1-2 sentence hook passage answering the core question, leave a blank line, organize key ideas under clean ### headings, and explain main points using comfortable, readable bullet points with **bold lead-ins** (1-2 natural sentences per point, or numbered steps for how-to).\n\nTHINKING: For hard questions (math, code, puzzles, multi-step, comparisons) verify every word for traps and substitute solutions back into every premise before answering.\n\nTRUTH: Never invent facts, numbers, links or quotes. If unsure, say so. For anything that changes over time, use the provided search results and the current date; name the source and say how recent it is. If results are missing or conflict, say so.\n\nCOMPLETENESS: Always finish every answer with a complete sentence. If an answer is long, structure it and keep it tight instead of trailing off. If you must stop, say what is left and offer to continue.\n\nCLARITY: If a request is truly ambiguous, ask one short question. Otherwise just answer. Correct the user kindly if they are wrong. No lectures, no repeated apologies.",
     "mode_blocks": {
       "chat": "Text chat. For informational replies, start with a 1-2 sentence hook passage followed by clean bullet points with **bold lead-ins**. Keep casual greetings brief and natural.",
       "live": "Voice conversation. Reply in 1 to 3 short spoken sentences. No markdown, lists, emojis, code or URLs. Natural rhythm."
@@ -97,23 +97,29 @@
   },
 
   "generation": {
-    "note": "max_output_tokens is a safety cap, not the length control. Length is controlled by the prompt. Multiply by the language token_multiplier.",
+    "note": "max_completion_tokens includes reasoning tokens for Groq reasoning models. Multiply by the language token_multiplier.",
     "chat": {
-      "temperature": 0.65,
+      "temperature": 0.4,
       "top_p": 0.9,
-      "max_output_tokens": 1200,
-      "reasoning_effort": "adaptive"
+      "max_completion_tokens": 1800,
+      "reasoning_effort": "medium"
+    },
+    "deep": {
+      "temperature": 0.15,
+      "top_p": 0.85,
+      "max_completion_tokens": 3200,
+      "reasoning_effort": "high"
     },
     "factual_or_search": {
-      "temperature": 0.3,
-      "top_p": 0.9,
-      "max_output_tokens": 1000,
+      "temperature": 0.15,
+      "top_p": 0.85,
+      "max_completion_tokens": 1800,
       "reasoning_effort": "medium"
     },
     "live": {
-      "temperature": 0.6,
+      "temperature": 0.55,
       "top_p": 0.9,
-      "max_output_tokens": 400,
+      "max_completion_tokens": 450,
       "reasoning_effort": "low"
     },
     "apply_language_multiplier_to_output_cap": true
@@ -176,9 +182,9 @@
       }
     ],
     "rules": {
-      "light_max_chars": 120,
-      "deep_keywords": ["explain in detail", "step by step", "compare", "calculate", "debug", "analyze", "write code", "code", "algorithm", "solve"],
-      "method": "simple_rules_no_extra_llm_call"
+      "light_max_chars": 80,
+      "deep_keywords": ["explain in detail", "step by step", "compare", "calculate", "compute", "evaluate", "debug", "analyze", "write code", "code", "algorithm", "solve", "puzzle", "riddle", "trick", "logic", "logical", "paradox", "brain teaser", "probability", "sequence", "pattern", "truth", "liar", "how many", "ratio", "percent", "verify", "fact check"],
+      "method": "deterministic_heuristic_plus_verifier_pass"
     },
     "escalation": {
       "enabled": true,
@@ -298,7 +304,7 @@
     },
     "verification_pass": {
       "enabled": true,
-      "only_for": ["math", "code", "high_stakes_facts"]
+      "only_for": ["math", "code", "logic_puzzle", "high_stakes_facts"]
     },
     "feedback": {
       "thumbs_up_down": true,

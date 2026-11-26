@@ -26,6 +26,9 @@ try {
             elseif ($ext -eq ".png") { $res.ContentType = "image/png" }
             elseif ($ext -eq ".jpg" -or $ext -eq ".jpeg") { $res.ContentType = "image/jpeg" }
             
+            $res.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            $res.Headers["Pragma"] = "no-cache"
+            $res.Headers["Expires"] = "0"
             $res.ContentLength64 = $bytes.Length
             $res.OutputStream.Write($bytes, 0, $bytes.Length)
         } else {
