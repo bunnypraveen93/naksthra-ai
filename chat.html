@@ -1111,10 +1111,14 @@ CRITICAL IDENTITY:
 
 LANGUAGE POLICY:
 - Always reply in the exact language the user writes/speaks (English -> English, Telugu -> natural everyday spoken Telugu, Tenglish/Hinglish -> same style).
-- Avoid archaic textbook Telugu words ("నివాసం", "సమయం", "సమాచారం"); use everyday spoken words naturally.
+- Avoid archaic textbook Telugu words ("నివాసం", "సమయం", "సమాచారం", "సమీకరణ"); use everyday spoken words naturally.
+- STRICT TELUGU SCRIPT HYGIENE: NEVER fuse Telugu and English letters inside one word (never write broken hybrids like "గhee"). Separate English loanwords with spaces or use exact everyday Telugu words (బాస్మతి బియ్యం = raw basmati rice before cooking [never బాస్మతి అన్నం before boiling], నెయ్యి = ghee [never వెన్న/గీ], పెరుగు = curd/yogurt [never దయి], కొత్తిమీర = cilantro leaves, ధనియాలు = coriander seeds, గోధుమ పిండి = wheat dough [never పొట్టు], మందపాటి గిన్నె = heavy pot [never బాటిల్/వెండి పాన్], వడ్డించడం = serve food [never సేవించడం], రైతా = raita [never రాయితీ], దమ్ = steam seal [never దంప్/దుమ్], మారినేట్ చేసి పక్కన ఉంచండి = marinate & rest [never మరిగించండి = boil], పావు/సగం = half [never అర్ధం], పసుపు = turmeric [never హల్దీ], నిమ్మకాయ = lemon [never లెమన్]).
 
-REASONING, PUZZLES & ANTI-HALLUCINATION (STRICT):
+REASONING, PUZZLES & PRACTICAL STEP ACCURACY (STRICT):
 - For logic puzzles, riddles, trick questions, math, or complex problems: read EVERY word literally to catch linguistic traps, hidden constraints, or impossible premises. Verify your candidate answer against EVERY condition before replying.
+- For ANY how-to guide, recipe/cooking request, or procedural task: mentally verify the ENTIRE real-world workflow from start to finish before writing:
+  1. Ingredient & Quantity Sanity: Every ingredient/tool listed must actually be used in the steps with realistic everyday home-cooking amounts (e.g., ~5-6 cups / 1.5 L water to parboil 2 cups of rice, NEVER wild numbers like 7-8 L; describe gas heat simply as low/medium/high flame, NEVER wattage like 30 W).
+  2. Strict Chronological Order & Parallel Prep: Put resting/marinating and soaking FIRST (e.g., marinate chicken & soak rice first, fry onions & cook chicken, then boil & drain hot 70% rice right before layering for dum). Check timings and classic failure traps (soak poha briefly 15 min rather than hours, keep dosa tawa oil-free before spreading batter in circular spiral strokes with the back of a ladle — do not swirl pan, specify dough/foil seal and low flame or tawa diffuser).
 - Never invent facts, numbers, dates, citations, or links. If you do not know or cannot verify something, honestly say you are not sure instead of guessing.
 - Write math clearly in plain text or inline code (e.g., \`x + (x + 1.00) = 1.10\`) without raw LaTeX brackets (\`\\[...\\]\` or \`\\(...\\)\`).
 
@@ -1127,18 +1131,14 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
 - For ALL informational, explanation, how-to, comparison, or puzzle replies, follow this exact editorial rhythm:
   1. Opening Hook Passage: Start directly with a clear, engaging 1-2 sentence summary answering the user's question directly.
   2. Section Headings: Leave a blank line, then organize key parts under clean "### Heading Title" headings.
-  3. Comfortable Bullet Points: Under each heading, use "- **Bold Lead-in:** natural 1-2 sentence explanation that is easy and comfortable to read" (avoid cramped one-fragment lines; use 1., 2., 3. for sequential steps).
+  3. Comfortable Points & Sequential Steps: Replace placeholders with REAL descriptive titles — NEVER literally print the words "Bold Lead-in" anywhere! For concepts/features use "- **Real Topic Name:** 1-2 sentence explanation"; for recipes, tutorials, and step-by-step guides use numbered steps ("1. **Action Title:** exact clear step with timings and heat/cues").
   4. Example style for "What is GitHub?":
      "GitHub is a cloud-based platform built around Git that lets developers store, track, and collaborate on code from anywhere. Think of it as Google Drive for software projects, with built-in version history and teamwork tools.
 
      ### Core Features
 
      - **Version Control with Git:** Every change you make is saved as a snapshot, so you can safely experiment, compare edits, or roll back mistakes anytime.
-     - **Collaboration & Pull Requests:** Team members can work on separate branches simultaneously, review each other's code, and merge updates cleanly.
-
-     ### Why Developers Use It
-
-     - **Open Source & Portfolios:** Millions of public projects live on GitHub, making it easy to learn from real code and showcase your own work."`;
+     - **Collaboration & Pull Requests:** Team members can work on separate branches simultaneously, review each other's code, and merge updates cleanly."`;
 
         let conversationHistory = [];
         let currentLanguage = 'en';
@@ -1653,6 +1653,18 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 t = t.replace(/నేను\s*మీకు\s*ఎలా\s*సహాయపడగలను\??/gu, 'చెప్పండి, ఏంటి విశేషాలు?');
                 t = t.replace(/\bI am doing well,\s*how are you\??/gi, "Hey! I'm doing great, how's it going?");
                 t = t.replace(/\bHow can I help you\??/gi, "What's on your mind?");
+                t = t.replace(/గhee/giu, 'నెయ్యి');
+                t = t.replace(/వెన్న\s*\(\s*గీ\s*\)/gu, 'నెయ్యి');
+                t = t.replace(/దహి\s*\(\s*నెయ్యి\s*\)/gu, 'పెరుగు లేదా నెయ్యి');
+                t = t.replace(/దయి\b/gu, 'పెరుగు');
+                t = t.replace(/రాయితీ\s*\(\s*రాయిత్\s*\)/gu, 'రైతా');
+                t = t.replace(/రాయతా/gu, 'రైతా');
+                t = t.replace(/మందమైన\s*బాటిల్/gu, 'మందపాటి గిన్నె');
+                t = t.replace(/వెండి\s*పాన్/gu, 'పాన్');
+                t = t.replace(/సేవించడం/gu, 'వడ్డించడం');
+                t = t.replace(/[“"]?(?:దంప్|దుమ్|డంప్)[”"]?/gu, 'దమ్');
+                t = t.replace(/(\d+\s*నిమిషాలు\s*)మరిగించండి(?=\s*(?:[.,\n]|$))/gu, '$1పక్కన ఉంచండి');
+                t = t.replace(/\s*\((?:సుమారు\s*)?\d+\s*W\)/giu, '');
                 t = t.replace(/([\u0C3E-\u0C4C])\1+/gu, '$1').replace(/[\u0400-\u04FF\u4E00-\u9FFF\u0600-\u06FF]/g, '');
                 return t;
             }).join('').trim();
@@ -1753,10 +1765,15 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             const lower = t.toLowerCase();
             const hasDeepKeyword = /\b(puzzle|riddle|trick|logic|logical|paradox|brain\s*teaser|solve|calculate|compute|evaluate|prove|proof|derivation|compare|analyze|debug|algorithm|probability|pattern|sequence|missing\s+number|odd\s+one|truth|liar|knight|knave|how\s+many|ratio|percent|percentage|equation|find\s+x|step\s+by\s+step|verify|fact\s+check|difference\s+between|write\s+code|podupu)\b/i.test(lower)
                 || /(పొడుపు|తర్కం|లెక్క|సమాధానం|ఎంత|తేడా|పోల్చు|కోడ్)/.test(t);
+            const hasHowToOrRecipe = /\b(how\s+to|recipe|cook|make|prepare|bake|fry|brew|boil|roast|build|setup|set\s+up|configure|fix|troubleshoot|instructions|method|process|biryani|briyani|dosa|curry|masala)\b/i.test(lower)
+                || /(ఎలా\s*వండాలి|ఎలా\s*చేయాలి|తయారీ|విధానం|వంట|బిర్యానీ|రెసిపీ|కైసే\s*బనాయే|कैसे\s*बनाएं|कैसे\s*पकाएं|ela\s+cheyyali|ela\s+vandali)/.test(t);
             const hasMultiConstraint = /\b(if|suppose|assuming|all\s+\w+\s+are|none\s+of|either|neither|only\s+one|twice|half|times\s+as|heavier|lighter|older|younger|weigh|door|hat|coin|box|train|speed|distance|clock|angle)\b/i.test(lower);
             const hasCode = /(```|\bfunction\b|\bclass\b|\bconst\b|\bdef\b|\bSELECT\b|\bTypeError\b|\bException\b)/i.test(t);
             const hasMathNumbers = (t.match(/\d+(?:\.\d+)?/g) || []).length >= 2 && /[?+\-*/=^%]|\b(total|sum|cost|left|remaining|find|many|much)\b/i.test(lower);
-            return hasDeepKeyword || hasMultiConstraint || hasCode || hasMathNumbers || t.length > 180;
+            return {
+                isDeep: hasDeepKeyword || hasMultiConstraint || hasCode || hasMathNumbers || t.length > 180,
+                isHowTo: hasHowToOrRecipe
+            };
         }
 
         async function sendMessage() {
@@ -1803,10 +1820,13 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 const detected = detectLanguage(text, false);
                 if (detected) currentLanguage = detected;
 
-                const isDeep = classifyPromptComplexity(text);
-                const deepGuard = isDeep
-                    ? `\n\n[CRITICAL LOGIC & PUZZLE CHECK]\n1. Re-read every premise literally for wordplay, trick constraints, or impossible setups.\n2. Test your answer against every condition before writing it.\n3. Verify all arithmetic and state uncertainty if any fact is unverified.`
-                    : '';
+                const complexity = classifyPromptComplexity(text);
+                const isDeep = complexity.isDeep;
+                const isHowTo = complexity.isHowTo;
+                const deepNotes = [];
+                if (isDeep) deepNotes.push(`[CRITICAL LOGIC & PUZZLE CHECK]\n1. Re-read every premise literally for wordplay, trick constraints, or impossible setups.\n2. Test your answer against every condition before writing it.\n3. Verify all arithmetic and state uncertainty if any fact is unverified.`);
+                if (isHowTo) deepNotes.push(`[HOW-TO & RECIPE STEP VERIFICATION]\n1. Check real-world step dependency order (prep -> cook -> finish) and ensure NO critical step or ingredient is skipped.\n2. Check practical culinary/technical accuracy (soaking times, heat settings, marination, pan prep — spread dosa batter with the back of a ladle in concentric spirals rather than swirling the pan, liquid ratios, drain steps, low-flame/tawa dum).\n3. Use numbered sequential steps (1., 2., 3.) with real action headings — NEVER print literal placeholder text like "Bold Lead-in" or mix Telugu+English letters in one word.`);
+                const deepGuard = deepNotes.length ? `\n\n${deepNotes.join('\n\n')}` : '';
                 const combinedSystem = `${SYSTEM_PROMPT}\n\n${getLangDirective(currentLanguage)}${deepGuard}`;
 
                 const response = await fetch(API_URL, {
@@ -1817,8 +1837,8 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                         model: "openai/gpt-oss-120b",
                         mode: "chat",
                         reasoning_effort: isDeep ? "high" : "medium",
-                        temperature: isDeep ? 0.15 : 0.4,
-                        max_tokens: isDeep ? 3200 : 1800,
+                        temperature: isDeep ? 0.15 : (isHowTo ? 0.2 : 0.4),
+                        max_tokens: (isDeep || isHowTo) ? 2400 : 1800,
                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
                         messages: [
                             { role: "system", content: combinedSystem },
@@ -2518,6 +2538,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 "SPOKEN CALL & EXPRESSION RULES:",
                 langRuleLine,
                 "- Reply in 1 to 2 short spoken sentences max (~10-28 words).",
+                "- For any how-to, recipe, or technical question, give the core steps in exact real-world chronological order without skipping essential steps or inventing details.",
                 "- Sound genuinely human and expressive, never robotic: react warmly first when fitting ('Oh nice!', 'Haha, wait really?', 'Aww...', 'అయ్యో నిజమా!', 'హేయ్ భలే చెప్పారు!', 'అవునా...'), use contractions (I'm, you're, that's), commas and '...' for soft natural breath pauses.",
                 "- For casual Telugu greetings, NEVER say robot phrases like 'సహాయం కావాలా?' — greet back warmly like a friend ('హేయ్! నేను చాలా బాగున్నాను... మీరు ఎలా ఉన్నారు, ఏంటి విశేషాలు?').",
                 "- Pure spoken words ONLY — zero markdown, asterisks, bullet lists, headings, emojis, or URLs."

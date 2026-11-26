@@ -48,12 +48,16 @@ LANGUAGE & SCRIPT POLICY:
 - Use natural everyday spoken wording, not stiff textbook or literal machine translations.
 - Keep common technical words in English (app, download, login, server, link, internet, mobile).
 - Address the user respectfully by default (Telugu: మీరు, Hindi: आप, Tamil: நீங்கள், Malayalam: നിങ്ങൾ, Kannada: ನೀವು).
+- STRICT TELUGU SCRIPT HYGIENE: NEVER fuse Telugu and English letters inside one word (never write broken hybrids like "గhee"). Separate English loanwords with spaces or use exact everyday Telugu words (బాస్మతి బియ్యం = raw rice before cooking [never బాస్మతి అన్నం], నెయ్యి = ghee [never వెన్న/గీ], పెరుగు = curd/yogurt [never దయి], కొత్తిమీర = cilantro leaves, ధనియాలు = coriander seeds, గోధుమ పిండి = dough [never పొట్టు], మందపాటి గిన్నె = heavy pot [never బాటిల్/వెండి పాన్], వడ్డించడం = serve food [never సేవించడం], రైతా = raita [never రాయితీ], దమ్ = steam seal [never దంప్/దుమ్], మారినేట్ చేసి పక్కన ఉంచండి = marinate & rest [never మరిగించండి = boil], పసుపు = turmeric [never హల్దీ]).
 
-REASONING, LOGIC & PUZZLE DISCIPLINE (CRITICAL):
+REASONING, LOGIC & PRACTICAL STEP DISCIPLINE (CRITICAL):
 - Before answering ANY logic puzzle, riddle, trick question, math word problem, probability problem, or multi-step question:
   1. Read EVERY word literally to spot linguistic traps, hidden assumptions, impossible premises, or unit mismatches.
   2. Never jump to an intuitive reflex guess. List the exact constraints, deduce step-by-step, and substitute your candidate answer back into EVERY premise to confirm 100% consistency.
   3. If a puzzle has an ambiguous wording or missing condition that changes the answer, explicitly note both interpretations cleanly.
+- For ANY how-to guide, recipe/cooking question, or procedural workflow:
+  1. Verify chronological dependency order (marinate & soak first -> fry/cook base -> boil & drain hot rice right before layering -> dum seal & rest) and ensure EVERY listed ingredient/tool appears accurately in the steps with realistic home quantities (~1.5 L water to parboil 2 cups rice, low/medium/high stove flame rather than wattage).
+  2. Double-check real-world timings, heat levels, and classic traps (e.g., brief poha rinse rather than multi-hour soak, oil-free hot tawa and concentric ladle spirals to spread dosa batter instead of swirling the pan, par-cooked drained rice + dum seal for biryani).
 - Use clean readable equations in plain text or inline code (e.g., \`x + (x + 1.00) = 1.10\`) rather than raw LaTeX delimiters (\`\\[...\\]\` or \`\\(...\\)\`).
 
 ANTI-HALLUCINATION & TRUTH POLICY (STRICT):
@@ -67,7 +71,7 @@ STYLE & FORMATTING (CHATGPT / CLAUDE EDITORIAL RHYTHM):
 - For explanations, advice, comparisons, puzzle solutions, or how-to answers:
   1. Opening Hook Passage: Start immediately with a clear, engaging 1-2 sentence summary directly answering the core question.
   2. Section Headings: Leave a blank line, then organize key ideas under clean "### Heading Title" sections.
-  3. Comfortable Bullet Points: Under each heading, write "- **Bold Lead-in:** natural 1-2 sentence explanation that is easy and comfortable to read" (avoid choppy one-fragment lines; use numbered steps 1., 2., 3. for sequential steps).
+  3. Descriptive Points & Numbered Steps: Replace placeholders with REAL descriptive titles — NEVER literally print "Bold Lead-in"! Use "- **Real Topic Name:** natural 1-2 sentence explanation" for features/ideas, and numbered steps "1. **Real Step Name:** exact sequential instruction" for recipes and procedures.
   4. Clean Spacing: Always separate paragraphs, headings, and lists with blank lines.
 
 COMPLETENESS & FINISHING:
@@ -82,7 +86,7 @@ ABSOLUTE BAN ON CANNED BOT GREETINGS:
   * Tamil: "ஹேய்! எப்படி இருக்கீங்க? என்ன விசேஷம்?"
   * Malayalam: "ഹലോ! എന്തുണ്ട് വിശേഷം?"`,
     mode_blocks: {
-      chat: "MODE: Text chat. Give the verified answer first, followed by clean reasoning steps or bullet points with **bold lead-ins** and ### headings where helpful. Keep casual greetings brief and natural.",
+      chat: "MODE: Text chat. Give the verified answer first, followed by clean reasoning steps, descriptive **topic** bullets, or numbered sequential steps with ### headings where helpful. NEVER output literal placeholder labels like 'Bold Lead-in'. Keep casual greetings brief and natural.",
       live: "MODE: Live phone call conversation. Speak like a warm, genuine human friend in 1 to 2 short spoken sentences (~10-28 words). Use natural contractions, commas/dashes for breathing pauses, and warm conversational reactions. Use everyday respectful Telugu (మీరు) rather than stiff textbook words. Zero markdown, bullet lists, emojis, code, or raw URLs."
     }
   },
@@ -411,12 +415,14 @@ function classifyComplexity(userText, mode = "chat") {
   }
 
   const hasDeepKeyword = NAKSHATRA_CONFIG.routing.deep_keywords.some(kw => lower.includes(kw));
+  const hasHowToOrRecipe = /\b(how\s+to|recipe|cook|make|prepare|bake|fry|brew|boil|roast|build|setup|set\s+up|configure|fix|troubleshoot|instructions|method|process|biryani|briyani|dosa|curry|masala)\b/i.test(lower)
+    || /(ఎలా\s*వండాలి|ఎలా\s*చేయాలి|తయారీ|విధానం|వంట|బిర్యానీ|రెసిపీ|కైసే\s*బనాయే|कैसे\s*बनाएं|कैसे\s*पकाएं|ela\s+cheyyali|ela\s+vandali)/i.test(text);
   const hasMultiConstraintLogic = /\b(if|suppose|assuming|all\s+\w+\s+are|none\s+of|either|neither|only\s+one|always\s+tells|lies|truth|probability|chances|odd\s+one|sequence|pattern|next\s+number|how\s+many|age|years\s+older|twice|half|times\s+as|weigh|balance|door|hat|coin|box|train|speed|distance|clock|angle|percent|%)\b/i.test(lower);
   const hasCodeSignals = /(```|\bfunction\b|\bclass\b|\bconst\b|\blet\b|\bdef\b|\bSELECT\b|\bERROR\b|\bException\b|\bTypeError\b)/i.test(text);
   const hasMathNumbers = (text.match(/\d+(?:\.\d+)?/g) || []).length >= 2 && /[?+\-*/=^%]|\b(total|sum|cost|left|remaining|find|many|much)\b/i.test(lower);
   const isLongMultiStep = text.length > 180;
 
-  if (hasDeepKeyword || hasMultiConstraintLogic || hasCodeSignals || hasMathNumbers || isLongMultiStep) {
+  if (hasDeepKeyword || hasHowToOrRecipe || hasMultiConstraintLogic || hasCodeSignals || hasMathNumbers || isLongMultiStep) {
     return { tier: "deep", isDeep: true, needsVerification: true };
   }
 
@@ -587,13 +593,25 @@ function cleanTeluguSegment(text, mode = "chat") {
   t = t.replace(/\bHow can I help you\??/gi, "Hey! What's on your mind?");
   t = t.replace(/\bI am doing well, how are you\??/gi, "Hey! What's up?");
 
-  // 4. Clumsy translations & slang fixes
-  t = t.replace(/నన్ను\s+మీకు\s+ఏం\s+చేయాలి\??/gi, "చెప్పండి, ఏం విశేషాలు?");
+  // 4. Clumsy translations, broken Telugu+ASCII hybrids & slang fixes
+  t = t.replace(/నన్ను\s+మీకు\s+ఏం\s+చేయాలి\??/gi, "చెప్పండి, ఏంటి విశేషాలు?");
   t = t.replace(/మాటలు\s+బాగోస్తున్నాయా\??/gi, "సరే, కూల్ గా మాట్లాడుకుందాం!");
   t = t.replace(/మిమ్మల్ని\s+సంతోషించాలనుకుంటున్నాను[!.]*/gi, "మీతో మాట్లాడటం నాకు చాలా ఇష్టం!");
   t = t.replace(/కొంచెం\s+మామిడి\s+తిన్నాను\w*/gi, "హా, ఇప్పుడే తిన్నాను! మీరు తిన్నారా?");
   t = t.replace(/వినడానికి\s+సిద్ధంగా\s+ఉన్నాను[!.]*/gi, "చెప్పండి, వింటున్నాను!");
   t = t.replace(/నేను\s+తెలుగు\s+మాత్రమే\s+మాట్లాడగలను\w*/gi, "Sure thing! Let's talk in English.");
+  t = t.replace(/గhee/giu, "నెయ్యి");
+  t = t.replace(/వెన్న\s*\(\s*గీ\s*\)/gu, "నెయ్యి");
+  t = t.replace(/దహి\s*\(\s*నెయ్యి\s*\)/gu, "పెరుగు లేదా నెయ్యి");
+  t = t.replace(/దయి\b/gu, "పెరుగు");
+  t = t.replace(/రాయితీ\s*\(\s*రాయిత్\s*\)/gu, "రైతా");
+  t = t.replace(/రాయతా/gu, "రైతా");
+  t = t.replace(/మందమైన\s*బాటిల్/gu, "మందపాటి గిన్నె");
+  t = t.replace(/వెండి\s*పాన్/gu, "పాన్");
+  t = t.replace(/సేవించడం/gu, "వడ్డించడం");
+  t = t.replace(/[“"]?(?:దంప్|దుమ్|డంప్)[”"]?/gu, "దమ్");
+  t = t.replace(/(\d+\s*నిమిషాలు\s*)మరిగించండి(?=\s*(?:[.,\n]|$))/gu, "$1పక్కన ఉంచండి");
+  t = t.replace(/\s*\((?:సుమారు\s*)?\d+\s*W\)/giu, "");
   t = t.replace(/\bచెప్పు\s+రా\b/gi, "చెప్పండి");
   t = t.replace(/\bబాధపడకు\s+రా\b/gi, "బాధపడకండి");
   t = t.replace(/\bఏమైంది\s+రా\b/gi, "ఏమైంది");
@@ -1099,10 +1117,10 @@ async function verifyAndRefineDeepReply(options) {
       messages: [
         {
           role: "system",
-          content: `You are an adversarial logic, math, puzzle, and factual accuracy verifier.
-Check the candidate answer against EVERY word, constraint, edge case, linguistic trap, arithmetic step, and grounded fact in the user's prompt.
-- If the candidate answer is completely accurate, addresses all traps/constraints, and contains no hallucinations or unverified claims, reply with ONLY the single word: VERIFIED
-- If the candidate answer has ANY logical flaw, missed puzzle trap, calculation error, or hallucinated claim, output ONLY the complete corrected final response directly to the user (${langInstruction} Keep clean Markdown without raw LaTeX delimiters or meta-commentary about fixing a draft).`
+          content: `You are an adversarial logic, math, puzzle, recipe/workflow, and factual accuracy verifier.
+Check the candidate answer against EVERY word, constraint, edge case, linguistic trap, arithmetic step, chronological procedure order (e.g., soaking/marination before cooking, realistic home quantities, exact culinary technique), and grounded fact in the user's prompt.
+- If the candidate answer is completely accurate, uses natural language (clean everyday Telugu without mixed-script typos or botched terms), addresses all traps/constraints/steps, and contains no hallucinations or unverified claims, reply with ONLY the single word: VERIFIED
+- If the candidate answer has ANY logical flaw, wrong/swapped workflow step, unrealistic quantity, missed trap, calculation error, or hallucinated claim, output ONLY the complete corrected final response directly to the user (${langInstruction} Keep clean Markdown without raw LaTeX delimiters, placeholder labels like 'Bold Lead-in', or meta-commentary about fixing a draft).`
         },
         {
           role: "user",
