@@ -159,11 +159,11 @@ function detectLanguage(text) {
     };
   }
 
-  // Check Romanized Indic (Tenglish, Hinglish, etc.)
+  // Check Romanized Indic (Tenglish, Hinglish, etc.) without false-positive English word collisions
   const lower = text.toLowerCase();
-  const teluguRomanized = /\b(thinnava|thinnara|cheppandi|cheppu|bagunnanu|bagunnara|enti|em|ela|unnaru|chesaru|meeru|nenu|kuda|chudu|visheshalu|avuna|ekkada|kavali|cheddam|matladu)\b/i;
-  const hindiRomanized = /\b(kaisa|kaise|kya|hal|chal|aap|tum|theek|accha|batao|karo|namaste|shukriya|samajh)\b/i;
-  const tamilRomanized = /\b(eppadi|irukinga|vanakkam|nandri|sollunga|enna|enga|irukku)\b/i;
+  const teluguRomanized = /\b(nuvvu|nenu|naaku|naku|neeku|meeru|manam|ela|unnav|unna|unnaru|unnava|enti|emiti|cheppu|cheppandi|cheppava|cheyi|cheyandi|cheyyali|cheptha|chepthava|chesava|chesaru|thinnava|tinnava|thinnara|bagunnava|bagunnav|bagunnara|bagunnanu|bagundi|kavali|kaavali|vaddu|ledu|undhi|unnadhi|enduku|ekkada|eppudu|evaru|entha|ayindi|avuthundi|ikkada|akkada|gurinchi|ippudu|sare|avuna|ayyo|kadha|kada|chudu|chudandi|vinu|vinandi|telusa|teliyadu|matladu|matladandi|eroju|repu|ninna|konchem|chala|manchi|antha|intha|vishayam|sahayam|bhojanam|neellu|kuda|kaani|aithe|lekapothe|vachindi|vellali|vastunna|chestunna|antunna|kaadu|podam|veldam|inkoka|visheshalu|cheddam)\b/i;
+  const hindiRomanized = /\b(kaisa|kaise|kya|kyun|kyon|hal|chal|aap|tum|theek|accha|batao|bataiye|karo|namaste|shukriya|samajh|nahi|aaj|bahut|yaar|thakan|mujhe|tumhe)\b/i;
+  const tamilRomanized = /\b(eppadi|irukinga|irukken|vanakkam|nandri|sollunga|enna|enga|irukku|romba|epdi|pannunga)\b/i;
 
   if (teluguRomanized.test(lower)) {
     return { code: "te", script: "Latin", multiplier: 2.0, locale: "te-IN", isRomanized: true };
