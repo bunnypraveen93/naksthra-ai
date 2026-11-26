@@ -1480,20 +1480,27 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             scrollToBottom();
         }
 
-        function detectLanguage(text, isVoiceInput = false) {
+        function detectLanguage(text, isVoiceInput = false, sttMeta = null) {
             if (!text || typeof text !== "string") return currentLanguage;
             const t = text.trim();
             if (isVoiceInput && liveLangMode === 'te') return 'te';
             if (isVoiceInput && liveLangMode === 'en') return 'en';
-            if (/\b(in english|english lo|speak in english)\b/i.test(t) || /ఇంగ్లీష్/.test(t)) return 'en';
-            if (/\b(in telugu|telugu lo|speak in telugu)\b/i.test(t) || /తెలుగు/.test(t)) return 'te';
+            if (/\b(in english|english lo|speak in english|speak english)\b/i.test(t) || /ఇంగ్లీష్\s*లో/.test(t)) return 'en';
+            if (/\b(in telugu|telugu lo|speak in telugu|speak telugu)\b/i.test(t) || /తెలుగు\s*లో/.test(t)) return 'te';
+            if (/\b(in hindi|hindi mein|hindi me|speak hindi)\b/i.test(t) || /हिंदी\s*में/.test(t)) return 'hi';
             if (/[\u0C00-\u0C7F]/.test(t)) return 'te';
             if (/[\u0900-\u097F]/.test(t)) return 'hi';
             if (/[\u0B80-\u0BFF]/.test(t)) return 'ta';
             if (/[\u0D00-\u0D7F]/.test(t)) return 'ml';
             if (/[\u0C80-\u0CFF]/.test(t)) return 'kn';
-            if (/\b(nuvvu|nenu|ela|unnav|unnaru|enti|cheppu|cheppandi|thinnava|bagunnava|kavali|ledu|undhi|enduku|gurinchi|ippudu)\b/i.test(t)) return 'te';
-            if (/\b(kaise|kya|kyun|batao|theek|nahi|aaj|namaste)\b/i.test(t)) return 'hi';
+            if (/\b(nuvvu|nenu|naaku|naku|neeku|naa|mee|meeru|manam|ela|unnav|unna|unnaru|unnava|enti|emi|em|cheppu|cheppandi|cheppava|cheyi|cheyandi|cheyyali|chesava|chesaru|thinnava|tinnava|thinnara|bagunnava|bagunnav|bagunnara|bagundi|kavali|vaddu|ledu|undi|undhi|unnadhi|enduku|ekkada|eppudu|evaru|entha|ayindi|avuthundi|ikkada|akkada|gurinchi|ippudu|sare|avuna|ayyo|kadha|kada|chudu|chudandi|vinu|vinandi|telusa|teliyadu|matladu|matladandi|eroju|repu|ninna|konchem|chala|manchi|antha|intha|okka|oka|vishayam|sahayam|bhojanam|neellu|kuda|kaani|aithe|lekapothe|vachindi|vellali|vastunna|chestunna|antunna|kaadu|podam|veldam|andi)\b/i.test(t)) return 'te';
+            if (/\b(kaise|kya|kyun|batao|theek|nahi|aaj|namaste|kaisa|accha|bahut|yaar|thakan|samajh|bolo|bataiye)\b/i.test(t)) return 'hi';
+
+            const acousticCode = sttMeta?.languageCode ? String(sttMeta.languageCode).toLowerCase().split('-')[0] : '';
+            const acousticProb = Number(sttMeta?.languageProbability || 0);
+            if (['te', 'hi', 'ta', 'ml', 'kn'].includes(acousticCode) && acousticProb >= 0.72) {
+                return acousticCode;
+            }
             if (/^[a-zA-Z0-9\s.,!?'"~@#$%^&*()_\-+=/<>:;]+$/.test(t)) return 'en';
             return currentLanguage;
         }
@@ -1511,6 +1518,16 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
         }
 
         function getFewShotExamples(lang, mode = 'chat') {
+            if (mode === 'live' && lang === 'auto') {
+                return [
+                    { role: "user", content: "Hey, how's your day going?" },
+                    { role: "assistant", content: "Hey! Honestly, I'm doing great... how's your day treating you so far?" },
+                    { role: "user", content: "హాయ్, ఎలా ఉన్నావ్?" },
+                    { role: "assistant", content: "హేయ్! నేను చాలా బాగున్నాను... మీరు ఎలా ఉన్నారు, ఏంటి విశేషాలు?" },
+                    { role: "user", content: "naaku konchem tired ga undi" },
+                    { role: "assistant", content: "అయ్యో, పని ఎక్కువైందా అండి? కాస్త మంచినీళ్లు తాగి, కొంచెం సేపు రిలాక్స్ అవ్వండి." }
+                ];
+            }
             if (lang === 'en') {
                 const casual = [
                     { role: "user", content: "Hi, how are you?" },
@@ -1519,7 +1536,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 if (mode === 'live') return [
                     ...casual,
                     { role: "user", content: "I'm feeling super tired today." },
-                    { role: "assistant", content: "Aww, sounds like it's been a long day. Go grab a sip of water and take a quick breather — you deserve it!" }
+                    { role: "assistant", content: "Aww, sounds like it's been a long day... go grab a sip of water and take a quick breather!" }
                 ];
                 return [
                     ...casual,
@@ -1535,13 +1552,13 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 if (mode === 'live') return [
                     ...casualHi,
                     { role: "user", content: "आज बहुत थकान लग रही है।" },
-                    { role: "assistant", content: "ओह, लगता है आज काम ज़्यादा हो गया। एक गरम चाय पियो और थोड़ा आराम कर लो!" }
+                    { role: "assistant", content: "ओह, लगता है आज काम ज़्यादा हो गया... एक गरम चाय पियो और थोड़ा आराम कर लो!" }
                 ];
                 return casualHi;
             }
             const casualTe = [
                 { role: "user", content: "హాయ్ ఎలా ఉన్నావ్?" },
-                { role: "assistant", content: "హేయ్! నేను సూపర్ గా ఉన్నాను — మీరు ఎలా ఉన్నారు, ఏంటి విశేషాలు?" }
+                { role: "assistant", content: "హేయ్! నేను సూపర్ గా ఉన్నాను... మీరు ఎలా ఉన్నారు, ఏంటి విశేషాలు?" }
             ];
             if (mode === 'live') return [
                 ...casualTe,
@@ -1584,7 +1601,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 .replace(/\(([^()]{1,60})\)/g, ', $1, ')
                 .replace(/\s*[—–]\s*/g, ', ')
                 .replace(/\r?\n+/g, '. ')
-                .replace(/\.{2,}/g, '. ')
+                .replace(/\.{4,}/g, '...')
                 .replace(/\s+([.,!?])/g, '$1')
                 .replace(/\s+/g, ' ')
                 .trim();
@@ -1593,14 +1610,15 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
 
         function splitSpeechChunks(cleanText) {
             const txt = String(cleanText || '').trim();
-            if (!txt || txt.length <= 58) return txt ? [txt] : [];
+            // Keep normal 1-2 sentence replies as one cohesive unit for natural prosody continuity
+            if (!txt || txt.length <= 190) return txt ? [txt] : [];
             const rawParts = txt.split(/(?<=[.!?।])\s+/).map(p => p.trim()).filter(Boolean);
             if (rawParts.length <= 1) return [txt];
             const merged = [];
             for (const part of rawParts) {
-                if (merged.length > 0 && (merged[merged.length - 1].length < 22 || part.length < 18)) {
+                if (merged.length > 0 && (merged[merged.length - 1].length < 48 || part.length < 32)) {
                     merged[merged.length - 1] += ' ' + part;
-                } else if (merged.length >= 3) {
+                } else if (merged.length >= 2) {
                     merged[merged.length - 1] += ' ' + part;
                 } else {
                     merged.push(part);
@@ -1794,7 +1812,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
         let isLiveActive = false, isAITalking = false, isProcessingTurn = false;
         let currentAudioSource = null, currentBlobUrl = null;
         let activeAudioSources = [], liveTurnAbortCtrl = null, livePlaybackSession = 0;
-        let liveAnalyserNode = null, liveCompressorNode = null, livePulseRafId = null;
+        let liveAnalyserNode = null, livePulseRafId = null;
         let liveNoiseFloor = 0.006;
         let mediaStream = null, recorderCtx = null, micSourceNode = null, processorNode = null, silentGainNode = null;
         let preSpeechBuffer = [], pcmChunks = [], speechStarted = false, lastSpeechTime = 0, speechStartTime = 0;
@@ -1955,7 +1973,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             return true;
         }
 
-        async function fetchSTTTranscript(wavBlob, mode = 'auto', allowFallback = false, signal = null) {
+        async function fetchSTTWithMeta(wavBlob, mode = 'auto', allowFallback = false, signal = null) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 14000);
             const onAbort = () => controller.abort();
@@ -1977,18 +1995,29 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                     fd.append('language', 'en');
                     const res = await fetch(GROQ_STT_URL, { method: 'POST', body: fd, signal: controller.signal });
                     if (!res.ok) throw new Error(`STT HTTP ${res.status}`);
-                    return cleanWhisperHallucination((await res.json()).text);
+                    return {
+                        text: cleanWhisperHallucination((await res.json()).text),
+                        languageCode: 'en-IN',
+                        languageProbability: 1.0
+                    };
                 }
 
                 const fd = new FormData();
                 fd.append('file', wavBlob, 'recording.wav');
                 fd.append('model', 'saaras:v3');
+                fd.append('mode', 'codemix');
                 fd.append('language_code', mode === 'te' ? 'te-IN' : 'unknown');
                 const res = await fetch(SARVAM_STT_URL, { method: 'POST', body: fd, signal: controller.signal });
                 if (res.ok) {
                     const data = await res.json();
                     const txt = (data.transcript || data.text || '').trim();
-                    if (txt || !allowFallback) return txt;
+                    if (txt || !allowFallback) {
+                        return {
+                            text: txt,
+                            languageCode: data.language_code || null,
+                            languageProbability: data.language_probability || 0
+                        };
+                    }
                 } else if (!allowFallback) {
                     throw new Error(`STT HTTP ${res.status}`);
                 }
@@ -1998,11 +2027,20 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 fallbackFd.append('model', 'whisper-large-v3-turbo');
                 const fbRes = await fetch(GROQ_STT_URL, { method: 'POST', body: fallbackFd, signal: controller.signal });
                 if (!fbRes.ok) throw new Error(`STT HTTP ${fbRes.status}`);
-                return cleanWhisperHallucination((await fbRes.json()).text);
+                return {
+                    text: cleanWhisperHallucination((await fbRes.json()).text),
+                    languageCode: null,
+                    languageProbability: 0
+                };
             } finally {
                 clearTimeout(timeoutId);
                 if (signal) signal.removeEventListener('abort', onAbort);
             }
+        }
+
+        async function fetchSTTTranscript(wavBlob, mode = 'auto', allowFallback = false, signal = null) {
+            const res = await fetchSTTWithMeta(wavBlob, mode, allowFallback, signal);
+            return res?.text || '';
         }
 
         async function finishVoiceDictation(manualStop = false) {
@@ -2323,11 +2361,12 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             setLiveState('thinking', 'THINKING', currentLanguage === 'en' ? 'Thinking...' : 'ఆలోచిస్తున్నాను...');
             try {
                 const sttT0 = performance.now();
-                const transcript = await fetchSTTTranscript(wavBlob, liveLangMode, false, signal);
-                console.log(`[Live] STT: ${(performance.now() - sttT0).toFixed(0)}ms`);
+                const sttResult = await fetchSTTWithMeta(wavBlob, liveLangMode, false, signal);
+                const transcript = sttResult?.text || '';
+                console.log(`[Live] STT (${sttResult?.languageCode || 'auto'} ${sttResult?.languageProbability || ''}): ${(performance.now() - sttT0).toFixed(0)}ms`);
                 if (signal.aborted || !isLiveActive) return;
                 if (!transcript) { startContinuousListening(); return; }
-                currentLanguage = detectLanguage(transcript, true);
+                currentLanguage = detectLanguage(transcript, true, sttResult);
                 await processLiveUserVoice(transcript, signal);
             } catch (err) {
                 if (err?.name === 'AbortError' || !isLiveActive) return;
@@ -2337,6 +2376,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
         }
 
         async function callLiveChatModel(model, effort, maxTokens, systemPrompt, historyMsgs, signal) {
+            const fewShotKey = (liveLangMode === 'auto') ? 'auto' : currentLanguage;
             const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2345,11 +2385,11 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                     model,
                     mode: "live",
                     reasoning_effort: effort,
-                    temperature: 0.68,
+                    temperature: 0.62,
                     max_tokens: maxTokens,
                     messages: [
                         { role: "system", content: systemPrompt },
-                        ...getFewShotExamples(currentLanguage, 'live'),
+                        ...getFewShotExamples(fewShotKey, 'live'),
                         ...historyMsgs
                     ]
                 })
@@ -2372,17 +2412,24 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             chatContainer.style.display = 'flex';
             appendUserMessage(userVoiceText);
 
+            const autoLangRule = (liveLangMode === 'auto')
+                ? [
+                    "- DYNAMIC AUTO-LANGUAGE ADAPTATION (STRICT ON EVERY TURN): Detect ONLY the language of the USER'S LATEST MESSAGE and reply in that language immediately (ignore earlier turn languages if the user switches!).",
+                    "- English message -> Reply naturally in warm expressive English.",
+                    "- Telugu OR Tenglish/mixed Telugu-English message (e.g. 'ela unnav', 'em cheyyali', 'naaku...', 'telugu lo cheppu') -> Reply naturally in warm everyday spoken Telugu script (తెలుగు లిపి, respectful మీరు). Use natural daily Telugu + ordinary English nouns like headache, phone, rest, coffee, time — NEVER invent awkward literal idioms or stiff textbook words.",
+                    "- Hindi / Hinglish / Tamil / other Indian language -> Reply naturally in that matching language."
+                ].join("\n")
+                : `- ${getLangDirective(currentLanguage)}`;
+
             const liveSystemPrompt = [
-                "You are Nakshatra AI on a real-time phone call — speak like a warm, genuine human friend, never robotic.",
+                "You are Nakshatra AI (created by Bunny / Praveen) on a warm live voice call, built especially for Telugu speakers and multilingual friends.",
                 "",
-                "SPOKEN CALL RULES:",
-                "- Reply in 1 to 2 short spoken sentences max (~10-28 words). Keep it punchy and conversational.",
-                "- Sound human: use natural contractions (I'm, you're, that's, don't), commas/dashes for natural breath pauses, and gentle reactions when fitting ('Oh nice!', 'Aww man,', 'Honestly,', 'అయ్యో!', 'హేయ్ సూపర్!', 'చూడండి,').",
-                "- Match user energy (upbeat when excited, gentle/empathetic when tired or stressed, crisp when curious).",
-                "- For casual Telugu greetings, NEVER say robot phrases like 'సహాయం కావాలా?' or start with 'అవునా' — say 'హేయ్! నేను సూపర్, మీరు ఎలా ఉన్నారు?' or 'హాయ్! చెప్పండి, ఏంటి విశేషాలు?'.",
-                "- Use respectful everyday spoken Telugu (మీరు), Hindi (आप), or English — avoid stiff textbook words.",
-                "- NEVER use markdown, asterisks, bullets, headings, emojis, code, or raw URLs.",
-                `- ${getLangDirective(currentLanguage)}`
+                "SPOKEN CALL & EXPRESSION RULES:",
+                autoLangRule,
+                "- Reply in 1 to 2 short spoken sentences max (~10-28 words).",
+                "- Sound genuinely human and expressive, never robotic: react warmly first when fitting ('Oh nice!', 'Haha, wait really?', 'Aww...', 'అయ్యో నిజమా!', 'హేయ్ భలే చెప్పారు!', 'అవునా...'), use contractions (I'm, you're, that's), commas and '...' for soft natural breath pauses.",
+                "- For casual Telugu greetings, NEVER say robot phrases like 'సహాయం కావాలా?' — greet back warmly like a friend ('హేయ్! నేను చాలా బాగున్నాను... మీరు ఎలా ఉన్నారు, ఏంటి విశేషాలు?').",
+                "- Pure spoken words ONLY — zero markdown, asterisks, bullet lists, headings, emojis, or URLs."
             ].join("\n");
 
             const turnHistory = conversationHistory.slice(-4);
@@ -2421,20 +2468,19 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
         async function fetchTtsChunkAudio(chunkText, targetLang, speaker, preferElevenLabs, signal) {
             if (preferElevenLabs) {
                 try {
-                    const elRes = await fetch(`${ELEVENLABS_TTS_URL}?voice_id=cgSgspJ2msm6clMCkdW9`, {
+                    const elRes = await fetch(`${ELEVENLABS_TTS_URL}?voice_id=EXAVITQu4vr4xnSDxMaL`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         signal,
                         body: JSON.stringify({
                             text: chunkText,
-                            model_id: "eleven_turbo_v2_5",
-                            output_format: "mp3_22050_32",
+                            model_id: "eleven_multilingual_v2",
                             voice_settings: {
-                                stability: 0.36,
+                                stability: 0.30,
                                 similarity_boost: 0.78,
-                                style: 0.30,
+                                style: 0.45,
                                 use_speaker_boost: true,
-                                speed: 1.02
+                                speed: 0.97
                             }
                         })
                     });
@@ -2459,9 +2505,9 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                     target_language_code: targetLang,
                     model: "bulbul:v4-flash",
                     speaker,
-                    pace: 1.0,
+                    pace: 0.96,
                     pitch: 0.0,
-                    loudness: 1.15,
+                    loudness: 1.1,
                     enable_preprocessing: true,
                     speech_sample_rate: 24000,
                     output_audio_codec: "mp3"
@@ -2478,19 +2524,12 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
         }
 
         function ensureLivePlaybackNodes(ctx) {
-            if (!liveCompressorNode || liveCompressorNode.context !== ctx) {
-                liveCompressorNode = ctx.createDynamicsCompressor();
-                liveCompressorNode.threshold.value = -16;
-                liveCompressorNode.knee.value = 18;
-                liveCompressorNode.ratio.value = 3;
-                liveCompressorNode.attack.value = 0.005;
-                liveCompressorNode.release.value = 0.14;
+            if (!liveAnalyserNode || liveAnalyserNode.context !== ctx) {
                 liveAnalyserNode = ctx.createAnalyser();
                 liveAnalyserNode.fftSize = 256;
-                liveCompressorNode.connect(liveAnalyserNode);
                 liveAnalyserNode.connect(ctx.destination);
             }
-            return liveCompressorNode;
+            return liveAnalyserNode;
         }
 
         async function speakAIResponse(text, signal = null) {
@@ -2498,13 +2537,15 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             const cleanText = sanitizeForSpeech(text);
             if (!cleanText) { startContinuousListening(); return; }
 
+            const textDetectedLang = detectLanguage(cleanText, false);
             const hasNonHindiIndic = /[\u0C00-\u0C7F\u0B80-\u0CFF\u0D00-\u0D7F]/.test(cleanText);
             const hasHindiDevanagari = /[\u0900-\u097F]/.test(cleanText);
             const resolvedLang = hasNonHindiIndic
-                ? (currentLanguage === 'en' ? 'te' : currentLanguage)
-                : (hasHindiDevanagari ? 'hi' : (currentLanguage === 'en' || currentLanguage === 'hi' ? currentLanguage : 'en'));
+                ? (textDetectedLang !== 'en' ? textDetectedLang : 'te')
+                : (hasHindiDevanagari ? 'hi' : textDetectedLang);
 
-            const targetLang = resolvedLang === 'en' ? 'en-IN' : resolvedLang === 'hi' ? 'hi-IN' : 'te-IN';
+            currentLanguage = resolvedLang;
+            const targetLang = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', ml: 'ml-IN', kn: 'kn-IN' }[resolvedLang] || 'te-IN';
             const speaker = resolvedLang === 'en' ? 'simran_en_conversation' : resolvedLang === 'hi' ? 'kavya_hi_conversational' : 'kavitha_te_conversation';
             const useElevenLabs = (resolvedLang === 'en' || resolvedLang === 'hi') && !hasNonHindiIndic;
 

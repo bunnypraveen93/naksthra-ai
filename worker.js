@@ -616,7 +616,7 @@ function cleanTeluguSegment(text, mode = "chat") {
   t = t.replace(/(^|\s)(ఆహ్+|ఓహ్+|హమ్మ్+|ఉమ్మ్+|umm+|ahh+|ohh+|hmm+|err+|ఆ{2,}|ఓ{2,})(\s|$|[.,!?])/giu, '$1$3');
 
   // 8. Expressive vocal harmony punctuation
-  t = t.replace(/\.{2,}/g, '. ');
+  t = mode === "live" ? t.replace(/\.{4,}/g, '...') : t.replace(/\.{2,}/g, '. ');
   t = t.replace(/!{2,}/g, '!');
   t = t.replace(/\?{2,}/g, '?');
 
