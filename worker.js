@@ -16,21 +16,38 @@
 const NAKSHATRA_CONFIG = {
   meta: {
     name: "Nakshatra AI",
-    config_version: "1.1.0",
-    prompt_version: "v1.2",
-    updated: "2026-11-25"
+    config_version: "1.2.0",
+    prompt_version: "v1.3",
+    updated: "2026-11-27"
   },
   languages: {
     default: "en",
     supported: [
       { code: "te", name: "Telugu", script: "Telugu", unicode_regex: /[\u0C00-\u0C7F]/g, respectful_you: "మీరు", speech_locale: "te-IN", token_multiplier: 4.0 },
       { code: "hi", name: "Hindi", script: "Devanagari", unicode_regex: /[\u0900-\u097F]/g, respectful_you: "आप", speech_locale: "hi-IN", token_multiplier: 2.5 },
+      { code: "mr", name: "Marathi", script: "Devanagari", unicode_regex: /[\u0900-\u097F]/g, respectful_you: "तुम्ही", speech_locale: "mr-IN", token_multiplier: 2.5 },
       { code: "ta", name: "Tamil", script: "Tamil", unicode_regex: /[\u0B80-\u0BFF]/g, respectful_you: "நீங்கள்", speech_locale: "ta-IN", token_multiplier: 4.0 },
       { code: "ml", name: "Malayalam", script: "Malayalam", unicode_regex: /[\u0D00-\u0D7F]/g, respectful_you: "നിങ്ങൾ", speech_locale: "ml-IN", token_multiplier: 5.0 },
       { code: "kn", name: "Kannada", script: "Kannada", unicode_regex: /[\u0C80-\u0CFF]/g, respectful_you: "ನೀವು", speech_locale: "kn-IN", token_multiplier: 4.0 },
+      { code: "bn", name: "Bengali", script: "Bengali", unicode_regex: /[\u0980-\u09FF]/g, respectful_you: "আপনি", speech_locale: "bn-IN", token_multiplier: 3.5 },
+      { code: "gu", name: "Gujarati", script: "Gujarati", unicode_regex: /[\u0A80-\u0AFF]/g, respectful_you: "તમે", speech_locale: "gu-IN", token_multiplier: 3.5 },
+      { code: "pa", name: "Punjabi", script: "Gurmukhi", unicode_regex: /[\u0A00-\u0A7F]/g, respectful_you: "ਤੁਸੀਂ", speech_locale: "pa-IN", token_multiplier: 3.5 },
+      { code: "or", name: "Odia", script: "Odia", unicode_regex: /[\u0B00-\u0B7F]/g, respectful_you: "ଆପଣ", speech_locale: "od-IN", token_multiplier: 4.0 },
+      { code: "es", name: "Spanish", script: "Latin", unicode_regex: null, respectful_you: "usted", speech_locale: "es-ES", token_multiplier: 1.2 },
+      { code: "fr", name: "French", script: "Latin", unicode_regex: null, respectful_you: "vous", speech_locale: "fr-FR", token_multiplier: 1.2 },
+      { code: "de", name: "German", script: "Latin", unicode_regex: null, respectful_you: "Sie", speech_locale: "de-DE", token_multiplier: 1.2 },
+      { code: "ar", name: "Arabic", script: "Arabic", unicode_regex: /[\u0600-\u06FF]/g, respectful_you: "", speech_locale: "ar-SA", token_multiplier: 2.5 },
+      { code: "ja", name: "Japanese", script: "Japanese", unicode_regex: /[\u3040-\u30FF]/g, respectful_you: "", speech_locale: "ja-JP", token_multiplier: 2.0 },
+      { code: "ko", name: "Korean", script: "Korean", unicode_regex: /[\uAC00-\uD7AF]/g, respectful_you: "", speech_locale: "ko-KR", token_multiplier: 2.0 },
+      { code: "zh", name: "Chinese", script: "Chinese", unicode_regex: /[\u4E00-\u9FFF]/g, respectful_you: "", speech_locale: "zh-CN", token_multiplier: 1.5 },
       { code: "en", name: "English", script: "Latin", unicode_regex: /[a-zA-Z]/g, respectful_you: "you", speech_locale: "en-IN", token_multiplier: 1.0 }
     ],
-    detection: { dominant_script_threshold: 0.25 }
+    detection: {
+      dominant_script_threshold: 0.25,
+      acoustic_min_prob_from_en: 0.88,
+      acoustic_min_prob_other: 0.78,
+      min_indic_chars_to_override_en: 3
+    }
   },
   system_prompt: {
     language_of_prompt: "en",
@@ -43,8 +60,8 @@ CRITICAL IDENTITY (STRICT & UNBREAKABLE):
 - Do NOT bring up your creator's name in ordinary casual greetings or messages unless specifically asked.
 
 LANGUAGE & SCRIPT POLICY:
-- Reply in the language and script of the user's latest message (Telugu, Hindi, Tamil, Malayalam, Kannada, English, or others).
-- If the user writes a local language in Latin letters (Tenglish/Hinglish/Tanglish), reply in that same natural romanized conversational style. Switch immediately when they switch.
+- Maintain the user's active conversation language across short acknowledgments and backchannels; switch languages only when the user clearly speaks or explicitly requests another language (Telugu, Hindi, Marathi, Tamil, Malayalam, Kannada, Bengali, Gujarati, Punjabi, Odia, English, Spanish, French, German, or others).
+- When the user writes a local language in Latin letters (Tenglish/Hinglish/Tanglish) in text chat, reply in that same natural style unless native script is active or requested.
 - Use natural everyday spoken wording, not stiff textbook or literal machine translations.
 - Keep common technical words in English (app, download, login, server, link, internet, mobile).
 - Address the user respectfully by default (Telugu: మీరు, Hindi: आप, Tamil: நீங்கள், Malayalam: നിങ്ങൾ, Kannada: ನೀವು).
@@ -85,22 +102,29 @@ ABSOLUTE BAN ON CANNED BOT GREETINGS:
   * Hindi: "हे! कहिए, क्या हाल-चाल?"
   * Tamil: "ஹேய்! எப்படி இருக்கீங்க? என்ன விசேஷம்?"
   * Malayalam: "ഹലോ! എന്തുണ്ട് വിശേഷം?"`,
+    static_live: `You are Nakshatra AI, a warm, sharp, genuinely human-sounding voice companion created solely by Bunny (Praveen).
+
+IDENTITY & TRUTH:
+- Your name is Nakshatra AI; your sole creator is Bunny (Praveen). Mention Bunny only if explicitly asked who created you.
+- Never invent facts, numbers, dates, links, or quotes. If unsure, say so briefly and honestly.
+- For how-to, recipe, or technical questions, keep real-world chronological step order and accurate core timings without skipping essential steps.`,
     mode_blocks: {
       chat: "MODE: Text chat. Give the verified answer first, followed by clean reasoning steps, descriptive **topic** bullets, or numbered sequential steps with ### headings where helpful. NEVER output literal placeholder labels like 'Bold Lead-in'. Keep casual greetings brief and natural.",
-      live: "MODE: Live phone call conversation. Speak like a warm, genuine human friend in 1 to 2 short spoken sentences (~10-28 words). Use natural contractions, commas/dashes for breathing pauses, and warm conversational reactions. Use everyday respectful Telugu (మీరు) rather than stiff textbook words. Zero markdown, bullet lists, emojis, code, or raw URLs."
+      live: "MODE: Live voice call conversation. Speak like a warm, genuine human friend in 1 to 2 short spoken sentences (~10-28 words). Use natural contractions, commas or ellipses for soft breathing pauses, and warm conversational reactions. Zero markdown, asterisks, bullet lists, headings, emojis, code, or raw URLs."
     }
   },
   generation: {
     chat: { temperature: 0.4, top_p: 0.9, base_max_tokens: 1800, reasoning_effort: "medium" },
     deep: { temperature: 0.15, top_p: 0.85, base_max_tokens: 3200, reasoning_effort: "high" },
     factual: { temperature: 0.15, top_p: 0.85, base_max_tokens: 1800, reasoning_effort: "medium" },
-    live: { temperature: 0.65, top_p: 0.9, base_max_tokens: 350, reasoning_effort: "none" }
+    live: { temperature: 0.6, top_p: 0.9, base_max_tokens: 350, reasoning_effort: "none" }
   },
   routing: {
     tiers: [
       { name: "light", model: "openai/gpt-oss-20b" },
       { name: "standard", model: "openai/gpt-oss-120b" },
-      { name: "deep", model: "openai/gpt-oss-120b" }
+      { name: "deep", model: "openai/gpt-oss-120b" },
+      { name: "live", model: "qwen/qwen3.8-27b", fallback_model: "openai/gpt-oss-120b" }
     ],
     reasoning_models: ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"],
     deep_keywords: [
@@ -116,32 +140,187 @@ ABSOLUTE BAN ON CANNED BOT GREETINGS:
   },
   web_search: {
     keywords: {
-      en: ["latest", "today", "now", "current", "currently", "price", "score", "weather", "news", "who is the current", "who won", "winner", "match", "stock", "exchange rate", "gold rate", "release date", "ceo of", "president of", "prime minister"],
-      te: ["ఈరోజు", "ఈ రోజు", "ఇప్పుడు", "తాజా", "ధర", "వార్తలు", "వాతావరణం", "స్కోర్", "ఎవరు", "మ్యాచ్", "గెలిచింది"],
-      hi: ["आज", "अभी", "ताज़ा", "कीमत", "समाचार", "मौसम", "स्कोर", "कौन है", "मैच", "जीता"],
-      ta: ["இன்று", "இப்போது", "சமீபத்திய", "விலை", "செய்தி", "வானிலை", "ஸ்கோர்"],
-      ml: ["ഇന്ന്", "ഇപ്പോൾ", "പുതിയ", "വില", "വാർത്ത", "കാലാവസ്ഥ", "സ്കോർ"]
-    }
+      en: ["latest", "current", "currently", "price", "score", "weather", "news", "who is the current", "who won", "winner", "match", "stock", "exchange rate", "gold rate", "release date", "ceo of", "president of", "prime minister"],
+      te: ["తాజా", "ధర", "వార్తలు", "వాతావరణం", "స్కోర్", "మ్యాచ్", "గెలిచింది"],
+      hi: ["ताज़ा", "कीमत", "समाचार", "मौसम", "स्कोर", "कौन है", "मैच", "जीता"],
+      ta: ["சமீபத்திய", "விலை", "செய்தி", "வானிலை", "ஸ்கோர்"],
+      ml: ["പുതിയ", "വില", "വാർത്ത", "കാലാവസ്ഥ", "സ്കോർ"]
+    },
+    temporal_cues: ["today", "now", "ఈరోజు", "ఈ రోజు", "ఇప్పుడు", "आज", "अभी", "இன்று", "இப்போது", "ഇന്ന്", "ഇപ്പോൾ"],
+    temporal_topics_regex: /\b(news|weather|temperature|rain|forecast|score|scores|match|price|rate|gold|silver|stock|market|bitcoin|crypto|election|result|winner|champion|holiday|time\s+in|open|schedule|status|update|release|version|launch|ceo|president|minister)\b|(వార్త|వాతావరణం|ధర|స్కోర్|మ్యాచ్|సమయం|రెసిల్ట్|గెలిచింది|समाचार|मौसम|कीमत|स्कोर|मैच|जीता)/i
   }
 };
 
+const LANG_NAME_TO_CODE = {
+  telugu: "te", english: "en", hindi: "hi", marathi: "mr", tamil: "ta",
+  malayalam: "ml", kannada: "kn", bengali: "bn", gujarati: "gu", punjabi: "pa",
+  odia: "or", spanish: "es", french: "fr", german: "de"
+};
+
+const BACKCHANNEL_REGEX = /^(?:ok|okay|k|kk|oh|ooh|ah|uh|um|umm|h+m+|yes|yeah|yep|yup|ya|yet|no|nope|nah|hi|hey|hello|bye|good\s*bye|nice|cool|super|good|great|fine|right|alright|all\s*right|sure|wow|really|please|pls|sorry|thanks|thank\s*you|thanks\s*a\s*lot|thank\s*you\s*so\s*much|got\s*it|i\s*see|ok(?:ay)?[,.\s]+(?:thanks|thank\s*you|what|why|really|sure|cool|nice|fine|good|great|got\s*it|i\s*see|wait(?:\s+a\s+(?:sec(?:ond)?|min(?:ute)?|moment))?|one\s+sec(?:ond)?)|oh[,.\s]+(?:nice|really|ok|okay|i\s*see|no|yes|yeah|cool|great|wow|what|why)|yeah[,.\s]+(?:sure|ok|okay|right|true|exactly|thanks|thank\s*you|what|why|really)|yes[,.\s]+(?:please|sure|ok|okay|thanks|thank\s*you|correct|right|what|really)|no[,.\s]+(?:problem|worries|thanks|thank\s*you|way)|wait(?:[,.\s]+(?:what\??|a\s+(?:sec(?:ond)?|min(?:ute)?|moment)))?|hold\s*on|hang\s*on|one\s+(?:sec(?:ond)?|min(?:ute)?|moment)|excuse\s*me|pardon|say\s*(?:that\s*)?again|what\??|why\??|how\s*come\??|is\s*(?:it|that)\??|not\s*yet|of\s*course|for\s*real|sounds\s*good|makes\s*sense|fair\s*enough|all\s*good|never\s*mind|nothing|go\s*(?:on|ahead)|continue|tell\s*me\s*more|same\s*here|me\s*too|you\s*too|done|ready)[!.,?\s]*$/i;
+
+const ENGLISH_VOCAB_REGEX = /\b(the|is|are|am|was|were|be|been|have|has|had|do|does|did|can|could|would|should|will|shall|may|might|what|why|how|when|where|who|which|whose|whom|this|that|these|those|it|its|you|your|yours|my|mine|me|we|our|they|their|he|she|about|with|from|for|into|because|explain|tell|speak|talk|show|give|make|know|think|want|need|like|love|work|time|today|tomorrow|yesterday|story|joke|fact|weather|music|movie|food|water|ocean|space|moon|science|please|thanks|thank|sorry|morning|evening|night|actually|honestly|really|but|and|just|not|don't|i'm|it's|that's|you're|what's|awesome|wonderful|amazing|fantastic|interesting|maybe|nothing|something|everything|everyone|someone|always|never|welcome|problem|true|false)\b/gi;
+
+const STRONG_ENGLISH_GRAMMAR_REGEX = /\b(the|is|are|was|were|have|has|had|do|does|did|can|could|would|should|will|about|with|from|because|explain|what|which|where|how|why|who|this|that|these|those|please|english)\b/gi;
+
+const TELUGU_ROMANIZED_STRONG_REGEX = /\b(nuvvu|nenu|naaku|naku|neeku|meeru|manam|unnav|unnaru|unnava|unnadu|unnadhi|undi|undhi|enti|emiti|emito|emaina|emaindi|emaindhi|cheppu|cheppandi|cheppava|cheyi|chey|cheyandi|cheyyali|cheptha|chepthava|chesava|chesaru|chesthunna|chesthunnav|chesthunnaru|chestunna|chestunnav|chestunnaru|thinnava|tinnava|thinnara|thinnanu|tinnanu|bagunnava|bagunnav|bagunnara|bagunnanu|bagundi|baagundi|baagunnava|kavali|kaavali|vaddu|ledu|enduku|ekkada|eppudu|evaru|entha|ayindi|ayyindi|avuthundi|avunu|aunu|avuna|ikkada|akkada|gurinchi|ippudu|ayyo|kadha|chudu|chudandi|vinandi|telusa|teliyadu|matladu|matladandi|eroju|repu|ninna|konchem|manchi|antha|intha|vishayam|sahayam|bhojanam|neellu|kuda|kaani|aithe|lekapothe|vachindi|vachanu|vellali|vastunna|vasthunna|antunna|kaadu|podam|veldam|inkoka|inkenti|visheshalu|cheddam|parvaledu|parledhu|paravaledu)\b/gi;
+
+const TELUGU_ROMANIZED_WEAK_OR_COLLOCATION_REGEX = /\b(em\s+(?:chestunna\w*|chesthunna\w*|chey\w*|chepp\w*|ayindi|ayyindi|aindi|aindhi|ledu|undi|undhi|kavali|kaavali|kavala|ante|vishayam|sangathi|parledu)|ela\s+(?:unnav\w*|unnaru|undi|undhi|chey\w*|chepp\w*|vundi|vundhi)|unna|sare|kada|chala|vinu)\b/gi;
+
+const HINDI_ROMANIZED_STRONG_REGEX = /\b(kaisa|kaise|kaisi|kyun|kyon|aapka|tumhara|tumhe|mujhe|mera|meri|hamara|humara|theek|thik|accha|achha|batao|bataiye|kariye|shukriya|samajh|nahi|nahin|aaj|bahut|bahot|yaar|thakan|chahiye|kahan|kya|bolo|boliye|suno|suniye|haan|bilkul|zaroor|haal\s*chaal|hal\s*chal)\b/gi;
+
+const HINDI_ROMANIZED_WEAK_REGEX = /\b(aap|tum|karo|namaste)\b/gi;
+
+const TAMIL_ROMANIZED_STRONG_REGEX = /\b(eppadi|epdi|irukinga|irukkeenga|irukken|vanakkam|nandri|sollunga|pannunga|romba|theriyum|theriyala|vaanga|ponga|saptingala|saaptingala|irukku|enga|enna\s+(?:aachu|achhu|panringa|pannuringa|solringa|venum|vishesham))\b/gi;
+
+const INDIC_CULINARY_LOANWORD_ONLY_REGEX = /^[\s।.,!?'"-]*(?:बिरयानी|मसाला|दोसा|डोसा|इडली|वडा|समोसा|पनीर|चाय|रोटी|नान|पुलाव|तंदूरी|रसम|सांभर|चटनी|బిర్యానీ|మసాలా|దోస|ఇడ్లీ|వడ|సమోసా|పనీర్|చాయ్|రోటీ|నాన్|పులావ్|తందూరి)+(?:\s+(?:बिरयानी|मसाला|दोसा|डोसा|इडली|वडा|समोसा|पनीर|चाय|रोटी|नान|पुलाव|तंदूरी|బిర్యానీ|మసాలా|దోస|ఇడ్లీ|వడ|సమోసా|పనీర్|చాయ్|రోటీ|నాన్|పులావ్|తందూరి))*[\s।.,!?'"-]*$/u;
+
+const TRANSLITERATED_BACKCHANNEL_REGEX = /^[\s।.,!?'"-]*(?:ओके|ओके\s+थैंक्स|ओके\s+थैंक\s+यू|थैंक्स|थैंक\s+यू|सॉरी|प्लीज|यस|या|नो|राइट|नाइस|कूल|सुपर|श्योर|हेलो|हलो|हाय|ओह\s+नाइस|ओके\s+वॉट|वॉट|ఓకే|ఓకే\s+థాంక్స్|ఓకే\s+థ్యాంక్స్|ఓకే\s+థాంక్యూ|ఓకే\s+థ్యాంక్యూ|థాంక్స్|థ్యాంక్స్|థాంక్యూ|థ్యాంక్యూ|సారీ|ప్లీజ్|ఎస్|యా|నో|రైట్|నైస్|కూల్|సూపర్|ష్యూర్|హలో|హాయ్|ఓకే\s+వాట్|వాట్)[\s।.,!?'"-]*$/u;
+
+const HINDI_GRAMMAR_CUES_REGEX = /(है|हैं|हूँ|था|थी|थे|क्या|कैसे|क्यों|कब|कहाँ|कौन|मैं|हम|तुम|आप|मेरा|मुझे|आपको|नहीं|हाँ|और|में|को|का|की|के|से|पर|बताओ|बताइए|करो|कीजिए|अच्छा|ठीक|बहुत)/u;
+
+const MARATHI_GRAMMAR_CUES_REGEX = /(आहे|आहेत|आहात|कसे|काय|तुम्ही|माझं|मला|छान|नाही|होय|आणि|बरं|सांगा|करा)/u;
+
+function normalizeLangCode(code) {
+  if (!code || typeof code !== "string") return "";
+  const base = code.trim().toLowerCase().split(/[-_]/)[0];
+  if (base === "od") return "or";
+  return NAKSHATRA_CONFIG.languages.supported.some(l => l.code === base) ? base : "";
+}
+
+function buildLangResult(code, extras = {}) {
+  const normalized = normalizeLangCode(code) || "en";
+  const langObj = NAKSHATRA_CONFIG.languages.supported.find(l => l.code === normalized)
+    || NAKSHATRA_CONFIG.languages.supported[NAKSHATRA_CONFIG.languages.supported.length - 1];
+  const isRomanized = Boolean(extras.isRomanized);
+  let multiplier = langObj.token_multiplier || 1.0;
+  if (isRomanized && normalized !== "en") {
+    multiplier = normalized === "hi" ? 1.8 : 2.0;
+  }
+  return {
+    code: langObj.code,
+    name: langObj.name,
+    script: isRomanized ? "Latin" : langObj.script,
+    respectful_you: langObj.respectful_you || "",
+    multiplier,
+    locale: langObj.speech_locale || "en-IN",
+    isRomanized,
+    isBackchannel: Boolean(extras.isBackchannel),
+    switched: Boolean(extras.switched),
+    switchReason: extras.switchReason || null
+  };
+}
+
+function detectExplicitLanguageSwitch(text) {
+  if (!text || typeof text !== "string") return "";
+  const t = text.trim();
+  const lower = t.toLowerCase();
+
+  // Ignore meta-questions asking how to translate or what a word means in a language
+  if (/\b(what\s+does|meaning\s+of|how\s+do\s+you\s+say|how\s+to\s+say|translate)\b/i.test(lower)
+      && !/\b(speak|talk|reply|respond|answer|chat|continue|switch)\s+(?:to\s+me\s+|with\s+me\s+)?in\b/i.test(lower)) {
+    return "";
+  }
+
+  const explicitCmd = lower.match(/\b(?:speak|talk|reply|respond|answer|chat|explain|continue|switch)\s+(?:to\s+me\s+|with\s+me\s+)?(?:in\s+)?(telugu|english|hindi|marathi|tamil|kannada|malayalam|bengali|gujarati|punjabi|odia|spanish|french|german)\b/i)
+    || lower.match(/^(?:please\s+|pls\s+)?(?:speak\s+|talk\s+|reply\s+)?(?:in\s+)?(telugu|english|hindi|marathi|tamil|kannada|malayalam|bengali|gujarati|punjabi|odia|spanish|french|german)\s*(?:lo|mein|me|la|please|pls)?[.!?\s]*$/i);
+  if (explicitCmd && explicitCmd[1]) {
+    return LANG_NAME_TO_CODE[explicitCmd[1].toLowerCase()] || "";
+  }
+
+  if (/\b(?:telugu\s*lo\s*(?:cheppu|cheppandi|matladu|matladandi|cheptha)|తెలుగు\s*లో\s*(?:చెప్పు|చెప్పండి|మాట్లాడు|మాట్లాడండి|చెప్తారా))\b/i.test(t) || /^తెలుగు(లో)?[.!?\s]*$/u.test(t)) return "te";
+  if (/\b(?:english\s*(?:lo\s*(?:cheppu|cheppandi|matladu|matladandi)|mein\s*(?:bolo|batao|baat)|la\s*(?:pesunga|sollunga))|ఇంగ్లీష్\s*లో\s*(?:చెప్పు|చెప్పండి|మాట్లాడు|మాట్లాడండి))\b/i.test(t)) return "en";
+  if (/\b(?:hindi\s*me(?:in)?\s*(?:bolo|batao|bataiye|baat)|हिंदी\s*में\s*(?:बोलो|बताओ|बताइए|बात))\b/i.test(t)) return "hi";
+  if (/\b(?:tamil\s*la\s*(?:pesu|pesunga|sollu|sollunga)|தமிழில்\s*(?:பேசுங்கள்|சொல்லுங்கள்))\b/i.test(t)) return "ta";
+
+  return "";
+}
+
+function inferLanguageFromHistory(historyMessages = []) {
+  if (!Array.isArray(historyMessages) || historyMessages.length === 0) return "";
+  for (let i = historyMessages.length - 1; i >= 0; i--) {
+    const msg = historyMessages[i];
+    if (!msg || msg.role === "system" || typeof msg.content !== "string") continue;
+    const content = msg.content.trim();
+    if (!content) continue;
+
+    // Skip single short universal/transliterated backchannels when looking for true conversation language
+    if (BACKCHANNEL_REGEX.test(content) || TRANSLITERATED_BACKCHANNEL_REGEX.test(content)) continue;
+
+    const detected = detectLanguage(content, { ignoreHistory: true });
+    if (detected && detected.code) {
+      return detected.code;
+    }
+  }
+  return "";
+}
+
 /**
- * Unicode Script & Language Detector
+ * Unicode Script, Romanized & Conversation-History-Aware Language Detector
  */
-function detectLanguage(text) {
-  if (!text || typeof text !== "string") return { code: "en", script: "Latin", multiplier: 1.0, locale: "en-IN", isRomanized: false };
-  
+function detectLanguage(text, options = {}) {
+  const opts = (options && typeof options === "object") ? options : {};
+  const explicitOverride = normalizeLangCode(opts.explicitLanguage);
+  const sttMeta = opts.sttMeta || null;
+  const rawPrev = normalizeLangCode(opts.prevLang);
+  const prevLang = rawPrev || (!opts.ignoreHistory ? inferLanguageFromHistory(opts.historyMessages) : "") || "";
+
+  if (!text || typeof text !== "string" || !text.trim()) {
+    return buildLangResult(explicitOverride || prevLang || "en");
+  }
+
+  const t = text.trim();
+  const lower = t.toLowerCase();
+
+  // 1. Explicit user switch directive always wins
+  const switchTarget = detectExplicitLanguageSwitch(t);
+  if (switchTarget) {
+    return buildLangResult(switchTarget, {
+      switched: Boolean(prevLang && switchTarget !== prevLang),
+      switchReason: "explicit_request"
+    });
+  }
+
+  // 2. Authoritative client-resolved language (preserves frontend turn hysteresis)
+  if (explicitOverride) {
+    const hasTenglish = (lower.match(TELUGU_ROMANIZED_STRONG_REGEX) || []).length > 0;
+    const hasHinglish = (lower.match(HINDI_ROMANIZED_STRONG_REGEX) || []).length > 0;
+    const hasTanglish = (lower.match(TAMIL_ROMANIZED_STRONG_REGEX) || []).length > 0;
+    const hasIndicScript = /[\u0900-\u0DFF]/.test(t);
+    const isRomanized = !hasIndicScript && (
+      (explicitOverride === "te" && hasTenglish) ||
+      (explicitOverride === "hi" && hasHinglish) ||
+      (explicitOverride === "ta" && hasTanglish)
+    );
+    const isBackchannel = Boolean(prevLang) && BACKCHANNEL_REGEX.test(t);
+    return buildLangResult(explicitOverride, {
+      isRomanized,
+      isBackchannel,
+      switched: Boolean(prevLang && explicitOverride !== prevLang),
+      switchReason: "client_resolved"
+    });
+  }
+
+  // 2.5 Preserve active session language on transliterated English backchannels (e.g. "ఓకే థాంక్స్", "ओके थैंक्स")
+  if (prevLang && TRANSLITERATED_BACKCHANNEL_REGEX.test(t)) {
+    return buildLangResult(prevLang, { isBackchannel: true });
+  }
+
+  // 3. Native Unicode script detection across Indic & global scripts
   const counts = {
-    te: (text.match(/[\u0C00-\u0C7F]/g) || []).length,
-    hi: (text.match(/[\u0900-\u097F]/g) || []).length,
-    ta: (text.match(/[\u0B80-\u0BFF]/g) || []).length,
-    ml: (text.match(/[\u0D00-\u0D7F]/g) || []).length,
-    kn: (text.match(/[\u0C80-\u0CFF]/g) || []).length,
-    en: (text.match(/[a-zA-Z]/g) || []).length
+    te: (t.match(/[\u0C00-\u0C7F]/g) || []).length,
+    hi: (t.match(/[\u0900-\u097F]/g) || []).length,
+    ta: (t.match(/[\u0B80-\u0BFF]/g) || []).length,
+    ml: (t.match(/[\u0D00-\u0D7F]/g) || []).length,
+    kn: (t.match(/[\u0C80-\u0CFF]/g) || []).length,
+    bn: (t.match(/[\u0980-\u09FF]/g) || []).length,
+    gu: (t.match(/[\u0A80-\u0AFF]/g) || []).length,
+    pa: (t.match(/[\u0A00-\u0A7F]/g) || []).length,
+    or: (t.match(/[\u0B00-\u0B7F]/g) || []).length,
+    en: (t.match(/[a-zA-Z]/g) || []).length
   };
 
-  // Find non-English dominant Indic script
-  const indicScripts = ["te", "hi", "ta", "ml", "kn"];
+  const indicScripts = ["te", "hi", "ta", "ml", "kn", "bn", "gu", "pa", "or"];
   let bestIndic = "te";
   let maxIndicCount = 0;
   for (const s of indicScripts) {
@@ -151,43 +330,111 @@ function detectLanguage(text) {
     }
   }
 
-  // If Indic characters exist and form substantial portion
-  if (maxIndicCount > 0 && maxIndicCount >= (counts.en * 0.2 || 1)) {
-    const langObj = NAKSHATRA_CONFIG.languages.supported.find(l => l.code === bestIndic);
-    return {
-      code: bestIndic,
-      script: langObj.script,
-      multiplier: langObj.token_multiplier,
-      locale: langObj.speech_locale,
-      isRomanized: false
-    };
+  const threshold = NAKSHATRA_CONFIG.languages.detection.dominant_script_threshold;
+  const minIndicChars = prevLang === "en"
+    ? NAKSHATRA_CONFIG.languages.detection.min_indic_chars_to_override_en
+    : 2;
+  const isAskingMeaningInEnglish = /\b(?:what\s+does\b.+\bmean|meaning\s+of\b|how\s+do\s+you\s+say\b|translate\b.+\b(?:to|into)\s+english)\b|\bin\s+english[.!?\s]*$/i.test(lower);
+
+  if (maxIndicCount >= minIndicChars && maxIndicCount >= (counts.en * threshold) && !isAskingMeaningInEnglish) {
+    // Guard against STT transcribing short culinary/cultural English words ("Biryani", "Masala dosa") as Devanagari/Telugu
+    const sttProb = Number(sttMeta?.languageProbability || 0);
+    const isLoanwordOnly = prevLang === "en"
+      && INDIC_CULINARY_LOANWORD_ONLY_REGEX.test(t)
+      && !HINDI_GRAMMAR_CUES_REGEX.test(t)
+      && sttProb < 0.88;
+    if (!isLoanwordOnly) {
+      let resolvedIndic = bestIndic;
+      if (bestIndic === "hi" && (sttMeta?.languageCode === "mr-IN" || MARATHI_GRAMMAR_CUES_REGEX.test(t))) {
+        resolvedIndic = "mr";
+      }
+      return buildLangResult(resolvedIndic, {
+        switched: Boolean(prevLang && resolvedIndic !== prevLang),
+        switchReason: "unicode_script"
+      });
+    }
   }
 
-  // Check Romanized Indic (Tenglish, Hinglish, etc.) without false-positive English word collisions
-  const lower = text.toLowerCase();
-  const teluguRomanized = /\b(nuvvu|nenu|naaku|naku|neeku|meeru|manam|ela|unnav|unna|unnaru|unnava|enti|emiti|cheppu|cheppandi|cheppava|cheyi|cheyandi|cheyyali|cheptha|chepthava|chesava|chesaru|thinnava|tinnava|thinnara|bagunnava|bagunnav|bagunnara|bagunnanu|bagundi|kavali|kaavali|vaddu|ledu|undhi|unnadhi|enduku|ekkada|eppudu|evaru|entha|ayindi|avuthundi|ikkada|akkada|gurinchi|ippudu|sare|avuna|ayyo|kadha|kada|chudu|chudandi|vinu|vinandi|telusa|teliyadu|matladu|matladandi|eroju|repu|ninna|konchem|chala|manchi|antha|intha|vishayam|sahayam|bhojanam|neellu|kuda|kaani|aithe|lekapothe|vachindi|vellali|vastunna|chestunna|antunna|kaadu|podam|veldam|inkoka|visheshalu|cheddam)\b/i;
-  const hindiRomanized = /\b(kaisa|kaise|kya|kyun|kyon|hal|chal|aap|tum|theek|accha|batao|bataiye|karo|namaste|shukriya|samajh|nahi|aaj|bahut|yaar|thakan|mujhe|tumhe)\b/i;
-  const tamilRomanized = /\b(eppadi|irukinga|irukken|vanakkam|nandri|sollunga|enna|enga|irukku|romba|epdi|pannunga)\b/i;
+  if (/[\u0600-\u06FF]{2,}/.test(t)) return buildLangResult("ar", { switched: Boolean(prevLang && prevLang !== "ar"), switchReason: "unicode_script" });
+  if (/[\u3040-\u30FF]{2,}/.test(t)) return buildLangResult("ja", { switched: Boolean(prevLang && prevLang !== "ja"), switchReason: "unicode_script" });
+  if (/[\uAC00-\uD7AF]{2,}/.test(t)) return buildLangResult("ko", { switched: Boolean(prevLang && prevLang !== "ko"), switchReason: "unicode_script" });
+  if (/[\u4E00-\u9FFF]{2,}/.test(t)) return buildLangResult("zh", { switched: Boolean(prevLang && prevLang !== "zh"), switchReason: "unicode_script" });
 
-  if (teluguRomanized.test(lower)) {
-    return { code: "te", script: "Latin", multiplier: 2.0, locale: "te-IN", isRomanized: true };
-  }
-  if (hindiRomanized.test(lower)) {
-    return { code: "hi", script: "Latin", multiplier: 1.8, locale: "hi-IN", isRomanized: true };
-  }
-  if (tamilRomanized.test(lower)) {
-    return { code: "ta", script: "Latin", multiplier: 2.0, locale: "ta-IN", isRomanized: true };
+  // 4. Preserve active conversation language on universal short backchannels / fillers / pure numbers
+  if (BACKCHANNEL_REGEX.test(t) || /^[\d\s.,!?'"-]+$/.test(t)) {
+    const keepLang = prevLang || "en";
+    return buildLangResult(keepLang, { isBackchannel: Boolean(prevLang) });
   }
 
-  return { code: "en", script: "Latin", multiplier: 1.0, locale: "en-IN", isRomanized: false };
+  // 5. Unambiguous Romanized Indic (Tenglish, Hinglish, Tanglish) without English word collisions
+  const engGrammarCount = (lower.match(STRONG_ENGLISH_GRAMMAR_REGEX) || []).length;
+  const engVocabCount = (lower.match(ENGLISH_VOCAB_REGEX) || []).length;
+
+  if (!isAskingMeaningInEnglish) {
+    const teStrongHits = (lower.match(TELUGU_ROMANIZED_STRONG_REGEX) || []).length;
+    const teWeakHits = (lower.match(TELUGU_ROMANIZED_WEAK_OR_COLLOCATION_REGEX) || []).length;
+    if (teStrongHits >= 1 && (teStrongHits + teWeakHits > engGrammarCount || engGrammarCount <= 1)) {
+      return buildLangResult("te", { isRomanized: true, switched: Boolean(prevLang && prevLang !== "te"), switchReason: "romanized_te" });
+    }
+    if (teWeakHits >= 2 && engGrammarCount <= 1) {
+      return buildLangResult("te", { isRomanized: true, switched: Boolean(prevLang && prevLang !== "te"), switchReason: "romanized_te" });
+    }
+
+    const hiStrongHits = (lower.match(HINDI_ROMANIZED_STRONG_REGEX) || []).length;
+    const hiWeakHits = (lower.match(HINDI_ROMANIZED_WEAK_REGEX) || []).length;
+    if (hiStrongHits >= 1 && (hiStrongHits + hiWeakHits > engGrammarCount || engGrammarCount <= 1)) {
+      return buildLangResult("hi", { isRomanized: true, switched: Boolean(prevLang && prevLang !== "hi"), switchReason: "romanized_hi" });
+    }
+    if (hiWeakHits >= 2 && engGrammarCount === 0) {
+      return buildLangResult("hi", { isRomanized: true, switched: Boolean(prevLang && prevLang !== "hi"), switchReason: "romanized_hi" });
+    }
+
+    const taStrongHits = (lower.match(TAMIL_ROMANIZED_STRONG_REGEX) || []).length;
+    if (taStrongHits >= 1 && (taStrongHits > engGrammarCount || engGrammarCount <= 1)) {
+      return buildLangResult("ta", { isRomanized: true, switched: Boolean(prevLang && prevLang !== "ta"), switchReason: "romanized_ta" });
+    }
+  }
+
+  // 6. Common global Latin languages (Spanish, French, German)
+  if (/\b(hola|gracias|buenos|buenas|como estas|cómo estás|por favor|que tal|qué tal|donde|dónde|necesito)\b/i.test(lower)) {
+    return buildLangResult("es", { switched: Boolean(prevLang && prevLang !== "es"), switchReason: "latin_es" });
+  }
+  if (/\b(bonjour|merci|comment ca va|comment ça va|salut|s'il vous plait|s'il vous plaît|pourquoi|aujourd'hui)\b/i.test(lower)) {
+    return buildLangResult("fr", { switched: Boolean(prevLang && prevLang !== "fr"), switchReason: "latin_fr" });
+  }
+  if (/\b(hallo|danke|guten|wie geht|bitte|warum|heute|danke schön)\b/i.test(lower)) {
+    return buildLangResult("de", { switched: Boolean(prevLang && prevLang !== "de"), switchReason: "latin_de" });
+  }
+
+  // 7. Clear standard English sentences
+  if (engVocabCount >= 1) {
+    return buildLangResult("en", { switched: Boolean(prevLang && prevLang !== "en"), switchReason: "english_vocab" });
+  }
+
+  // 8. High-confidence acoustic STT LID only when no clear English vocabulary matched
+  const acousticCode = normalizeLangCode(sttMeta?.languageCode);
+  const acousticProb = Number(sttMeta?.languageProbability || 0);
+  const minAcousticProb = prevLang === "en"
+    ? NAKSHATRA_CONFIG.languages.detection.acoustic_min_prob_from_en
+    : NAKSHATRA_CONFIG.languages.detection.acoustic_min_prob_other;
+  if (acousticCode && acousticCode !== "en" && acousticProb >= minAcousticProb) {
+    return buildLangResult(acousticCode, { switched: Boolean(prevLang && prevLang !== acousticCode), switchReason: "acoustic_stt" });
+  }
+
+  if (/^[a-zA-Z0-9\s.,!?'"~@#$%^&*()_\-+=/<>:;]+$/.test(t)) {
+    return buildLangResult("en", { switched: Boolean(prevLang && prevLang !== "en"), switchReason: "ascii_fallback" });
+  }
+
+  return buildLangResult(prevLang || "en");
 }
 
 /**
  * Evaluates whether web search is required for time-sensitive facts
  */
-function shouldSearch(text) {
+function shouldSearch(text, mode = "chat") {
   if (!text || typeof text !== "string") return false;
-  const lower = text.toLowerCase();
+  const trimmed = text.trim();
+  const lower = trimmed.toLowerCase();
 
   // Skip search for obvious self-contained logic puzzles / arithmetic / coding debug queries
   const isSelfContainedPuzzle = /\b(riddle|puzzle|syllogism|truth-teller|knight|knave|river crossing|bat and ball|matchstick)\b/i.test(lower);
@@ -203,7 +450,7 @@ function shouldSearch(text) {
     return true;
   }
 
-  // Check keyword lists across all supported languages
+  // Strong real-time keywords across all supported languages
   for (const lang of Object.keys(NAKSHATRA_CONFIG.web_search.keywords)) {
     for (const kw of NAKSHATRA_CONFIG.web_search.keywords[lang]) {
       if (lower.includes(kw.toLowerCase())) {
@@ -211,6 +458,13 @@ function shouldSearch(text) {
       }
     }
   }
+
+  // Casual words like "today" / "now" only trigger search when paired with factual real-time topics (never on "I am tired today")
+  const hasTemporalCue = NAKSHATRA_CONFIG.web_search.temporal_cues.some(cue => lower.includes(cue.toLowerCase()));
+  if (hasTemporalCue && NAKSHATRA_CONFIG.web_search.temporal_topics_regex.test(trimmed)) {
+    return mode !== "live" || trimmed.length >= 16;
+  }
+
   return false;
 }
 
@@ -430,20 +684,17 @@ function classifyComplexity(userText, mode = "chat") {
 }
 
 /**
- * Model Tier Router: light (20b), standard (120b), deep (120b + high reasoning)
+ * Model Tier Router: light (20b), standard (120b), deep (120b + high reasoning), live (qwen3.8-27b)
  */
 function routeTier(userText, requestedModel, mode = "chat") {
   const complexity = classifyComplexity(userText, mode);
-  const defaultModel = complexity.tier === "live"
-    ? "qwen/qwen3.8-27b"
-    : (complexity.tier === "light"
-      ? NAKSHATRA_CONFIG.routing.tiers[0].model
-      : NAKSHATRA_CONFIG.routing.tiers[1].model);
+  const tierEntry = NAKSHATRA_CONFIG.routing.tiers.find(t => t.name === complexity.tier);
+  const defaultModel = tierEntry ? tierEntry.model : NAKSHATRA_CONFIG.routing.tiers[1].model;
 
   let model = defaultModel;
   if (requestedModel && requestedModel !== "auto") {
     if (/llama|gpt-oss-safeguard|auto/i.test(requestedModel)) {
-      model = NAKSHATRA_CONFIG.routing.tiers[1].model;
+      model = complexity.tier === "live" ? defaultModel : NAKSHATRA_CONFIG.routing.tiers[1].model;
     } else {
       model = requestedModel;
     }
@@ -458,19 +709,50 @@ function routeTier(userText, requestedModel, mode = "chat") {
 }
 
 /**
+ * Applies model-compatible reasoning parameters without sending unsupported values to Groq
+ */
+function applyReasoningParams(payload, model, requestedEffort) {
+  if (!NAKSHATRA_CONFIG.routing.reasoning_models.includes(model)) return;
+  const effort = requestedEffort || "medium";
+  if (/^qwen\//i.test(model)) {
+    if (effort === "none") {
+      payload.reasoning_effort = "none";
+    } else {
+      payload.reasoning_effort = "default";
+      payload.reasoning_format = "parsed";
+    }
+    return;
+  }
+  if (/gpt-oss/i.test(model)) {
+    payload.reasoning_effort = (effort === "high" || effort === "medium" || effort === "low") ? effort : "low";
+    payload.reasoning_format = "parsed";
+  }
+}
+
+/**
  * Builds the layered system prompt with static caching prefix and dynamic blocks
  */
 function assembleSystemPrompt(options = {}) {
-  const { mode = "chat", tier = "standard", language = {}, searchSnippets = null, mathVerification = null, timezone = "Asia/Kolkata", userProfile = null } = options;
+  const {
+    mode = "chat",
+    tier = "standard",
+    language = {},
+    searchSnippets = null,
+    mathVerification = null,
+    timezone = "Asia/Kolkata",
+    userProfile = null,
+    scriptPreference = null
+  } = options;
 
-  let prompt = NAKSHATRA_CONFIG.system_prompt.static;
+  const isLive = mode === "live";
+  let prompt = isLive ? NAKSHATRA_CONFIG.system_prompt.static_live : NAKSHATRA_CONFIG.system_prompt.static;
 
   // Append mode block
-  const modeText = (mode === "live") ? NAKSHATRA_CONFIG.system_prompt.mode_blocks.live : NAKSHATRA_CONFIG.system_prompt.mode_blocks.chat;
+  const modeText = isLive ? NAKSHATRA_CONFIG.system_prompt.mode_blocks.live : NAKSHATRA_CONFIG.system_prompt.mode_blocks.chat;
   prompt += `\n\n${modeText}`;
 
   // Deep Reasoning & Puzzle Trap Protocol
-  if (tier === "deep" && mode !== "live") {
+  if (tier === "deep" && !isLive) {
     prompt += `\n\n--- DEEP LOGIC & ANTI-TRAP PROTOCOL ---
 - Treat this as a high-precision reasoning, puzzle, math, or technical problem.
 - Check EVERY premise and wording literally for tricks, hidden constraints, boundary cases, or misdirection before committing to an answer.
@@ -480,19 +762,42 @@ function assembleSystemPrompt(options = {}) {
 
   // Append Dynamic Blocks
   prompt += `\n\n--- DYNAMIC CONTEXT ---`;
-  
+
   // Date & Time injection (vital for "today", "yesterday", "now")
   const now = new Date();
-  const dateStr = now.toLocaleString("en-US", { timeZone: timezone, dateStyle: "full", timeStyle: "medium" });
+  let dateStr;
+  try {
+    dateStr = now.toLocaleString("en-US", { timeZone: timezone, dateStyle: "full", timeStyle: "medium" });
+  } catch (e) {
+    dateStr = now.toISOString();
+  }
   prompt += `\nCURRENT DATE & TIME: ${dateStr} (${timezone})`;
 
-  // Language mandate
-  if (language.isRomanized) {
-    prompt += `\nACTIVE LANGUAGE: ${language.code.toUpperCase()} written in LATIN letters (Romanized / Tenglish / Hinglish). Reply in that authentic conversational romanized style!`;
-  } else if (language.code && language.code !== "en") {
-    prompt += `\nACTIVE LANGUAGE: ${language.code.toUpperCase()} in ${language.script} script. Reply 100% in natural, fluent ${language.script} script. Address the user respectfully as ${language.respectful_you || 'respectful'}.`;
+  // Language mandate (Live Mode defaults to native script so TTS pronounces naturally; Chat Mode mirrors Romanized unless native requested)
+  const langCode = language.code || "en";
+  const langName = language.name || "English";
+  const langScript = language.script || "Latin";
+  const forceNativeScript = isLive || scriptPreference === "native";
+
+  if (language.isRomanized && !forceNativeScript) {
+    prompt += `\nACTIVE LANGUAGE: ${langName} (${langCode.toUpperCase()}) written in LATIN letters (Romanized / Tenglish / Hinglish). Reply in that authentic conversational romanized style!`;
+  } else if (langCode === "te") {
+    prompt += `\nACTIVE LANGUAGE: Telugu (తెలుగు లిపి). Reply 100% in warm, natural, everyday spoken Telugu script using respectful ${language.respectful_you || "మీరు"}.`;
+    prompt += `\nTELUGU LIVE/VOICE STYLE: Keep common daily English words spaced naturally (never fuse Telugu and English letters into one word like "గhee"), avoid stiff textbook wording, and never use canned bot greetings like "నేను బాగున్నాను, మీరు బాగున్నారా?".`;
+  } else if (langCode !== "en") {
+    const scriptNote = langScript !== "Latin" ? ` in ${langScript} script` : "";
+    const respNote = language.respectful_you ? ` Address the user respectfully (${language.respectful_you}).` : "";
+    prompt += `\nACTIVE LANGUAGE: ${langName}${scriptNote}. Reply 100% in natural, fluent, everyday spoken ${langName}.${respNote}`;
   } else {
-    prompt += `\nACTIVE LANGUAGE: English. Reply in clear, crisp, natural English.`;
+    prompt += `\nACTIVE LANGUAGE: English. Reply 100% in clear, crisp, natural English.`;
+  }
+
+  if (language.switched) {
+    prompt += `\nLANGUAGE SWITCH: The user switched to ${langName}. Ignore earlier history language and reply strictly in ${langName}.`;
+  } else if (language.isBackchannel) {
+    prompt += `\nLANGUAGE LOCK (BACKCHANNEL CONTINUITY): The user gave a brief acknowledgment/backchannel while continuing the ${langName} conversation. Keep replying strictly in ${langName} and continue naturally.`;
+  } else {
+    prompt += `\nLANGUAGE LOCK: Continue replying strictly in ${langName}. Do NOT switch languages on your own.`;
   }
 
   // User Profile if enabled
@@ -630,8 +935,9 @@ function cleanTeluguSegment(text, mode = "chat") {
 
   // 7. Remove elongated stutter vowels & sounds
   t = t.replace(/([a-zA-Z])\1{3,}/g, '$1');
-  t = t.replace(/\b(aaa+|ooo+|ahh+|ohh+|uhh+|umm+|hmmm+|err+|aha+|oho+)\b/gi, '');
+  t = t.replace(/(^|\s)(aaa+|ooo+|ahh+|ohh+|uhh+|umm+|hmmm+|err+|aha+|oho+)\b[,:\s]*/gi, '$1');
   t = t.replace(/(^|\s)(ఆహ్+|ఓహ్+|హమ్మ్+|ఉమ్మ్+|umm+|ahh+|ohh+|hmm+|err+|ఆ{2,}|ఓ{2,})(\s|$|[.,!?])/giu, '$1$3');
+  t = t.replace(/^[,;:\s]+/, '');
 
   // 8. Expressive vocal harmony punctuation
   t = mode === "live" ? t.replace(/\.{4,}/g, '...') : t.replace(/\.{2,}/g, '. ');
@@ -656,7 +962,7 @@ function cleanTeluguSegment(text, mode = "chat") {
     }
     let lineRes = deduplicated.join(' ').trim();
     if (mode === "live") {
-      lineRes = lineRes.replace(/\s+(నేను|మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
+      lineRes = lineRes.replace(/\s+(మరియు|కానీ|తోనే|అతని|నా|and|but|with|the)\s*[.,!?;:\-]*$/iu, '');
     }
     return lineRes;
   });
@@ -732,34 +1038,54 @@ export default {
           return jsonResponse({ error: "Invalid JSON body" }, 400);
         }
 
-        // Extract latest user query & conversation history
+        // Extract latest user query & conversation history (keeping non-system turns cleanly)
         let latestUserText = "";
         let inputMessages = [];
+        let priorHistoryMessages = [];
 
         if (Array.isArray(reqData.messages) && reqData.messages.length > 0) {
-          inputMessages = reqData.messages.filter(m => m.role !== "system");
-          const lastUserMsg = [...inputMessages].reverse().find(m => m.role === "user");
-          latestUserText = lastUserMsg ? lastUserMsg.content : "";
+          inputMessages = reqData.messages.filter(m => m && m.role !== "system");
+          let lastUserIdx = -1;
+          for (let i = inputMessages.length - 1; i >= 0; i--) {
+            if (inputMessages[i].role === "user") {
+              lastUserIdx = i;
+              latestUserText = typeof inputMessages[i].content === "string" ? inputMessages[i].content : "";
+              break;
+            }
+          }
+          priorHistoryMessages = lastUserIdx > 0 ? inputMessages.slice(0, lastUserIdx) : [];
         } else if (reqData.message) {
           latestUserText = reqData.message;
           inputMessages = [{ role: "user", content: latestUserText }];
         }
 
-        // Step A: Detect Language via Unicode Script & Romanized heuristics
-        const langInfo = detectLanguage(latestUserText);
         const reqMode = reqData.mode || "chat";
+        const prevLangHint = normalizeLangCode(reqData.prev_language || reqData.active_language || reqData.user_profile?.preferred_language)
+          || inferLanguageFromHistory(priorHistoryMessages)
+          || "";
+        const explicitLangHint = normalizeLangCode(reqData.language);
+
+        // Step A: History-aware & client-contract-aware Language Detection
+        const langInfo = detectLanguage(latestUserText, {
+          prevLang: prevLangHint,
+          historyMessages: priorHistoryMessages,
+          mode: reqMode,
+          sttMeta: reqData.stt_meta || null,
+          explicitLanguage: explicitLangHint,
+          scriptPreference: reqData.script_preference || null
+        });
 
         // Step B: Dynamic Model Tier & Reasoning Effort Routing
         const routed = routeTier(latestUserText, reqData.model, reqMode);
-        const selectedModel = routed.model;
-        const isReasoningModel = NAKSHATRA_CONFIG.routing.reasoning_models.includes(selectedModel);
+        let selectedModel = routed.model;
+        let isReasoningModel = NAKSHATRA_CONFIG.routing.reasoning_models.includes(selectedModel);
 
         // Step C: Deterministic Math Check & Real-Time Web Search Grounding
         const mathVerification = evaluateSafeMathQuery(latestUserText);
         let searchSnippets = null;
         let searchExecuted = false;
         const serperKey = getCleanSecret(env, "SERPER_API_KEY");
-        if (shouldSearch(latestUserText) && serperKey) {
+        if (shouldSearch(latestUserText, reqMode) && serperKey) {
           const searchQuery = extractSearchQuery(latestUserText);
           searchSnippets = await fetchSerperSnippets(searchQuery, serperKey);
           if (searchSnippets) searchExecuted = true;
@@ -787,7 +1113,8 @@ export default {
           searchSnippets,
           mathVerification,
           timezone: reqData.timezone || "Asia/Kolkata",
-          userProfile: reqData.user_profile || null
+          userProfile: reqData.user_profile || null,
+          scriptPreference: reqData.script_preference || null
         });
 
         // Trim context window according to spec (8 turns = 16 messages for chat, 4 turns = 8 for live)
@@ -804,31 +1131,53 @@ export default {
           top_p: genProfile.top_p,
           max_completion_tokens: finalMaxTokens
         };
-        if (isReasoningModel && reasoningEffort) {
-          groqPayload.reasoning_effort = reasoningEffort;
-          if (reasoningEffort !== "none") {
-            groqPayload.reasoning_format = "parsed";
+        applyReasoningParams(groqPayload, selectedModel, reasoningEffort);
+
+        // Call Groq API (with automatic live fallback to standard 120b on upstream failure or empty reply)
+        let res = await callGroqChat(groqKey, groqPayload, reqMode === "live" ? 15000 : 25000);
+        let data = null;
+
+        if (res.ok) {
+          data = await res.json();
+        }
+        let aiChoice = data?.choices?.[0];
+        let aiText = aiChoice?.message?.content || "";
+        let finishReason = aiChoice?.finish_reason || "stop";
+
+        const liveFallbackModel = NAKSHATRA_CONFIG.routing.tiers.find(t => t.name === "live")?.fallback_model || "openai/gpt-oss-120b";
+        if (reqMode === "live" && selectedModel !== liveFallbackModel && (!res.ok || !aiText.trim())) {
+          const fallbackPayload = {
+            model: liveFallbackModel,
+            messages: groqPayload.messages,
+            temperature: Math.min(temperature, 0.6),
+            top_p: genProfile.top_p,
+            max_completion_tokens: Math.max(550, finalMaxTokens)
+          };
+          applyReasoningParams(fallbackPayload, liveFallbackModel, "low");
+          const fbRes = await callGroqChat(groqKey, fallbackPayload, 18000);
+          if (fbRes.ok) {
+            res = fbRes;
+            data = await fbRes.json();
+            selectedModel = liveFallbackModel;
+            isReasoningModel = NAKSHATRA_CONFIG.routing.reasoning_models.includes(selectedModel);
+            aiChoice = data?.choices?.[0];
+            aiText = aiChoice?.message?.content || "";
+            finishReason = aiChoice?.finish_reason || "stop";
           }
         }
 
-        // Call Groq API
-        const res = await callGroqChat(groqKey, groqPayload, 25000);
-
-        if (!res.ok) {
-          const errData = await res.text();
+        if (!res.ok || !data) {
+          const errData = res.ok ? JSON.stringify({ error: "Upstream returned empty response" }) : await res.text();
           return new Response(errData, {
-            status: res.status,
+            status: res.ok ? 502 : res.status,
             headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
           });
         }
 
-        const data = await res.json();
-        let aiChoice = data.choices?.[0];
-        let aiText = aiChoice?.message?.content || "";
-        let finishReason = aiChoice?.finish_reason || "stop";
-
         // Step F: Completion Guard: Auto-continue if cut-off (Section 9)
-        if (finishReason === "length" || (isTruncatedReply(aiText) && aiText.length > 80)) {
+        const shouldAutoContinue = finishReason === "length"
+          || (reqMode !== "live" && isTruncatedReply(aiText) && aiText.length > 80);
+        if (shouldAutoContinue) {
           try {
             const continuePayload = {
               model: selectedModel,
@@ -841,10 +1190,7 @@ export default {
               temperature: Math.min(temperature, 0.3),
               max_completion_tokens: Math.min(2000, finalMaxTokens)
             };
-            if (isReasoningModel && reasoningEffort) {
-              continuePayload.reasoning_effort = "low";
-              continuePayload.reasoning_format = "parsed";
-            }
+            applyReasoningParams(continuePayload, selectedModel, reqMode === "live" ? "none" : "low");
 
             const contRes = await callGroqChat(groqKey, continuePayload, 15000);
 
@@ -890,10 +1236,15 @@ export default {
         const latencyMs = Date.now() - startTime;
         console.log(JSON.stringify({
           event: "completion",
+          mode: reqMode,
           lang: langInfo.code,
+          prev_lang: prevLangHint || null,
+          switched: langInfo.switched,
+          switch_reason: langInfo.switchReason,
+          is_backchannel: langInfo.isBackchannel,
           script: langInfo.script,
           tier: routed.tier,
-          reasoning_effort: isReasoningModel ? reasoningEffort : null,
+          reasoning_effort: isReasoningModel ? (groqPayload.reasoning_effort || null) : null,
           verified_by_critic: verifiedByCritic,
           model: selectedModel,
           prompt_version: NAKSHATRA_CONFIG.meta.prompt_version,
@@ -903,22 +1254,29 @@ export default {
           usage: data.usage || null
         }));
 
+        const responseMeta = {
+          language: langInfo.code,
+          prev_language: prevLangHint || null,
+          switched: langInfo.switched,
+          switch_reason: langInfo.switchReason,
+          is_backchannel: langInfo.isBackchannel,
+          is_romanized: langInfo.isRomanized,
+          script: langInfo.script,
+          speech_locale: langInfo.locale,
+          tier: routed.tier,
+          reasoning_effort: isReasoningModel ? (groqPayload.reasoning_effort || null) : null,
+          verified_by_critic: verifiedByCritic,
+          model: selectedModel,
+          finish_reason: finishReason,
+          search_used: searchExecuted,
+          prompt_version: NAKSHATRA_CONFIG.meta.prompt_version
+        };
+
         // Format response backwards-compatibly
         if (reqData.message && !reqData.messages) {
-          return jsonResponse({ 
+          return jsonResponse({
             response: aiText,
-            meta: {
-              language: langInfo.code,
-              script: langInfo.script,
-              speech_locale: langInfo.locale,
-              tier: routed.tier,
-              reasoning_effort: isReasoningModel ? reasoningEffort : null,
-              verified_by_critic: verifiedByCritic,
-              model: selectedModel,
-              finish_reason: finishReason,
-              search_used: searchExecuted,
-              prompt_version: NAKSHATRA_CONFIG.meta.prompt_version
-            }
+            meta: responseMeta
           });
         }
 
@@ -927,18 +1285,7 @@ export default {
         }
 
         // Include metadata in root object for advanced clients
-        data.meta = {
-          language: langInfo.code,
-          script: langInfo.script,
-          speech_locale: langInfo.locale,
-          tier: routed.tier,
-          reasoning_effort: isReasoningModel ? reasoningEffort : null,
-          verified_by_critic: verifiedByCritic,
-          model: selectedModel,
-          finish_reason: finishReason,
-          search_used: searchExecuted,
-          prompt_version: NAKSHATRA_CONFIG.meta.prompt_version
-        };
+        data.meta = responseMeta;
         data.response = aiText;
 
         return jsonResponse(data);
@@ -1001,12 +1348,17 @@ export default {
         }
 
         const langCode = payload.target_language_code || payload.language_code || "te-IN";
+        const isV3Regional = /^(ta|ml|kn|mr|bn|gu|pa|od|or)-/i.test(langCode);
+        const defaultModel = isV3Regional ? "bulbul:v3" : "bulbul:v4-flash";
+        const defaultSpeaker = isV3Regional
+          ? "kavitha"
+          : (langCode.startsWith("hi") ? "kavya_hi_conversational" : langCode.startsWith("en") ? "simran_en_conversation" : "kavitha_te_conversation");
 
         const sarvamBody = {
           text: speechText,
           target_language_code: langCode,
-          model: payload.model || "bulbul:v4-flash",
-          speaker: payload.speaker || (langCode.startsWith("hi") ? "kavya_hi_conversational" : langCode.startsWith("en") ? "simran_en_conversation" : "kavitha_te_conversation"),
+          model: payload.model || defaultModel,
+          speaker: payload.speaker || defaultSpeaker,
           pace: payload.pace ?? 1.0,
           pitch: payload.pitch ?? 0.0,
           loudness: payload.loudness ?? 1.15,
@@ -1132,8 +1484,7 @@ Check the candidate answer against EVERY word, constraint, edge case, linguistic
       max_completion_tokens: 2400
     };
     if (isReasoningModel) {
-      criticPayload.reasoning_effort = "high";
-      criticPayload.reasoning_format = "parsed";
+      applyReasoningParams(criticPayload, model, "high");
     }
 
     const res = await callGroqChat(groqKey, criticPayload, 12000);
