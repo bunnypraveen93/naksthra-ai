@@ -66,6 +66,7 @@ LANGUAGE & SCRIPT POLICY:
 - Keep common technical words in English (app, download, login, server, link, internet, mobile).
 - Address the user respectfully by default (Telugu: మీరు, Hindi: आप, Tamil: நீங்கள், Malayalam: നിങ്ങൾ, Kannada: ನೀವು).
 - STRICT TELUGU SCRIPT HYGIENE: NEVER fuse Telugu and English letters inside one word (never write broken hybrids like "గhee"). Separate English loanwords with spaces or use exact everyday Telugu words (బాస్మతి బియ్యం = raw rice before cooking [never బాస్మతి అన్నం], నెయ్యి = ghee [never వెన్న/గీ], పెరుగు = curd/yogurt [never దయి], కొత్తిమీర = cilantro leaves, ధనియాలు = coriander seeds, గోధుమ పిండి = dough [never పొట్టు], మందపాటి గిన్నె = heavy pot [never బాటిల్/వెండి పాన్], వడ్డించడం = serve food [never సేవించడం], రైతా = raita [never రాయితీ], దమ్ = steam seal [never దంప్/దుమ్], మారినేట్ చేసి పక్కన ఉంచండి = marinate & rest [never మరిగించండి = boil], పసుపు = turmeric [never హల్దీ]).
+- MORE TELUGU KITCHEN WORDS: పెరుగు = yogurt [never యోగర్ట్], యాలకులు = cardamom [never కార్డమోమ్], బిర్యానీ ఆకు = bay leaf [never బే లీఫ్], రైతా [never రైటా], వడ్డించడం = serving [never సేవ], మసాలా పట్టించండి = coat with masala [never మసాలా పూయండి], మందపాటి గిన్నె = heavy-bottom pot [never బరువు ఉన్న పాన్], ఆవాలు = mustard seeds [never మస్టర్డ్ సీడ్స్], కారం = red chili powder [never మిరియాల పొడి, which is black pepper], కొత్తిమీర = cilantro leaves (pair with పుదీనా, never ధనియాలు), యాలకులు = cardamom (the ONLY word for it; never కారదమోము, and never list cardamom twice).
 
 REASONING, LOGIC & PRACTICAL STEP DISCIPLINE (CRITICAL):
 - Before answering ANY logic puzzle, riddle, trick question, math word problem, probability problem, or multi-step question:
@@ -82,14 +83,21 @@ ANTI-HALLUCINATION & REAL-TIME TRUTH POLICY (STRICT):
 - Nakshatra AI has built-in real-time weather, Google News, Wikipedia News, currency, crypto, and web grounding. Whenever <search_context> is present, answer directly from those live facts (stating city, source, and recency) and NEVER claim you don't have internet access or tell the user to check weather/news apps.
 - Never extrapolate unverified details or pretend to verify live external events when no <search_context> is provided.
 
-STYLE & FORMATTING (CHATGPT / CLAUDE EDITORIAL RHYTHM):
+RESPONSE SIZE & BEHAVIOR (PROFESSIONAL ASSISTANT STYLE, STRICT):
+- Answer exactly what was asked, in the FIRST sentence. Match the length of your answer to the size of the question.
+- Simple, yes/no, casual, or factual questions (e.g. "do you know Telugu?", "are you there?", "who made you?", "2+2?"): reply in 1-2 short plain sentences. NO headings, NO bullets, NO bold, NO lists of features or tips, NO summary. At most one short natural follow-up question.
+- Questions about yourself or your abilities: answer directly and briefly. Never list everything you can do.
+- Medium questions (explain, why, how does X work): a short paragraph (about 60-120 words). Use a small list only when there are 3+ truly parallel items.
+- Use ### headings and numbered or bulleted structure ONLY for long tasks the user asks for: step-by-step guides, recipes, detailed comparisons, essays, code walkthroughs.
+- Never pad: no restating the question, no repeated intro, no "In conclusion", no closing recap, no unnecessary disclaimers.
+- NEVER end with a generic offer such as "Anything else you want to know?", "ఇంకేమైనా తెలుసుకోవాలనుకుంటున్నారా?", "Let me know if you'd like..." or "What can I help you with?". Stop when the answer is complete; ask a follow-up ONLY when it is genuinely needed to continue.
+- NEVER repeat anything you already said earlier in the conversation. If asked again, answer in fresh, shorter words or a one-line confirmation. Never write the same sentence or paragraph twice in one reply.
+- If the request is ambiguous, ask ONE short clarifying question instead of guessing at length.
+- UNCLEAR OR AMBIGUOUS WORDS (STRICT): if a word is unknown, misspelled, or could mean different things (especially Romanized Indic words, e.g. "pamu" = snake vs "pappu" = lentils/dal), NEVER silently guess and NEVER invent a dish, word, or gloss like "X (Y)". Ask ONE short clarifying question offering the 1-2 most likely meanings. Obvious typos (briyani = biryani, chyali = cheyali) are simply understood without comment.
+- FACTS ABOUT PEOPLE & CURRENT OFFICES (STRICT): offices change. Who currently holds a post (CM, PM, CEO, etc.) must come ONLY from <search_context>, never from memory. Never invent biographies, parties, birth years, or family relations. If <search_context> does not contain the answer, say you are not sure.
+- NEVER agree with a claim just because the user phrased it as a question ("...aa?", "right?", "kada?"). Check it against the search context or solid knowledge; if it is wrong, politely correct it; if unsure, say so.
 - NO GREETING OPENERS ON QUESTIONS: NEVER start answers to questions, explanations, puzzles, or coding requests with "Hi!", "Hi there!", "Hey!", "Hello!", "Sure!", or "Here is...". Only greet back when the user's message itself is strictly a greeting ("hi", "hello", "ela unnav").
-- For casual greetings ONLY: reply warmly in 1-2 short sentences with no headings or bullets.
-- For explanations, advice, comparisons, puzzle solutions, or how-to answers:
-  1. Opening Hook Passage: Start immediately with a clear, engaging 1-2 sentence summary directly answering the core question.
-  2. Section Headings: Leave a blank line, then organize key ideas under clean "### Heading Title" sections.
-  3. Descriptive Points & Numbered Steps: Replace placeholders with REAL descriptive titles — NEVER literally print "Bold Lead-in"! Use "- **Real Topic Name:** natural 1-2 sentence explanation" for features/ideas, and numbered steps "1. **Real Step Name:** exact sequential instruction" for recipes and procedures.
-  4. Clean Spacing: Always separate paragraphs, headings, and lists with blank lines.
+- For descriptive points use "- **Real Topic Name:** natural 1-2 sentence explanation" and for procedures "1. **Real Step Name:** instruction". NEVER print placeholder text like "Bold Lead-in".
 
 COMPLETENESS & FINISHING:
 - Always finish every answer with a complete, well-formed sentence. Never trail off or cut off mid-thought. If an answer must end, summarize cleanly and offer to continue.
@@ -107,10 +115,11 @@ ABSOLUTE BAN ON CANNED BOT GREETINGS:
 IDENTITY & TRUTH:
 - Your name is Nakshatra AI; your sole creator is Bunny (Praveen). Mention Bunny only if explicitly asked who created you.
 - Never invent facts, numbers, dates, links, or quotes. When <search_context> is provided, answer directly with the live weather, news headlines, prices, or facts cleanly in spoken words — NEVER tell the user to check external apps.
-- For how-to, recipe, or technical questions, keep real-world chronological step order and accurate core timings without skipping essential steps.`,
+- For how-to, recipe, or technical questions, keep real-world chronological step order and accurate core timings without skipping essential steps.
+- Answer exactly what was asked, first. Yes/no or capability questions (e.g. "do you know Telugu?") get ONE short sentence plus at most a tiny follow-up, never a list of features. Never repeat what you already said earlier.`,
     mode_blocks: {
-      chat: "MODE: Text chat. Give the verified answer first, followed by clean reasoning steps, descriptive **topic** bullets, or numbered sequential steps with ### headings where helpful. NEVER output literal placeholder labels like 'Bold Lead-in'. Keep casual greetings brief and natural.",
-      live: "MODE: Live voice call conversation. Speak like a warm, genuine human friend in 1 to 2 short spoken sentences (~10-28 words). Use natural contractions, commas or ellipses for soft breathing pauses, and warm conversational reactions. Zero markdown, asterisks, bullet lists, headings, emojis, code, or raw URLs."
+      chat: "MODE: Text chat. Give the direct answer first and keep it as short as the question allows (1-2 plain sentences for simple questions). Use ### headings, bullets or numbered steps ONLY for genuinely long, multi-part tasks the user asks for. NEVER output literal placeholder labels like 'Bold Lead-in'. Keep casual greetings brief and natural.",
+      live: "MODE: Live voice call conversation. Speak like a warm, genuine human friend in 1 to 3 short spoken sentences (~12-35 words), reacting to the user's feeling first, varying openers, mirroring their mood and language, never robotic or lecture-like. Use natural contractions, commas or ellipses for soft breathing pauses, and warm conversational reactions. Zero markdown, asterisks, bullet lists, headings, emojis, code, or raw URLs."
     }
   },
   generation: {
@@ -173,7 +182,7 @@ const ENGLISH_VOCAB_REGEX = /\b(the|is|are|am|was|were|be|been|have|has|had|do|d
 
 const STRONG_ENGLISH_GRAMMAR_REGEX = /\b(the|is|are|was|were|have|has|had|do|does|did|can|could|would|should|will|about|with|from|because|explain|what|which|where|how|why|who|this|that|these|those|please|english)\b/gi;
 
-const TELUGU_ROMANIZED_STRONG_REGEX = /\b(nuvvu|nenu|naaku|naku|neeku|meeru|manam|unnav|unnaru|unnava|unnadu|unnadhi|undi|undhi|enti|emiti|emito|emaina|emaindi|emaindhi|cheppu|cheppandi|cheppava|cheyi|chey|cheyandi|cheyyali|cheptha|chepthava|chesava|chesaru|chesthunna|chesthunnav|chesthunnaru|chestunna|chestunnav|chestunnaru|thinnava|tinnava|thinnara|thinnanu|tinnanu|bagunnava|bagunnav|bagunnara|bagunnanu|bagundi|baagundi|baagunnava|kavali|kaavali|vaddu|ledu|enduku|ekkada|eppudu|evaru|entha|ayindi|ayyindi|avuthundi|avunu|aunu|avuna|ikkada|akkada|gurinchi|ippudu|ayyo|kadha|chudu|chudandi|vinandi|telusa|teliyadu|matladu|matladandi|eroju|repu|ninna|konchem|manchi|antha|intha|vishayam|sahayam|bhojanam|neellu|kuda|kaani|aithe|lekapothe|vachindi|vachanu|vellali|vastunna|vasthunna|antunna|kaadu|podam|veldam|inkoka|inkenti|visheshalu|cheddam|parvaledu|parledhu|paravaledu)\b/gi;
+const TELUGU_ROMANIZED_STRONG_REGEX = /\b(nuvvu|nenu|naaku|naku|neeku|meeru|manam|unnav|unnaru|unnava|unnadu|unnadhi|undi|undhi|enti|emiti|emito|emaina|emaindi|emaindhi|cheppu|cheppandi|cheppava|cheyi|chey|cheyandi|cheyyali|cheptha|chepthava|chesava|chesaru|chesthunna|chesthunnav|chesthunnaru|chestunna|chestunnav|chestunnaru|thinnava|tinnava|thinnara|thinnanu|tinnanu|bagunnava|bagunnav|bagunnara|bagunnanu|bagundi|baagundi|baagunnava|kavali|kaavali|vaddu|ledu|enduku|ekkada|eppudu|evaru|entha|ayindi|ayyindi|avuthundi|avunu|aunu|avuna|ikkada|akkada|gurinchi|ippudu|ayyo|kadha|chudu|chudandi|vinandi|telusa|teliyadu|matladu|matladandi|eroju|repu|ninna|konchem|manchi|antha|intha|vishayam|sahayam|bhojanam|neellu|kuda|kaani|aithe|lekapothe|vachindi|vachanu|vellali|vastunna|vasthunna|antunna|kaadu|podam|veldam|inkoka|inkenti|visheshalu|cheddam|parvaledu|parledhu|paravaledu|yela|yenti|yemi|chyali|chyandi|chyadam|chesindi|ninnu|nannu|telugulo|yevaru|yaevaru|gurnchi|gurunchi|yermana|ermana|nanna)\b/gi;
 
 const TELUGU_ROMANIZED_WEAK_OR_COLLOCATION_REGEX = /\b(em\s+(?:chestunna\w*|chesthunna\w*|chey\w*|chepp\w*|ayindi|ayyindi|aindi|aindhi|ledu|undi|undhi|kavali|kaavali|kavala|ante|vishayam|sangathi|parledu)|ela\s+(?:unnav\w*|unnaru|undi|undhi|chey\w*|chepp\w*|vundi|vundhi)|unna|sare|kada|chala|vinu)\b/gi;
 
@@ -432,6 +441,9 @@ function detectLanguage(text, options = {}) {
   }
 
   if (/^[a-zA-Z0-9\s.,!?'"~@#$%^&*()_\-+=/<>:;]+$/.test(t)) {
+    if (prevLang && prevLang !== "en") {
+      return buildLangResult(prevLang, { switchReason: "keep_prev_latin_unknown" });
+    }
     return buildLangResult("en", { switched: Boolean(prevLang && prevLang !== "en"), switchReason: "ascii_fallback" });
   }
 
@@ -687,12 +699,19 @@ function classifyRealtimeIntent(text, mode = "chat", langCode = "en") {
     };
   }
 
-  // 6. Explicit search or year-specific / officeholder / factual entity lookups
+  // 6. Explicit search, officeholders/person lookups, or year-specific factual queries
   const explicitSearch = /\b(search\s+for|search\s+on\s+google|look\s+up|google\s+cheyi|search\s+cheyi)\b|(వెతుకు|నెట్\s*లో\s*చూడు|సెర్చ్\s*చేయి)/i.test(trimmed);
   const yearFactual = /\b202[4-9]\b/.test(lower) && /\b(who|what|when|which|won|winner|champion|latest|new|released|launched|update|version|price|score|result|election)\b/i.test(lower);
   const isKnowledgeEntity = /\b(who\s+is\s+(?:the\s+)?(?:current|present|new)\s+(?:ceo|president|prime\s+minister|chief\s+minister|cm|pm|governor)|ceo\s+of|president\s+of|prime\s+minister\s+of|chief\s+minister\s+of)\b|(?:ప్రస్తుత\s*(?:ముఖ్యమంత్రి|ప్రధానమంత్రి|రాష్ట్రపతి)|వెర్షన్)/i.test(trimmed);
+  const roleRegex = /(?<![\d.]\s{0,2})\b(?:cm|pm|mla|mp|chief\s+minister|prime\s+minister|mukhyamantri|governor|minister|president|ceo|speaker|mayor|captain|coach)\b|ముఖ్యమంత్రి|ప్రధాని|మంత్రి|గవర్నర్|ఎమ్మెల్యే|సీఎం|పీఎం/i;
+  const askWhoRegex = /\bwho\s+(?:is|was|are)\b|\btell\s+me\s+about\b|\b(?:ye?a?e?v+aru|evarandi|evaru)\b|gu?r[iu]?n?chi|గురించి|ఎవరు/i;
+  const personFactRegex = /\b(?:nanna|nana|tandri|amma|bharya|bhartha|vayasu|born|father|mother|wife|husband|age|party)\b|తండ్రి|నాన్న|భార్య|వయసు/i;
+  const isPeopleOrOfficeQuery = !/\b(?:hi|hello|hey)\b[!.?\s]*$/i.test(lower)
+    && ((roleRegex.test(trimmed) && askWhoRegex.test(trimmed))
+      || (askWhoRegex.test(trimmed) && trimmed.length <= 120 && !/\b(recipe|biryani|briyani|cook|code|function)\b/i.test(lower))
+      || (personFactRegex.test(trimmed) && trimmed.length <= 120));
 
-  if (isKnowledgeEntity) {
+  if (isKnowledgeEntity || isPeopleOrOfficeQuery) {
     return {
       ...empty,
       needsSearch: true,
@@ -1831,6 +1850,7 @@ function assembleSystemPrompt(options = {}) {
     mathVerification = null,
     timezone = "Asia/Kolkata",
     userProfile = null,
+    brevityHint = false,
     scriptPreference = null
   } = options;
 
@@ -1847,11 +1867,15 @@ function assembleSystemPrompt(options = {}) {
 - Treat this as a high-precision reasoning, puzzle, math, or technical problem.
 - Check EVERY premise and wording literally for tricks, hidden constraints, boundary cases, or misdirection before committing to an answer.
 - Explicitly verify your candidate solution against EVERY given condition in the prompt before writing the final response.
-- If the problem lacks enough information or has an impossible premise, point that out directly instead of inventing assumptions.`;
+- If the problem lacks enough information or has an impossible premise, point that out directly instead of inventing assumptions.
+- For recipes: include every classic step (e.g. biryani needs marinating the meat/veg with yogurt and spices, par-boiled rice, then dum), use correct everyday ingredient names, and never list the same ingredient twice under two different names.`;
   }
 
   // Append Dynamic Blocks
   prompt += `\n\n--- DYNAMIC CONTEXT ---`;
+  if (brevityHint) {
+    prompt += `\nTHIS TURN: The user's message is short. Answer in 1-3 plain sentences (no headings, bullets, bold or lists) unless they explicitly ask for detail, steps, a list, or code.`;
+  }
 
   // Date & Time injection (vital for "today", "yesterday", "now")
   const now = new Date();
@@ -1959,6 +1983,50 @@ function cleanTeluguOutput(text, mode = "chat") {
   }).join('').trim();
 }
 
+function stripGenericClosers(text) {
+  if (!text || typeof text !== "string") return text;
+  const patterns = [
+    /\s*(?:ఇంకేమైనా|ఇంకా\s*ఏమైనా|ఇంకా\s*ఏవైనా)[^.?!\u0964\n]*?(?:తెలుసుకోవాలనుకుంటున్నారా|కావాలా|చెప్పండి)\s*[.?!\u0964]?\s*$/u,
+    /\s*(?:Is there anything else|Anything else|Would you like to know (?:more|anything else)|Do you want to know (?:more|anything else)|What can I help you with)[^.?!\n]*[.?!]?\s*$/i,
+    /\s*Let me know if you(?:'d| would)? (?:like|need|want)[^.!?\n]*[.!?]?\s*$/i
+  ];
+  let out = text;
+  for (const p of patterns) {
+    const next = out.replace(p, "");
+    if (next !== out && next.trim().length >= 12) out = next;
+  }
+  return out.trim();
+}
+
+function dedupeRepeatedBlocks(text) {
+  if (!text || typeof text !== "string") return text;
+  const seen = new Set();
+  const norm = (s) => s.replace(/\s+/g, " ").replace(/[*_`#>\-]/g, "").trim().toLowerCase();
+  return text.split(/(```[\s\S]*?```)/g).map(part => {
+    if (part.startsWith("```")) return part;
+    return part.split(/\n{2,}/).map(par => {
+      const isStructured = /^\s*(?:[-*+]|\d+\.|#|>|\|)/.test(par);
+      if (!isStructured) {
+        const sentences = par.split(/(?<=[.!?\u0964])\s+/);
+        par = sentences.filter(s => {
+          const k = norm(s);
+          if (k.length < 20) return true;
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        }).join(" ");
+      } else {
+        const k = norm(par);
+        if (k.length >= 25) {
+          if (seen.has(k)) return "";
+          seen.add(k);
+        }
+      }
+      return par;
+    }).filter(p => p.trim()).join("\n\n");
+  }).join("");
+}
+
 function cleanTeluguSegment(text, mode = "chat") {
   let t = text;
 
@@ -2012,6 +2080,25 @@ function cleanTeluguSegment(text, mode = "chat") {
   t = t.replace(/[“"]?(?:దంప్|దుమ్|డంప్)[”"]?/gu, "దమ్");
   t = t.replace(/(\d+\s*నిమిషాలు\s*)మరిగించండి(?=\s*(?:[.,\n]|$))/gu, "$1పక్కన ఉంచండి");
   t = t.replace(/\s*\((?:సుమారు\s*)?\d+\s*W\)/giu, "");
+  t = t.replace(/యోగ(?:ర్)?ట్/gu, "పెరుగు");
+  t = t.replace(/కార్డమోమ్|కార్డమమ్|కార్డమం/gu, "యాలకులు");
+  t = t.replace(/బే\s*లీఫ్/gu, "బిర్యానీ ఆకు");
+  t = t.replace(/రైటా/gu, "రైతా");
+  t = t.replace(/(^|\n)(\s*(?:\d+\.\s*)?(?:\*\*)?)సేవ(\s*[:：])/gu, "$1$2వడ్డించడం$3");
+  t = t.replace(/మసాలా\s*పూయండి/gu, "మసాలా పట్టించండి");
+  t = t.replace(/మసాలా\s*పూసిన/gu, "మసాలా పట్టించిన");
+  t = t.replace(/బరువు\s*ఉన్న\s*పాన్[\u200C\u200D]?\s*లో/gu, "మందపాటి గిన్నెలో");
+  t = t.replace(/ముద్దతో\s*బిగించండి/gu, "గోధుమ పిండి ముద్దతో సీల్ చేయండి");
+  t = t.replace(/కారదమోము|కారదమోమ్|కార్డమోము/gu, "యాలకులు");
+  t = t.replace(/మస్టర్డ్\s*సీడ్స్/gu, "ఆవాలు");
+  t = t.replace(/(పుదీనా[\s,\u2011\u2013-]*(?:మరియు\s*)?)ధనియాలు/gu, "$1కొత్తిమీర");
+  t = t.replace(/ధనియాలు([\s,]*(?:మరియు\s*)?పుదీనా)/gu, "కొత్తిమీర$1");
+  t = t.replace(/([\u0C00-\u0C7F]{2,})\s*\(\s*\1\s*\)/gu, "$1");
+  t = t.split("\n").map(line => {
+    if ((line.match(/యాలకులు/gu) || []).length < 2) return line;
+    let n = 0;
+    return line.replace(/(?:,\s*|\s+)?(?:[\d½¼¾]+(?:\.\d+)?\s*)?(?:టీస్పూన్|టేబుల్[\u200C\u200D]?స్పూన్)?\s*యాలకులు/gu, m => (++n === 1 ? m : ""));
+  }).join("\n");
   t = t.replace(/\bచెప్పు\s+రా\b/gi, "చెప్పండి");
   t = t.replace(/\bబాధపడకు\s+రా\b/gi, "బాధపడకండి");
   t = t.replace(/\bఏమైంది\s+రా\b/gi, "ఏమైంది");
@@ -2252,6 +2339,7 @@ export default {
           mathVerification,
           timezone: reqData.timezone || "Asia/Kolkata",
           userProfile: reqData.user_profile || null,
+          brevityHint: reqMode === "chat" && !routed.isDeep && !searchExecuted && latestUserText.trim().length <= 90,
           scriptPreference: reqData.script_preference || null
         });
 
@@ -2419,7 +2507,8 @@ export default {
         }
 
         // Step H: Clean Output & Vocal Polish
-        aiText = cleanTeluguOutput(aiText, reqMode);
+        aiText = dedupeRepeatedBlocks(cleanTeluguOutput(aiText, reqMode));
+        if (reqMode === "chat") aiText = stripGenericClosers(aiText);
         if (reqMode === "chat" && routed.tier !== "light" && aiText.length > 35) {
           aiText = aiText.replace(/^(?:hi|hello|hey|హాయ్|హలో|హేయ్)(?:\s+there)?[!.,:]+\s+/i, '').trim();
         }
