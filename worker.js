@@ -2238,7 +2238,9 @@ export default {
         const temperature = (typeof reqData.temperature === "number")
           ? Math.min(genProfile.temperature, reqData.temperature)
           : (searchExecuted ? 0.15 : genProfile.temperature);
-        const reasoningEffort = reqData.reasoning_effort || genProfile.reasoning_effort;
+        const reasoningEffort = (reqMode === "chat" && searchExecuted && !routed.isDeep)
+          ? "low"
+          : (reqData.reasoning_effort || genProfile.reasoning_effort);
 
         // Step E: Assemble System Prompt with dynamic date, timezone, math & search grounding
         const systemPrompt = assembleSystemPrompt({
@@ -2318,24 +2320,41 @@ export default {
         let aiText = aiChoice?.message?.content || "";
         let finishReason = aiChoice?.finish_reason || "stop";
 
-        if (reqMode === "live" && selectedModel !== liveFallbackModel && (!res.ok || !aiText.trim())) {
-          const fallbackPayload = {
-            model: liveFallbackModel,
-            messages: groqPayload.messages,
-            temperature: Math.min(temperature, 0.6),
-            top_p: genProfile.top_p,
-            max_completion_tokens: Math.max(550, finalMaxTokens)
-          };
-          applyReasoningParams(fallbackPayload, liveFallbackModel, "low");
-          const fbRes = await callGroqChat(groqKey, fallbackPayload, 18000);
-          if (fbRes.ok) {
-            res = fbRes;
-            data = await fbRes.json();
-            selectedModel = liveFallbackModel;
-            isReasoningModel = NAKSHATRA_CONFIG.routing.reasoning_models.includes(selectedModel);
-            aiChoice = data?.choices?.[0];
-            aiText = aiChoice?.message?.content || "";
-            finishReason = aiChoice?.finish_reason || "stop";
+        const liveFallbackModel = NAKSHATRA_CONFIG.routing.tiers.find(t => t.name === "live")?.fallback_model || "openai/gpt-oss-120b";
+        const chatFallbackChain = [liveFallbackModel, "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]
+          .filter((m, idx, arr) => m !== selectedModel && arr.indexOf(m) === idx);
+        const fallbackCandidates = (reqMode === "live")
+          ? [liveFallbackModel]
+          : chatFallbackChain;
+
+        if (!res.ok || !aiText.trim()) {
+          for (const fbModel of fallbackCandidates) {
+            if (fbModel === selectedModel) continue;
+            const fbEffort = reqMode === "live" ? "low" : (fbModel === "qwen/qwen3.8-27b" ? "none" : "low");
+            const fallbackPayload = {
+              model: fbModel,
+              messages: groqPayload.messages,
+              temperature: reqMode === "live" ? Math.min(temperature, 0.6) : temperature,
+              top_p: genProfile.top_p,
+              max_completion_tokens: reqMode === "live" ? Math.max(550, finalMaxTokens) : Math.min(1800, finalMaxTokens)
+            };
+            applyReasoningParams(fallbackPayload, fbModel, fbEffort);
+            const fbRes = await callGroqChat(groqKey, fallbackPayload, reqMode === "live" ? 18000 : 20000);
+            if (fbRes.ok) {
+              const fbJson = await fbRes.json();
+              const fbChoice = fbJson?.choices?.[0];
+              const fbText = fbChoice?.message?.content || "";
+              if (fbText.trim()) {
+                res = fbRes;
+                data = fbJson;
+                selectedModel = fbModel;
+                isReasoningModel = NAKSHATRA_CONFIG.routing.reasoning_models.includes(selectedModel);
+                aiChoice = fbChoice;
+                aiText = fbText;
+                finishReason = fbChoice?.finish_reason || "stop";
+                break;
+              }
+            }
           }
         }
 
@@ -2380,9 +2399,9 @@ export default {
           }
         }
 
-        // Step G: Self-Verification Pass for complex puzzles, logic, math, and high-stakes facts
+        // Step G: Self-Verification Pass strictly for deep puzzles, logic traps, and multi-step math/code
         let verifiedByCritic = false;
-        if (reqMode === "chat" && (routed.needsVerification || searchExecuted) && aiText && (Date.now() - startTime) < 16000) {
+        if (reqMode === "chat" && routed.needsVerification && aiText && (Date.now() - startTime) < 16000) {
           const refined = await verifyAndRefineDeepReply({
             groqKey,
             model: selectedModel,
@@ -2521,12 +2540,25 @@ export default {
           return jsonResponse({ error: "Invalid JSON body" }, 400);
         }
 
-        const speechText = (payload.text || (Array.isArray(payload.inputs) ? payload.inputs[0] : payload.inputs) || "").trim();
+        let rawSpeech = "";
+        if (typeof payload.text === "string" && payload.text.trim()) rawSpeech = payload.text;
+        else if (Array.isArray(payload.inputs) && payload.inputs.length > 0) rawSpeech = payload.inputs.join(" ");
+        else if (typeof payload.inputs === "string") rawSpeech = payload.inputs;
+        else if (typeof payload.message === "string") rawSpeech = payload.message;
+        else if (typeof payload.prompt === "string") rawSpeech = payload.prompt;
+
+        const speechText = cleanTeluguOutput(rawSpeech || "", "live").trim();
         if (!speechText) {
-          return jsonResponse({ error: "Text is required for TTS" }, 400);
+          return jsonResponse({ error: "Text is required for TTS", audios: [] }, 400);
         }
 
-        const langCode = payload.target_language_code || payload.language_code || "te-IN";
+        let langCode = payload.target_language_code || payload.language_code || "te-IN";
+        const shortToLocale = {
+          te: "te-IN", hi: "hi-IN", en: "en-IN", ta: "ta-IN", kn: "kn-IN",
+          mr: "mr-IN", bn: "bn-IN", gu: "gu-IN", pa: "pa-IN", ml: "ml-IN", od: "od-IN", or: "od-IN"
+        };
+        if (shortToLocale[langCode]) langCode = shortToLocale[langCode];
+
         const isV3Regional = /^(ta|ml|kn|mr|bn|gu|pa|od|or)-/i.test(langCode);
         const defaultModel = isV3Regional ? "bulbul:v3" : "bulbul:v4-flash";
         const defaultSpeaker = isV3Regional
@@ -2546,15 +2578,38 @@ export default {
           output_audio_codec: payload.output_audio_codec || "mp3"
         };
 
-        const res = await fetchWithTimeout("https://api.sarvam.ai/text-to-speech", {
+        let res = await fetchWithTimeout("https://api.sarvam.ai/text-to-speech", {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json", 
-            "API-Subscription-Key": sarvamKey 
+          headers: {
+            "Content-Type": "application/json",
+            "API-Subscription-Key": sarvamKey
           },
           body: JSON.stringify(sarvamBody)
         });
-        return respond(res);
+        if (!res.ok && sarvamBody.model === "bulbul:v4-flash") {
+          const fbBody = {
+            ...sarvamBody,
+            model: "bulbul:v3",
+            speaker: langCode.startsWith("en") ? "simran" : langCode.startsWith("hi") ? "kavya" : "kavitha"
+          };
+          const fbRes = await fetchWithTimeout("https://api.sarvam.ai/text-to-speech", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "API-Subscription-Key": sarvamKey },
+            body: JSON.stringify(fbBody)
+          });
+          if (fbRes.ok) res = fbRes;
+        }
+        if (!res.ok) return respond(res);
+
+        const ttsData = await res.json();
+        const firstAudio = (ttsData.audios && ttsData.audios[0]) ? ttsData.audios[0] : "";
+        return jsonResponse({
+          ...ttsData,
+          request_id: ttsData.request_id || ("tts-" + Date.now()),
+          audios: ttsData.audios || (firstAudio ? [firstAudio] : []),
+          audio: firstAudio,
+          audio_content: firstAudio
+        });
       }
 
       // 6. SARVAM STT
