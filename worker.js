@@ -77,10 +77,10 @@ REASONING, LOGIC & PRACTICAL STEP DISCIPLINE (CRITICAL):
   2. Double-check real-world timings, heat levels, and classic traps (e.g., brief poha rinse rather than multi-hour soak, oil-free hot tawa and concentric ladle spirals to spread dosa batter instead of swirling the pan, par-cooked drained rice + dum seal for biryani).
 - Use clean readable equations in plain text or inline code (e.g., \`x + (x + 1.00) = 1.10\`) rather than raw LaTeX delimiters (\`\\[...\\]\` or \`\\(...\\)\`).
 
-ANTI-HALLUCINATION & TRUTH POLICY (STRICT):
+ANTI-HALLUCINATION & REAL-TIME TRUTH POLICY (STRICT):
 - Never invent facts, numbers, dates, statistics, links, quotes, or APIs. If you do not know or cannot verify something, state clearly: "I am not sure" (or the natural equivalent in the user's language) instead of guessing.
-- Never extrapolate unverified details or pretend to verify live external events when no search results are provided.
-- For current events, live scores, prices, weather, or real-time topics, rely strictly on the provided real-time search results and current date; state the source and date. If search results are missing or conflicting, say so openly.
+- Nakshatra AI has built-in real-time weather, Google News, Wikipedia News, currency, crypto, and web grounding. Whenever <search_context> is present, answer directly from those live facts (stating city, source, and recency) and NEVER claim you don't have internet access or tell the user to check weather/news apps.
+- Never extrapolate unverified details or pretend to verify live external events when no <search_context> is provided.
 
 STYLE & FORMATTING (CHATGPT / CLAUDE EDITORIAL RHYTHM):
 - NO GREETING OPENERS ON QUESTIONS: NEVER start answers to questions, explanations, puzzles, or coding requests with "Hi!", "Hi there!", "Hey!", "Hello!", "Sure!", or "Here is...". Only greet back when the user's message itself is strictly a greeting ("hi", "hello", "ela unnav").
@@ -106,7 +106,7 @@ ABSOLUTE BAN ON CANNED BOT GREETINGS:
 
 IDENTITY & TRUTH:
 - Your name is Nakshatra AI; your sole creator is Bunny (Praveen). Mention Bunny only if explicitly asked who created you.
-- Never invent facts, numbers, dates, links, or quotes. If unsure, say so briefly and honestly.
+- Never invent facts, numbers, dates, links, or quotes. When <search_context> is provided, answer directly with the live weather, news headlines, prices, or facts cleanly in spoken words — NEVER tell the user to check external apps.
 - For how-to, recipe, or technical questions, keep real-world chronological step order and accurate core timings without skipping essential steps.`,
     mode_blocks: {
       chat: "MODE: Text chat. Give the verified answer first, followed by clean reasoning steps, descriptive **topic** bullets, or numbered sequential steps with ### headings where helpful. NEVER output literal placeholder labels like 'Bold Lead-in'. Keep casual greetings brief and natural.",
@@ -469,7 +469,39 @@ const LOCAL_CITY_ALIASES = [
   [/\bchicago\b/i, "Chicago"],
   [/\btoronto\b/i, "Toronto"],
   [/\bparis\b/i, "Paris"],
-  [/\bberlin\b/i, "Berlin"]
+  [/\bberlin\b/i, "Berlin"],
+  [/\bsecunderabad\b|సికింద్రాబాద్|सिकंदराबाद/i, "Secunderabad"],
+  [/\bongole\b|ఒంగోలు/i, "Ongole"],
+  [/\beluru\b|ఏలూరు/i, "Eluru"],
+  [/\bkadapa\b|cuddapah|కడప/i, "Kadapa"],
+  [/\banantapur\b|అనంతపురం/i, "Anantapur"],
+  [/\bnizamabad\b|నిజామాబాద్/i, "Nizamabad"],
+  [/\bkarimnagar\b|కరీంనగర్/i, "Karimnagar"],
+  [/\bkhammam\b|ఖమ్మం/i, "Khammam"],
+  [/\bsrikakulam\b|శ్రీకాకుళం/i, "Srikakulam"],
+  [/\bvizianagaram\b|విజయనగరం/i, "Vizianagaram"],
+  [/\bmachilipatnam\b|మచిలీపట్నం/i, "Machilipatnam"],
+  [/\bbhimavaram\b|భీమవరం/i, "Bhimavaram"],
+  [/\btenali\b|తెనాలి/i, "Tenali"],
+  [/\bproddatur\b|ప్రొద్దుటూరు/i, "Proddatur"],
+  [/\bnandyal\b|నంద్యాల/i, "Nandyal"],
+  [/\badilabad\b|ఆదిలాబాద్/i, "Adilabad"],
+  [/\bmahbubnagar\b|mahabubnagar|మహబూబ్‌?నగర్/i, "Mahbubnagar"],
+  [/\bnalgonda\b|నల్గొండ/i, "Nalgonda"],
+  [/\bsiddipet\b|సిద్దిపేట/i, "Siddipet"],
+  [/\bsuryapet\b|సూర్యాపేట/i, "Suryapet"],
+  [/\bcoimbatore\b/i, "Coimbatore"],
+  [/\bmadurai\b/i, "Madurai"],
+  [/\bnagpur\b/i, "Nagpur"],
+  [/\blucknow\b/i, "Lucknow"],
+  [/\bpatna\b/i, "Patna"],
+  [/\bbhopal\b/i, "Bhopal"],
+  [/\bindore\b/i, "Indore"],
+  [/\bchandigarh\b/i, "Chandigarh"],
+  [/\bsurat\b/i, "Surat"],
+  [/\b(?:mysuru|mysore)\b/i, "Mysuru"],
+  [/\b(?:mangaluru|mangalore)\b/i, "Mangaluru"],
+  [/\bthiruvananthapuram\b|trivandrum/i, "Thiruvananthapuram"]
 ];
 
 const CURRENCY_TOKEN_MAP = {
@@ -501,11 +533,20 @@ function extractWeatherLocation(text) {
   for (const [re, city] of LOCAL_CITY_ALIASES) {
     if (re.test(t)) return city;
   }
-  const inMatch = t.match(/\b(?:weather|temperature|forecast|rain|climate|temp)\s+(?:in|at|for|of)\s+([a-zA-Z][a-zA-Z\s.-]{1,28}?)(?=\s+(?:today|now|tonight|tomorrow|right\s+now|please)\b|[?!.,]|$)/i)
-    || t.match(/\bin\s+([a-zA-Z][a-zA-Z\s.-]{1,24}?)\s+(?:weather|temperature|forecast|rain)\b/i);
+
+  const noisePrefix = /^(?:tell\s+me|what\s+is|what'?s|how\s+is|how'?s|check|give\s+me|current|today'?s|today|now|live|outside|the)\s+/gi;
+  const cleanedForCity = t.replace(noisePrefix, "").trim();
+
+  const inMatch = t.match(/\b(?:weather|temperature|forecast|rain|climate|temp)\s+(?:in|at|for|of|near)\s+([a-zA-Z][a-zA-Z\s.-]{1,28}?)(?=\s+(?:today|now|tonight|tomorrow|right\s+now|cheppu|enti|kaisa|please)\b|[?!.,]|$)/i)
+    || t.match(/\bin\s+([a-zA-Z][a-zA-Z\s.-]{1,24}?)\s+(?:weather|temperature|forecast|rain|temp)\b/i)
+    || cleanedForCity.match(/^([a-zA-Z][a-zA-Z\s.-]{1,24}?)\s+(?:lo\s+|mein\s+|la\s+)?(?:weather|temperature|temp|forecast|climate|rain)\b/i);
   if (inMatch && inMatch[1]) {
-    const candidate = inMatch[1].trim();
-    if (!/^(?:india|my|here|the|city|area|town|world)$/i.test(candidate)) return candidate;
+    const candidate = inMatch[1]
+      .replace(/^(?:the|today|today'?s|current|now|live|local|my|here|india|our)\s+/gi, "")
+      .trim();
+    if (candidate && candidate.length >= 3 && !/^(?:india|my|here|the|city|area|town|world|today|now|outside|current|weather|forecast|climate|temperature|rain|what|how|live)$/i.test(candidate)) {
+      return candidate;
+    }
   }
   return null;
 }
@@ -965,21 +1006,40 @@ function describeWmoWeatherCode(code) {
 }
 
 /**
- * Keyless Live Weather via Open-Meteo (Geocoding + Forecast) with Edge Cache & Cloudflare cf location fallback
+ * Keyless Live Weather via Open-Meteo (+ Nominatim fallback, browser coords, & Cloudflare request.cf location)
  */
 async function fetchOpenMeteoWeather(intentLocation, options = {}) {
-  const { timeoutMs = 3500, ctx = null, cf = null, clientCity = null } = options;
+  const { timeoutMs = 4500, ctx = null, cf = null, clientCity = null, clientCoords = null, timezone = "Asia/Kolkata" } = options;
   let lat = null;
   let lon = null;
-  let placeLabel = intentLocation || clientCity || "";
+  let placeLabel = intentLocation || "";
+  let locationSourceNote = "city query";
 
-  if (!placeLabel && cf && cf.latitude && cf.longitude) {
+  if (!placeLabel && clientCoords && Number.isFinite(Number(clientCoords.lat)) && Number.isFinite(Number(clientCoords.lon))) {
+    lat = Number(clientCoords.lat);
+    lon = Number(clientCoords.lon);
+    placeLabel = clientCity || [cf?.city, cf?.region, cf?.country].filter(Boolean).join(", ") || "your detected location";
+    locationSourceNote = "user device location";
+  } else if (!placeLabel && clientCity) {
+    placeLabel = clientCity;
+    locationSourceNote = "user city";
+  } else if (!placeLabel && cf && cf.latitude && cf.longitude) {
     lat = Number(cf.latitude);
     lon = Number(cf.longitude);
     placeLabel = [cf.city, cf.region, cf.country].filter(Boolean).join(", ") || "your local area";
+    locationSourceNote = "Cloudflare network location";
+  } else if (!placeLabel && cf && cf.city) {
+    placeLabel = [cf.city, cf.country].filter(Boolean).join(", ");
+    locationSourceNote = "Cloudflare edge city";
   }
 
-  const targetPlace = placeLabel || "Hyderabad";
+  const defaultCity = /kolkata|calcutta/i.test(String(timezone || "")) ? "Hyderabad, India" : "Hyderabad, India";
+  const targetPlace = placeLabel || defaultCity;
+  if (!placeLabel) {
+    placeLabel = targetPlace;
+    locationSourceNote = "regional default (no city specified)";
+  }
+
   const cacheKey = normalizeSearchQueryKey(
     lat !== null ? `${lat.toFixed(2)}_${lon.toFixed(2)}` : targetPlace,
     "weather"
@@ -992,14 +1052,32 @@ async function fetchOpenMeteoWeather(intentLocation, options = {}) {
   try {
     if (lat === null || lon === null) {
       const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(targetPlace)}&count=1&language=en&format=json`;
-      const geoRes = await fetchWithTimeout(geoUrl, {}, Math.min(timeoutMs, 2500));
-      if (!geoRes.ok) return null;
-      const geoData = await geoRes.json();
-      const first = Array.isArray(geoData?.results) ? geoData.results[0] : null;
-      if (!first) return null;
-      lat = first.latitude;
-      lon = first.longitude;
-      placeLabel = [first.name, first.admin1, first.country].filter(Boolean).join(", ");
+      const geoRes = await fetchWithTimeout(geoUrl, { headers: { "User-Agent": WIKIMEDIA_USER_AGENT } }, Math.min(timeoutMs, 3000));
+      if (geoRes.ok) {
+        const geoData = await geoRes.json();
+        const first = Array.isArray(geoData?.results) ? geoData.results[0] : null;
+        if (first) {
+          lat = first.latitude;
+          lon = first.longitude;
+          placeLabel = [first.name, first.admin1, first.country].filter(Boolean).join(", ");
+        }
+      }
+
+      // OpenStreetMap Nominatim backup if Open-Meteo missed smaller town/district spelling
+      if (lat === null || lon === null) {
+        const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(targetPlace)}&format=jsonv2&limit=1`;
+        const nomRes = await fetchWithTimeout(nomUrl, { headers: { "User-Agent": WIKIMEDIA_USER_AGENT } }, Math.min(timeoutMs, 3000));
+        if (nomRes.ok) {
+          const nomData = await nomRes.json();
+          const hit = Array.isArray(nomData) ? nomData[0] : null;
+          if (hit && hit.lat && hit.lon) {
+            lat = Number(hit.lat);
+            lon = Number(hit.lon);
+            placeLabel = hit.name || targetPlace;
+          }
+        }
+      }
+      if (lat === null || lon === null) return null;
     }
 
     const wxUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=2&timezone=auto`;
@@ -1016,13 +1094,13 @@ async function fetchOpenMeteoWeather(intentLocation, options = {}) {
     const tomorrowMax = wx?.daily?.temperature_2m_max?.[1];
     const tomorrowMin = wx?.daily?.temperature_2m_min?.[1];
     const dailyPart = (typeof maxT === "number" && typeof minT === "number")
-      ? ` Today range: ${Math.round(minT)}-${Math.round(maxT)} C${typeof rainProb === "number" ? `, Rain chance: ${rainProb}%` : ""}.`
+      ? ` Today high/low: ${Math.round(maxT)}/${Math.round(minT)}°C${typeof rainProb === "number" ? `, Rain probability: ${rainProb}%` : ""}.`
       : "";
     const tomorrowPart = (typeof tomorrowMax === "number" && typeof tomorrowMin === "number")
-      ? ` Tomorrow expected: ${Math.round(tomorrowMin)}-${Math.round(tomorrowMax)} C.`
+      ? ` Tomorrow expected: ${Math.round(tomorrowMin)}-${Math.round(tomorrowMax)}°C.`
       : "";
 
-    const snippets = `- **Live Weather for ${placeLabel}** (open-meteo.com, updated ${cur.time || "now"} ${wx.timezone_abbreviation || ""}): ${desc}, ${cur.temperature_2m} C (feels like ${cur.apparent_temperature ?? cur.temperature_2m} C), Humidity ${cur.relative_humidity_2m ?? "N/A"}%, Wind ${cur.wind_speed_10m ?? "N/A"} km/h.${dailyPart}${tomorrowPart}`;
+    const snippets = `- **Verified Live Weather for ${placeLabel}** (open-meteo.com [${locationSourceNote}], ${cur.time || "now"} ${wx.timezone_abbreviation || ""}): ${desc}, ${cur.temperature_2m}°C (feels like ${cur.apparent_temperature ?? cur.temperature_2m}°C), Humidity ${cur.relative_humidity_2m ?? "N/A"}%, Wind ${cur.wind_speed_10m ?? "N/A"} km/h.${dailyPart}${tomorrowPart}`;
 
     await writeRealtimeCache(cacheKey, { snippets }, getCacheTtlForCategory("weather"), ctx);
     return { snippets, provider: "open-meteo", cacheHit: false };
@@ -1274,27 +1352,83 @@ function parseRssXmlItems(xmlText, defaultSource = "News", maxItems = 10) {
 }
 
 /**
- * Keyless Multilingual Current News via Google News RSS (EN/TE/HI India) + BBC India/World fallback
+ * Keyless Wikipedia / Wikimedia Current Events News ("In the news" JSON Feed)
+ */
+async function fetchWikimediaNews(topic = "", wikiLang = "en", options = {}) {
+  const { timeoutMs = 5500, maxItems = 4 } = options;
+  const sub = "en";
+  const now = new Date();
+  const candidates = [now, new Date(now.getTime() - 86400000)];
+  const topicWords = String(topic || "").toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+
+  for (const dt of candidates) {
+    const yyyy = dt.getUTCFullYear();
+    const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(dt.getUTCDate()).padStart(2, "0");
+    const url = `https://api.wikimedia.org/feed/v1/wikipedia/${sub}/featured/${yyyy}/${mm}/${dd}`;
+    try {
+      const res = await fetchWithTimeout(url, {
+        headers: { "User-Agent": WIKIMEDIA_USER_AGENT, "Accept": "application/json" }
+      }, timeoutMs);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const newsArr = Array.isArray(data?.news) ? data.news : [];
+      if (!newsArr.length) continue;
+
+      const parsed = newsArr
+        .map(item => {
+          const cleanStory = decodeXmlAndHtmlEntities(item?.story || "");
+          const linkTs = item?.links?.[0]?.timestamp || "";
+          const { ts, label } = formatRelativeAgeLabel(linkTs || `${yyyy}-${mm}-${dd}T00:00:00Z`);
+          const score = topicWords.length
+            ? topicWords.reduce((acc, w) => acc + (cleanStory.toLowerCase().includes(w) ? 1 : 0), 0)
+            : 1;
+          return {
+            title: cleanStory,
+            source: "Wikipedia News",
+            pubDate: linkTs || `${yyyy}-${mm}-${dd}`,
+            ts,
+            ageLabel: label,
+            score
+          };
+        })
+        .filter(x => x.title && (!topicWords.length || x.score > 0));
+
+      if (parsed.length) {
+        parsed.sort((a, b) => (b.score - a.score) || ((b.ts || 0) - (a.ts || 0)));
+        return parsed.slice(0, maxItems);
+      }
+      if (newsArr.length) break;
+    } catch (e) {}
+  }
+  return [];
+}
+
+/**
+ * Keyless Multilingual Current News Fusion: Google News RSS (EN/TE/HI India) + BBC RSS + Wikipedia In-the-News
  */
 async function fetchCurrentNewsRSS(topic = "", newsLang = "en", rawQuery = "", options = {}) {
-  const { timeoutMs = 3500, ctx = null, maxHeadlines = 4, category = "news", forceSearchFeed = false } = options;
+  const { timeoutMs = 4800, ctx = null, maxHeadlines = 5, category = "news", forceSearchFeed = false } = options;
   const effectiveTopic = (forceSearchFeed ? (topic || rawQuery) : topic).trim();
   const isWorld = /\b(world|global|international|us|usa|uk|europe|middle east)\b/i.test(effectiveTopic || rawQuery);
   const langKey = (newsLang === "te" || newsLang === "hi") ? newsLang : "en";
 
-  const cacheKey = normalizeSearchQueryKey(effectiveTopic || (isWorld ? "world_top" : "india_top"), `rss_${category}`, `${langKey}_${maxHeadlines}`);
+  const cacheKey = normalizeSearchQueryKey(effectiveTopic || (isWorld ? "world_top" : "india_top"), `news_fusion_${category}`, `${langKey}_${maxHeadlines}`);
   const cached = await readRealtimeCache(cacheKey);
   if (cached && cached.snippets) {
-    return { snippets: cached.snippets, provider: cached.provider || "google-news-rss", cacheHit: true };
+    return { snippets: cached.snippets, provider: cached.provider || "google-news+wikipedia", cacheHit: true };
   }
 
   const feeds = [];
   if (effectiveTopic) {
-    const qEncoded = encodeURIComponent(`${effectiveTopic} when:2d`);
+    const qEncoded = encodeURIComponent(`${effectiveTopic} when:3d`);
     if (langKey === "te") {
       feeds.push({ url: `https://news.google.com/rss/search?q=${qEncoded}&hl=te&gl=IN&ceid=IN:te`, source: "Google News Telugu" });
     } else if (langKey === "hi") {
       feeds.push({ url: `https://news.google.com/rss/search?q=${qEncoded}&hl=hi&gl=IN&ceid=IN:hi`, source: "Google News Hindi" });
+    }
+    if (/\b(tech|ai|software|mobile|apple|google|samsung|startup)\b/i.test(effectiveTopic)) {
+      feeds.push({ url: "https://news.google.com/rss/headlines/section/TOPIC/TECHNOLOGY?hl=en-IN&gl=IN&ceid=IN:en", source: "Google News Tech" });
     }
     feeds.push({ url: `https://news.google.com/rss/search?q=${qEncoded}&hl=en-IN&gl=IN&ceid=IN:en`, source: "Google News India" });
   } else {
@@ -1304,38 +1438,55 @@ async function fetchCurrentNewsRSS(topic = "", newsLang = "en", rawQuery = "", o
       feeds.push({ url: "https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi", source: "Google News Hindi" });
     }
     if (isWorld) {
+      feeds.push({ url: "https://news.google.com/rss/headlines/section/TOPIC/WORLD?hl=en-IN&gl=IN&ceid=IN:en", source: "Google News World" });
       feeds.push({ url: "https://feeds.bbci.co.uk/news/world/rss.xml", source: "BBC News World" });
     } else {
-      feeds.push({ url: "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en", source: "Google News India" });
+      feeds.push({ url: "https://news.google.com/rss/headlines/section/TOPIC/NATION?hl=en-IN&gl=IN&ceid=IN:en", source: "Google News India" });
       feeds.push({ url: "https://feeds.bbci.co.uk/news/world/asia/india/rss.xml", source: "BBC News India" });
     }
   }
 
   try {
-    const results = await Promise.allSettled(
-      feeds.slice(0, 2).map(async (feed) => {
-        const res = await fetchWithTimeout(feed.url, {
-          headers: { "User-Agent": WIKIMEDIA_USER_AGENT, "Accept": "application/rss+xml, application/xml, text/xml" }
-        }, timeoutMs);
-        if (!res.ok) return [];
-        const xml = await res.text();
-        return parseRssXmlItems(xml, feed.source, 8);
-      })
-    );
+    const rssPromises = feeds.slice(0, 2).map(async (feed) => {
+      const res = await fetchWithTimeout(feed.url, {
+        headers: { "User-Agent": WIKIMEDIA_USER_AGENT, "Accept": "application/rss+xml, application/xml, text/xml" }
+      }, timeoutMs);
+      if (!res.ok) return [];
+      const xml = await res.text();
+      return parseRssXmlItems(xml, feed.source, 8);
+    });
 
-    const allItems = [];
-    for (const r of results) {
+    const wikiPromise = fetchWikimediaNews(effectiveTopic, langKey, {
+      timeoutMs: Math.max(timeoutMs, 5500),
+      maxItems: 3
+    });
+
+    const [rssResults, wikiItems] = await Promise.all([
+      Promise.allSettled(rssPromises),
+      wikiPromise.catch(() => [])
+    ]);
+
+    const rssItems = [];
+    for (const r of rssResults) {
       if (r.status === "fulfilled" && Array.isArray(r.value)) {
-        allItems.push(...r.value);
+        rssItems.push(...r.value);
       }
     }
-    if (!allItems.length) return null;
 
-    // Sort newest first & deduplicate overlapping headlines
-    allItems.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    rssItems.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+    const combined = [];
+    const wikiSlice = Array.isArray(wikiItems) ? wikiItems.slice(0, rssItems.length ? 2 : maxHeadlines) : [];
+    const rssTarget = Math.max(0, maxHeadlines - (wikiSlice.length ? Math.min(1, wikiSlice.length) : 0));
+
+    combined.push(...rssItems.slice(0, rssTarget + 2));
+    combined.push(...wikiSlice);
+
+    if (!combined.length) return null;
+
     const seenKeys = new Set();
     const topItems = [];
-    for (const item of allItems) {
+    for (const item of combined) {
       const fingerprint = item.title.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").split(/\s+/).slice(0, 5).join(" ");
       if (!fingerprint || seenKeys.has(fingerprint)) continue;
       seenKeys.add(fingerprint);
@@ -1348,33 +1499,37 @@ async function fetchCurrentNewsRSS(topic = "", newsLang = "en", rawQuery = "", o
     const snippets = topItems
       .map(item => `- **${item.title}** (${item.source}, ${item.ageLabel})`)
       .join("\n");
-    const provider = feeds.some(f => f.source.includes("BBC")) && !effectiveTopic ? "rss-india+bbc" : "google-news-rss";
+    const hasWiki = topItems.some(i => i.source === "Wikipedia News");
+    const hasGNews = topItems.some(i => i.source !== "Wikipedia News");
+    const provider = (hasGNews && hasWiki)
+      ? "google-news+wikipedia"
+      : (hasWiki ? "wikipedia-news" : "google-news+bbc-rss");
     await writeRealtimeCache(cacheKey, { snippets, provider }, getCacheTtlForCategory(category), ctx);
     return { snippets, provider, cacheHit: false };
   } catch (err) {
-    console.error("RSS news fetch error:", err);
+    console.error("News fusion fetch error:", err);
     return null;
   }
 }
 
 /**
- * Multi-layer Real-Time Data Router: Edge Cache -> Keyless Official APIs & RSS -> Serper Fallback
+ * Multi-layer Real-Time Data Router: Edge Cache -> Keyless Official APIs / Google+Wikipedia News -> Serper Fallback
  */
 async function resolveRealtimeContext(queryText, options = {}) {
-  const { mode = "chat", langCode = "en", env = {}, ctx = null, cf = null, clientCity = null } = options;
+  const { mode = "chat", langCode = "en", env = {}, ctx = null, cf = null, clientCity = null, clientCoords = null, timezone = "Asia/Kolkata" } = options;
   const intent = classifyRealtimeIntent(queryText, mode, langCode);
   if (!intent.needsSearch) {
-    return { executed: false, category: "none", provider: null, cacheHit: false, snippets: null };
+    return { executed: false, unavailable: false, category: "none", provider: null, cacheHit: false, snippets: null };
   }
 
   const isLive = mode === "live";
-  const fastTimeout = isLive ? 3200 : 5200;
+  const fastTimeout = isLive ? 4500 : 7500;
   const hl = (langCode === "te" || langCode === "hi") ? langCode : "en";
   let result = null;
 
   let cachedRssFallback = null;
   if (intent.category === "weather") {
-    result = await fetchOpenMeteoWeather(intent.location, { timeoutMs: fastTimeout, ctx, cf, clientCity });
+    result = await fetchOpenMeteoWeather(intent.location, { timeoutMs: fastTimeout, ctx, cf, clientCity, clientCoords, timezone });
   } else if (intent.category === "currency") {
     result = await fetchCurrencyRate(intent.currency, { timeoutMs: fastTimeout, ctx });
   } else if (intent.category === "crypto") {
@@ -1383,11 +1538,10 @@ async function resolveRealtimeContext(queryText, options = {}) {
     result = await fetchCurrentNewsRSS(intent.newsTopic, intent.newsLang, intent.cleanQuery, {
       timeoutMs: fastTimeout,
       ctx,
-      maxHeadlines: isLive ? 3 : 4,
+      maxHeadlines: isLive ? 3 : 5,
       category: "news"
     });
   } else if (intent.category === "sports_live") {
-    // Check live RSS news first; escalate to Serper only if Serper keys exist and RSS lacks score details
     cachedRssFallback = await fetchCurrentNewsRSS(intent.cleanQuery, intent.newsLang, intent.cleanQuery, {
       timeoutMs: fastTimeout,
       ctx,
@@ -1401,9 +1555,25 @@ async function resolveRealtimeContext(queryText, options = {}) {
     }
   } else if (intent.category === "knowledge") {
     result = await fetchKnowledgeSnippets(intent.cleanQuery, langCode, { timeoutMs: fastTimeout, ctx });
+  } else if (intent.category === "general") {
+    const needsNumericWebTable = /\b(gold\s+rate|silver\s+rate|petrol|diesel|sensex|nifty|share\s+price|stock\s+price|train\s+status|search\s+for|search\s+on\s+google)\b|(బంగారం\s*ధర|వెండి\s*ధర|పెట్రోల్)/i.test(queryText);
+    if (!needsNumericWebTable || !getSerperApiKeys(env).length || Date.now() < serperExhaustedUntil) {
+      cachedRssFallback = await fetchCurrentNewsRSS(intent.cleanQuery, intent.newsLang, intent.cleanQuery, {
+        timeoutMs: fastTimeout,
+        ctx,
+        maxHeadlines: isLive ? 3 : 4,
+        category: "general",
+        forceSearchFeed: true
+      });
+      if (cachedRssFallback && cachedRssFallback.snippets) {
+        result = cachedRssFallback;
+      } else {
+        result = await fetchKnowledgeSnippets(intent.cleanQuery, langCode, { timeoutMs: fastTimeout, ctx });
+      }
+    }
   }
 
-  // Fallback to Edge-Cached Serper ONLY if specialized keyless source returned nothing
+  // Fallback to Edge-Cached Serper ONLY if free official sources/news fusion didn't answer cleanly
   if (!result || !result.snippets) {
     result = await fetchSerperSnippets(intent.cleanQuery || extractSearchQuery(queryText), env, {
       category: intent.category,
@@ -1414,7 +1584,7 @@ async function resolveRealtimeContext(queryText, options = {}) {
     });
   }
 
-  // Final keyless rescue net if Serper is absent or quota-exhausted
+  // Final keyless rescue net if Serper also failed/exhausted
   if (!result || !result.snippets) {
     if (cachedRssFallback && cachedRssFallback.snippets) {
       result = cachedRssFallback;
@@ -1435,6 +1605,7 @@ async function resolveRealtimeContext(queryText, options = {}) {
   if (result && result.snippets) {
     return {
       executed: true,
+      unavailable: false,
       category: intent.category,
       provider: result.provider || "realtime",
       cacheHit: Boolean(result.cacheHit),
@@ -1442,7 +1613,7 @@ async function resolveRealtimeContext(queryText, options = {}) {
     };
   }
 
-  return { executed: false, category: intent.category, provider: null, cacheHit: false, snippets: null };
+  return { executed: false, unavailable: true, category: intent.category, provider: null, cacheHit: false, snippets: null };
 }
 
 /**
@@ -1656,6 +1827,7 @@ function assembleSystemPrompt(options = {}) {
     tier = "standard",
     language = {},
     searchSnippets = null,
+    realtimeUnavailable = false,
     mathVerification = null,
     timezone = "Asia/Kolkata",
     userProfile = null,
@@ -1731,9 +1903,11 @@ function assembleSystemPrompt(options = {}) {
   // Real-Time Search Grounding
   if (searchSnippets) {
     const modeSearchGuide = isLive
-      ? "Summarize cleanly in 1-2 natural spoken sentences naming the source briefly. Say temperatures, percentages, and currency naturally in spoken words; output zero URLs, asterisks, or brackets."
-      : "Base time-sensitive facts strictly on these results. Cite the source name and recency cleanly; if headlines or numbers conflict, state so transparently and never guess.";
+      ? "VERIFIED LIVE DATA PROVIDED ABOVE. Answer directly in 1-2 warm spoken sentences naming the city/source briefly. Speak numbers, degrees, and currency naturally with ZERO URLs, asterisks, or brackets. NEVER say you don't know the location or tell the user to check apps."
+      : "VERIFIED LIVE DATA PROVIDED ABOVE. Base every time-sensitive fact strictly on these live results, stating the city/source and recency cleanly. NEVER say you lack internet/location access or tell the user to check external weather/news apps.";
     prompt += `\n\n<search_context>\n${searchSnippets}\nINSTRUCTION: ${modeSearchGuide}\n</search_context>`;
+  } else if (realtimeUnavailable) {
+    prompt += `\n\n<realtime_unavailable>\nLive external data feeds did not return fresh results for this specific query right now. Honestly say the live feed is temporarily unavailable or ask the user to name a specific city/topic cleanly — NEVER invent fake temperatures, scores, prices, or headlines.\n</realtime_unavailable>`;
   }
 
   return prompt;
@@ -1934,10 +2108,25 @@ export default {
             "coinpaprika",
             "google-news-rss",
             "bbc-rss",
+            "wikimedia-news",
             "wikipedia",
+            "nominatim",
             "duckduckgo",
             "serper-fallback"
           ]
+        });
+      }
+
+      if (path === "/my-location") {
+        const cf = request.cf || {};
+        return jsonResponse({
+          ok: true,
+          city: cf.city || null,
+          region: cf.region || null,
+          country: cf.country || null,
+          latitude: cf.latitude ? Number(cf.latitude) : null,
+          longitude: cf.longitude ? Number(cf.longitude) : null,
+          timezone: cf.timezone || null
         });
       }
 
@@ -2013,15 +2202,23 @@ export default {
         let selectedModel = routed.model;
         let isReasoningModel = NAKSHATRA_CONFIG.routing.reasoning_models.includes(selectedModel);
 
-        // Step C: Deterministic Math Check & Real-Time Live Grounding (Edge Cache -> Keyless APIs/RSS -> Serper Fallback)
+        // Step C: Deterministic Math Check & Real-Time Live Grounding (Edge Cache -> Keyless APIs/News Fusion -> Serper Fallback)
         const mathVerification = evaluateSafeMathQuery(latestUserText);
+        const rawClientLoc = (reqData.location && typeof reqData.location === "object") ? reqData.location : null;
+        const clientCoords = (rawClientLoc && rawClientLoc.lat != null && rawClientLoc.lon != null) ? rawClientLoc : null;
+        const resolvedClientCity = (typeof reqData.city === "string" && reqData.city.trim())
+          ? reqData.city.trim()
+          : (typeof rawClientLoc?.city === "string" && rawClientLoc.city.trim() ? rawClientLoc.city.trim() : null);
+
         const realtime = await resolveRealtimeContext(latestUserText, {
           mode: reqMode,
           langCode: langInfo.code,
           env,
           ctx,
           cf: request.cf || null,
-          clientCity: reqData.city || reqData.location || null
+          clientCity: resolvedClientCity,
+          clientCoords,
+          timezone: reqData.timezone || "Asia/Kolkata"
         });
         const searchSnippets = realtime.snippets;
         const searchExecuted = realtime.executed;
@@ -2049,6 +2246,7 @@ export default {
           tier: routed.tier,
           language: langInfo,
           searchSnippets,
+          realtimeUnavailable: Boolean(realtime.unavailable),
           mathVerification,
           timezone: reqData.timezone || "Asia/Kolkata",
           userProfile: reqData.user_profile || null,
@@ -2071,6 +2269,44 @@ export default {
         };
         applyReasoningParams(groqPayload, selectedModel, reasoningEffort);
 
+        const liveFallbackModel = NAKSHATRA_CONFIG.routing.tiers.find(t => t.name === "live")?.fallback_model || "openai/gpt-oss-120b";
+
+        // True low-latency SSE streaming path for Live Mode (with real-time search grounding preserved)
+        if (reqData.stream === true) {
+          const streamPayload = { ...groqPayload, stream: true };
+          let streamRes = await callGroqChat(groqKey, streamPayload, reqMode === "live" ? 15000 : 25000);
+          if ((!streamRes.ok || !streamRes.body) && reqMode === "live" && selectedModel !== liveFallbackModel) {
+            const fbStreamPayload = {
+              model: liveFallbackModel,
+              messages: groqPayload.messages,
+              stream: true,
+              temperature: Math.min(temperature, 0.6),
+              top_p: genProfile.top_p,
+              max_completion_tokens: Math.max(550, finalMaxTokens)
+            };
+            applyReasoningParams(fbStreamPayload, liveFallbackModel, "low");
+            const fbStreamRes = await callGroqChat(groqKey, fbStreamPayload, 18000);
+            if (fbStreamRes.ok && fbStreamRes.body) {
+              streamRes = fbStreamRes;
+              selectedModel = liveFallbackModel;
+            }
+          }
+          if (streamRes.ok && streamRes.body) {
+            return new Response(streamRes.body, {
+              status: 200,
+              headers: {
+                "Content-Type": streamRes.headers.get("Content-Type") || "text/event-stream; charset=utf-8",
+                "Cache-Control": "no-cache",
+                "Access-Control-Allow-Origin": "*",
+                "X-Nakshatra-Search-Used": searchExecuted ? "1" : "0",
+                "X-Nakshatra-Search-Category": searchCategory || "none",
+                "X-Nakshatra-Search-Provider": searchProvider || "none",
+                "X-Nakshatra-Cache": searchCacheHit ? "HIT" : "MISS"
+              }
+            });
+          }
+        }
+
         // Call Groq API (with automatic live fallback to standard 120b on upstream failure or empty reply)
         let res = await callGroqChat(groqKey, groqPayload, reqMode === "live" ? 15000 : 25000);
         let data = null;
@@ -2082,7 +2318,6 @@ export default {
         let aiText = aiChoice?.message?.content || "";
         let finishReason = aiChoice?.finish_reason || "stop";
 
-        const liveFallbackModel = NAKSHATRA_CONFIG.routing.tiers.find(t => t.name === "live")?.fallback_model || "openai/gpt-oss-120b";
         if (reqMode === "live" && selectedModel !== liveFallbackModel && (!res.ok || !aiText.trim())) {
           const fallbackPayload = {
             model: liveFallbackModel,
