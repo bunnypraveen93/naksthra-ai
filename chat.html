@@ -1687,7 +1687,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                     return { lang: 'en', strength: 'strong', isBackchannel: false };
                 }
                 // Active non-English voice conversation: require substantial English sentence or 2-turn confirmation
-                if (englishWordMatches.length >= 8 && englishGrammarMatches.length >= 3 && (!sttMeta || !acousticCode || acousticCode === 'en' || acousticProb < 0.75)) {
+                if (englishWordMatches.length >= 4 && englishGrammarMatches.length >= 2 && (!sttMeta || !acousticCode || acousticCode === 'en' || acousticProb < 0.75)) {
                     return { lang: 'en', strength: 'strong', isBackchannel: false };
                 }
                 if (englishWordMatches.length >= 3 || (latinWords.length >= 4 && englishGrammarMatches.length >= 2)) {
@@ -1735,6 +1735,15 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             }
 
             const sig = analyzeLanguageSignal(transcript, true, sttMeta, activeLang);
+            const acCode = String(sttMeta?.languageCode || '').toLowerCase().split('-')[0].replace(/^od$/, 'or');
+            const acProb = Number(sttMeta?.languageProbability || 0);
+            const wordCount = transcript.trim().split(/\s+/).length;
+            if (sig.strength !== 'explicit' && sig.strength !== 'neutral' && sig.strength !== 'weak_noise' && sig.lang !== activeLang
+                && ((acCode === sig.lang && acProb >= 0.7 && wordCount >= 2) || (sig.strength === 'moderate' && wordCount >= 4))) {
+                livePendingLang = null;
+                livePendingCount = 0;
+                return sig.lang;
+            }
             if (sig.strength === 'explicit') {
                 livePendingLang = null;
                 livePendingCount = 0;
@@ -1852,6 +1861,11 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
             }
             if (mode === 'live') {
                 const otherLive = {
+                    mr: [{ role: "user", content: "नमस्कार, कसे आहात?" }, { role: "assistant", content: "अरे नमस्कार! मी एकदम मस्त आहे... तुमचा दिवस कसा चाललाय?" }],
+                    bn: [{ role: "user", content: "হ্যালো, কেমন আছেন?" }, { role: "assistant", content: "আরে হ্যালো! আমি দারুণ আছি... আপনার দিনটা কেমন যাচ্ছে?" }],
+                    gu: [{ role: "user", content: "હેલો, કેમ છો?" }, { role: "assistant", content: "અરે હેલો! હું મજામાં છું... તમારો દિવસ કેવો જાય છે?" }],
+                    pa: [{ role: "user", content: "ਹੈਲੋ, ਕੀ ਹਾਲ ਹੈ?" }, { role: "assistant", content: "ਓਏ ਹੈਲੋ! ਮੈਂ ਬਿਲਕੁਲ ਠੀਕ ਹਾਂ... ਤੁਹਾਡਾ ਦਿਨ ਕਿਵੇਂ ਲੰਘ ਰਿਹਾ ਹੈ?" }],
+                    or: [{ role: "user", content: "ନମସ୍କାର, କେମିତି ଅଛନ୍ତି?" }, { role: "assistant", content: "ଆରେ ନମସ୍କାର! ମୁଁ ବହୁତ ଭଲ ଅଛି... ଆପଣଙ୍କ ଦିନଟା କେମିତି ଚାଲିଛି?" }],
                     ta: [{ role: "user", content: "வணக்கம், எப்படி இருக்கீங்க?" }, { role: "assistant", content: "ஹாய்! நான் சூப்பரா இருக்கேன்... நீங்க எப்படி இருக்கீங்க?" }],
                     kn: [{ role: "user", content: "ಹಲೋ ಹೇಗಿದ್ದೀರಾ?" }, { role: "assistant", content: "ಹೇ! ನಾನು ಚೆನ್ನಾಗಿದ್ದೀನಿ... ನೀವು ಹೇಗಿದ್ದೀರಾ?" }],
                     ml: [{ role: "user", content: "ഹലോ എങ്ങനെയുണ്ട്?" }, { role: "assistant", content: "ഹായ്! ഞാൻ സുഖമായിരിക്കുന്നു... നിങ്ങൾക്ക് സുഖമാണോ?" }],
@@ -2742,7 +2756,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                     model,
                     mode: "live",
                     reasoning_effort: effort,
-                    temperature: 0.60,
+                    temperature: 0.72,
                     max_tokens: maxTokens,
                     language: turnLang,
                     prev_language: prevLang || turnLang,
@@ -2805,7 +2819,14 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 "",
                 "SPOKEN CALL & EXPRESSION RULES:",
                 langRuleLine,
-                "- Reply in 1 to 2 short spoken sentences max (~10-28 words).",
+                "- Reply in 1 to 3 short spoken sentences (~12-35 words). Greetings and small talk: just 1 short sentence. Use a 3rd sentence only when the question truly needs it.",
+                "- Talk like a close friend on a phone call: react to the feeling first, then answer. Vary how you open every time, never repeat the same opener twice in a row.",
+                "- Natural spoken rhythm: contractions, light fillers native to the language (hmm, oh, అవునా, अरे, ஓ), short clauses, commas and '...' for breaths. Never lecture, never list, never sound like reading an article.",
+                "- Mirror the user's mood and energy (excited, tired, sad, joking). When they are sad or stressed, be soft and gentle and empathise before any advice.",
+                "- Sometimes (not always) end with a short natural follow-up question or warm nudge, like a friend would.",
+                "- Write numbers, units and abbreviations the way they are spoken in that language.",
+                "- Answer exactly what was asked, first. For yes/no or capability questions (like 'do you know Telugu?') reply in ONE short sentence, plus at most a tiny follow-up. Never list features or abilities.",
+                "- Never repeat or rephrase what you already said in earlier turns, and never say the same sentence twice in a reply.",
                 "- For any how-to, recipe, or technical question, give the core steps in exact real-world chronological order without skipping essential steps or inventing details.",
                 `- Sound genuinely human and expressive, never robotic: ${reactionExamples}`,
                 "- Pure spoken words ONLY — zero markdown, asterisks, bullet lists, headings, emojis, or URLs."
@@ -2820,11 +2841,21 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 : conversationHistory.slice(-4);
             try {
                 const llmT0 = performance.now();
-                let aiText = await callLiveChatModel("qwen/qwen3.8-27b", "none", 280, liveSystemPrompt, turnHistory, signal, resolvedTurnLang, previousTurnLang, sttMeta).catch(() => "");
+                const speaker = createLiveSpeaker(signal, resolvedTurnLang);
+                let aiText = "";
+                try {
+                    aiText = await streamLiveChatModel("qwen/qwen3.8-27b", "none", 420, liveSystemPrompt, turnHistory, signal, resolvedTurnLang, previousTurnLang, sttMeta, (d) => speaker.push(d));
+                } catch (e) { if (e?.name === 'AbortError') throw e; aiText = ""; }
+                aiText = cleanTeluguOutput(aiText);
+                const streamed = Boolean(aiText);
+                if (streamed) speaker.end(); else speaker.cancel();
+                if (!aiText && !(signal && signal.aborted)) {
+                    aiText = await callLiveChatModel("qwen/qwen3.8-27b", "none", 280, liveSystemPrompt, turnHistory, signal, resolvedTurnLang, previousTurnLang, sttMeta).catch(() => "");
+                }
                 if (!aiText && !(signal && signal.aborted)) {
                     aiText = await callLiveChatModel("openai/gpt-oss-120b", "low", 550, liveSystemPrompt, turnHistory, signal, resolvedTurnLang, previousTurnLang, sttMeta);
                 }
-                if (aiText && isLiveReplyLanguageMismatch(aiText, resolvedTurnLang) && !(signal && signal.aborted)) {
+                if (aiText && !streamed && isLiveReplyLanguageMismatch(aiText, resolvedTurnLang) && !(signal && signal.aborted)) {
                     const retryPrompt = `CRITICAL: Reply ONLY in ${targetLangName} (${getLangDirective(resolvedTurnLang)}). Output 1-2 warm spoken sentences with zero markdown.`;
                     const retried = await callLiveChatModel("openai/gpt-oss-120b", "low", 550, retryPrompt, [{ role: "user", content: userVoiceText }], signal, resolvedTurnLang, previousTurnLang, sttMeta).catch(() => "");
                     if (retried && !isLiveReplyLanguageMismatch(retried, resolvedTurnLang)) {
@@ -2852,12 +2883,173 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                 chatContainer.appendChild(aiRow);
                 scrollToBottom();
                 console.log(`[Live] STT+LLM total before TTS: ${(performance.now() - roundTripT0).toFixed(0)}ms`);
-                await speakAIResponse(aiText, signal, resolvedTurnLang);
+                if (streamed) await speaker.finish(aiText); else await speakAIResponse(aiText, signal, resolvedTurnLang);
             } catch (err) {
                 if (err?.name === 'AbortError' || !isLiveActive) return;
                 console.warn('[Live] LLM error:', err);
                 if (isLiveActive) setTimeout(startContinuousListening, 700);
             }
+        }
+
+        function resolveTtsVoice(txt, hintLang) {
+            const base = hintLang || 'en';
+            const ranges = { te: /[\u0C00-\u0C7F]/g, hi: /[\u0900-\u097F]/g, ta: /[\u0B80-\u0BFF]/g, ml: /[\u0D00-\u0D7F]/g, kn: /[\u0C80-\u0CFF]/g, bn: /[\u0980-\u09FF]/g, gu: /[\u0A80-\u0AFF]/g, pa: /[\u0A00-\u0A7F]/g, or: /[\u0B00-\u0B7F]/g };
+            let best = null, bestN = 0;
+            for (const [c, re] of Object.entries(ranges)) { const n = (txt.match(re) || []).length; if (n > bestN) { bestN = n; best = c; } }
+            const latin = (txt.match(/[a-zA-Z]/g) || []).length;
+            const indicLangs = ['te', 'hi', 'mr', 'ta', 'ml', 'kn', 'bn', 'gu', 'pa', 'or'];
+            let lang = base;
+            if (bestN >= 2) lang = (best === 'hi' && base === 'mr') ? 'mr' : best;
+            else if (bestN === 0 && latin >= 3 && indicLangs.includes(base)) lang = 'en';
+            const langMap = { en: 'en-IN', hi: 'hi-IN', mr: 'mr-IN', te: 'te-IN', ta: 'ta-IN', ml: 'ml-IN', kn: 'kn-IN', bn: 'bn-IN', gu: 'gu-IN', pa: 'pa-IN', or: 'od-IN' };
+            const regional = ['ta', 'ml', 'kn', 'mr', 'bn', 'gu', 'pa', 'or'].includes(lang);
+            return {
+                lang,
+                targetLang: langMap[lang] || 'en-IN',
+                model: regional ? 'bulbul:v3' : 'bulbul:v4-flash',
+                speaker: regional ? 'kavitha' : (lang === 'en' ? 'simran_en_conversation' : lang === 'hi' ? 'kavya_hi_conversational' : 'kavitha_te_conversation'),
+                useEl: false /* Sarvam only, as in your setup */
+            };
+        }
+
+        async function streamLiveChatModel(model, effort, maxTokens, systemPrompt, historyMsgs, signal, turnLang, prevLang, sttMeta, onDelta) {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                signal,
+                body: JSON.stringify({
+                    model, mode: "live", stream: true, reasoning_effort: effort, temperature: 0.72, max_tokens: maxTokens,
+                    language: turnLang, prev_language: prevLang || turnLang, script_preference: "native",
+                    stt_meta: sttMeta ? { languageCode: sttMeta.languageCode || null, languageProbability: Number(sttMeta.languageProbability || 0) } : null,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+                    messages: [{ role: "system", content: systemPrompt }, ...getFewShotExamples(turnLang, 'live'), ...historyMsgs]
+                })
+            });
+            if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+            const reader = res.body.getReader();
+            const dec = new TextDecoder();
+            let acc = '', carry = '';
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                carry += dec.decode(value, { stream: true });
+                const lines = carry.split('\n');
+                carry = lines.pop();
+                for (const ln of lines) {
+                    const s = ln.trim();
+                    if (!s.startsWith('data:')) continue;
+                    const p = s.slice(5).trim();
+                    if (p === '[DONE]') continue;
+                    try {
+                        const d = JSON.parse(p).choices?.[0]?.delta?.content;
+                        if (d) { acc += d; onDelta(d); }
+                    } catch (e) {}
+                }
+            }
+            return acc;
+        }
+
+        // Sentence-by-sentence TTS pipeline: starts speaking while the LLM is still generating
+        function createLiveSpeaker(signal, hintLang) {
+            const ctx = getPlaybackAudioContext();
+            stopAudioPlayback();
+            const mySession = livePlaybackSession;
+            let buf = '', voice = null, count = 0, cancelled = false, began = false;
+            const spoken = new Set();
+            let nextTime = 0, lastSource = null, scheduled = 0, chain = Promise.resolve();
+            const dead = () => cancelled || mySession !== livePlaybackSession || !isLiveActive || (signal && signal.aborted);
+
+            function begin() {
+                if (began) return;
+                began = true;
+                isAITalking = true;
+                setLiveState('speaking', 'SPEAKING', '');
+                if (mediaStream) mediaStream.getAudioTracks().forEach(t => t.enabled = false);
+                if (recorderCtx?.state === 'running') recorderCtx.suspend().catch(() => {});
+                startOrbVoicePulse(ensureLivePlaybackNodes(ctx));
+                nextTime = ctx.currentTime + 0.03;
+            }
+
+            function emit(seg) {
+                const clean = sanitizeForSpeech(seg);
+                if (!clean || !ctx || dead()) return;
+                const spokenKey = clean.toLowerCase().replace(/\s+/g, ' ');
+                if (spoken.has(spokenKey)) return;
+                spoken.add(spokenKey);
+                if (!voice) voice = resolveTtsVoice(clean, hintLang);
+                const v = voice;
+                const p = fetchTtsChunkAudio(clean, v.targetLang, v.speaker, v.useEl, signal, v.model).catch(() => null);
+                chain = chain.then(async () => {
+                    const item = await p;
+                    if (!item || !item.arrayBuffer || dead()) return;
+                    let decoded;
+                    try { decoded = await ctx.decodeAudioData(item.arrayBuffer.slice(0)); } catch (e) { return; }
+                    if (dead()) return;
+                    if (ctx.state === 'suspended') await ctx.resume().catch(() => {});
+                    begin();
+                    const src = ctx.createBufferSource();
+                    src.buffer = decoded;
+                    src.connect(ensureLivePlaybackNodes(ctx));
+                    const startAt = Math.max(ctx.currentTime + 0.01, nextTime);
+                    src.start(startAt);
+                    nextTime = startAt + decoded.duration;
+                    activeAudioSources.push(src);
+                    lastSource = src;
+                    scheduled++;
+                });
+            }
+
+            function drain(final) {
+                while (true) {
+                    const minLen = count === 0 ? 24 : 45;
+                    const re = /[.!?\u0964\u2026]+["')\]]*(?=\s)/g;
+                    let m, cut = -1;
+                    while ((m = re.exec(buf))) {
+                        const end = m.index + m[0].length;
+                        if (end >= minLen) { cut = end; break; }
+                    }
+                    if (cut < 0 && !final && count === 0 && buf.length >= 70) {
+                        const c = buf.lastIndexOf(',');
+                        if (c >= 30) cut = c + 1;
+                    }
+                    if (cut < 0) break;
+                    emit(buf.slice(0, cut));
+                    buf = buf.slice(cut).replace(/^\s+/, '');
+                    count++;
+                }
+                if (final && buf.trim()) { emit(buf); buf = ''; count++; }
+            }
+
+            return {
+                push(d) { buf += d; drain(false); },
+                end() { drain(true); },
+                cancel() { cancelled = true; },
+                async finish(fullText) {
+                    await chain;
+                    if (dead()) return;
+                    if (!scheduled || !lastSource) {
+                        stopAudioPlayback();
+                        await fallbackBrowserSpeech(sanitizeForSpeech(fullText), hintLang);
+                        return;
+                    }
+                    await new Promise((resolve) => {
+                        let settled = false;
+                        const done = () => {
+                            if (settled) return;
+                            settled = true;
+                            if (mySession === livePlaybackSession) {
+                                stopOrbVoicePulse();
+                                activeAudioSources = [];
+                                isAITalking = false;
+                                if (isLiveActive) setTimeout(() => { if (isLiveActive && !isAITalking) startContinuousListening(); }, 140);
+                            }
+                            resolve();
+                        };
+                        lastSource.onended = done;
+                        setTimeout(done, Math.max(150, Math.ceil((nextTime - ctx.currentTime) * 1000) + 250));
+                    });
+                }
+            };
         }
 
         function base64ToArrayBuffer(b64) {
@@ -2908,7 +3100,7 @@ CHATGPT / CLAUDE EDITORIAL RESPONSE STYLE (STRICT):
                     target_language_code: targetLang,
                     model: sarvamModel,
                     speaker,
-                    pace: 0.96,
+                    pace: 1.0,
                     pitch: 0.0,
                     loudness: 1.1,
                     enable_preprocessing: true,
