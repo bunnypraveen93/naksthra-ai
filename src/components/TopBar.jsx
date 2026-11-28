@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function TopBar({ onToggleMenu }) {
+export function TopBar({ onToggleMenu, isChatActive, onNewChat }) {
   return (
     <header className="top-bar">
       <div className="top-left-group">
@@ -14,6 +14,18 @@ export function TopBar({ onToggleMenu }) {
           </span>
         </div>
       </div>
+
+      {isChatActive && (
+        <button
+          type="button"
+          className="top-new-chat-btn"
+          onClick={onNewChat}
+          title="New Chat"
+          aria-label="New Chat"
+        >
+          <i className="fa-regular fa-pen-to-square" aria-hidden="true" />
+        </button>
+      )}
     </header>
   );
 }

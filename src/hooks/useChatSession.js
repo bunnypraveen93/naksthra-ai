@@ -17,6 +17,7 @@ function makeId(prefix = 'msg') {
 export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
   const [messages, setMessages] = useState([]);
   const [recentChats, setRecentChats] = useState([{ id: 'welcome', title: 'Welcome Chat' }]);
+  const [activeChatId, setActiveChatId] = useState(null);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [greetingVariant, setGreetingVariant] = useState(() => Math.floor(Math.random() * 3));
 
@@ -27,8 +28,11 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
   const typingTimerRef = useRef(null);
   const typingRafRef = useRef(null);
   const isSendingRef = useRef(false);
-  const hasRecordedRecentRef = useRef(false);
+  const currentSessionIdRef = useRef(null);
+  const savedSessionsRef = useRef(new Map());
+  const messagesRef = useRef([]);
 
+  messagesRef.current = messages;
   const isChatActive = messages.length > 0;
 
   const stopTypingAnimation = useCallback(() => {
@@ -53,47 +57,69 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
     };
   }, [stopTypingAnimation]);
 
-  const recordRecentIfFirst = useCallback((firstPromptText) => {
-    if (hasRecordedRecentRef.current) return;
-    hasRecordedRecentRef.current = true;
-    const title = String(firstPromptText || '').trim().substring(0, 22);
-    if (title) {
-      setRecentChats((r) => [{ id: makeId('chat'), title }, ...r]);
-    }
+  const syncSavedSession = useCallback((chatId, nextMessages, nextHistory) => {
+    if (!chatId) return;
+    savedSessionsRef.current.set(chatId, {
+      messages: nextMessages,
+      history: [...nextHistory],
+      lang: currentLanguageRef.current
+    });
+  }, []);
+
+  const ensureRecentChatForPrompt = useCallback((firstPromptText) => {
+    if (currentSessionIdRef.current) return currentSessionIdRef.current;
+    const chatId = makeId('chat');
+    currentSessionIdRef.current = chatId;
+    setActiveChatId(chatId);
+    const title = String(firstPromptText || '').trim().substring(0, 28) || 'New chat';
+    setRecentChats((r) => [{ id: chatId, title }, ...r]);
+    return chatId;
   }, []);
 
   const appendUserMessage = useCallback(
     (text) => {
-      recordRecentIfFirst(text);
+      const chatId = ensureRecentChatForPrompt(text);
       const id = makeId('user');
-      setMessages((prev) => [...prev, { id, role: 'user', content: text }]);
+      setMessages((prev) => {
+        const next = [...prev, { id, role: 'user', content: text }];
+        syncSavedSession(chatId, next, conversationHistoryRef.current);
+        return next;
+      });
       return id;
     },
-    [recordRecentIfFirst]
+    [ensureRecentChatForPrompt, syncSavedSession]
   );
 
-  const appendCompletedAIMessage = useCallback((text) => {
-    const id = makeId('ai');
-    setMessages((prev) => [
-      ...prev,
-      {
-        id,
-        role: 'assistant',
-        content: text,
-        fullContent: text,
-        isLoading: false,
-        isTyping: false,
-        isCutOff: false,
-        isContinuing: false,
-        continueRetry: false,
-        isError: false
-      }
-    ]);
-    return id;
-  }, []);
+  const appendCompletedAIMessage = useCallback(
+    (text) => {
+      const chatId = currentSessionIdRef.current;
+      const id = makeId('ai');
+      setMessages((prev) => {
+        const next = [
+          ...prev,
+          {
+            id,
+            role: 'assistant',
+            content: text,
+            fullContent: text,
+            isLoading: false,
+            isTyping: false,
+            isCutOff: false,
+            isContinuing: false,
+            continueRetry: false,
+            isError: false
+          }
+        ];
+        syncSavedSession(chatId, next, conversationHistoryRef.current);
+        return next;
+      });
+      return id;
+    },
+    [syncSavedSession]
+  );
 
   const animateAIReplyReveal = useCallback(
-    (aiMsgId, fullText, sessionId) => {
+    (aiMsgId, fullText, sessionId, chatId) => {
       return new Promise((resolve) => {
         stopTypingAnimation();
         const text = String(fullText || '');
@@ -104,8 +130,8 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
         const tokens = text.match(/\S+\s*/g);
 
         if (reduceMotion || !tokens || tokens.length <= 2) {
-          setMessages((prev) =>
-            prev.map((m) =>
+          setMessages((prev) => {
+            const next = prev.map((m) =>
               m.id === aiMsgId
                 ? {
                     ...m,
@@ -116,14 +142,15 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
                     isCutOff: isReplyCutOff(text) && text.length > 60
                   }
                 : m
-            )
-          );
+            );
+            syncSavedSession(chatId, next, conversationHistoryRef.current);
+            return next;
+          });
           resolve();
           return;
         }
 
         const total = tokens.length;
-        // Batch token reveals gently (~36-42ms) so mobile React/Markdown avoids DOM layout thrashing
         const step = total > 180 ? 7 : total > 75 ? 4 : 2;
         const intervalMs = total > 180 ? 34 : total > 75 ? 36 : 40;
         let idx = 0;
@@ -137,8 +164,8 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
           const isDone = idx >= total;
           const slice = isDone ? text : tokens.slice(0, idx).join('');
 
-          setMessages((prev) =>
-            prev.map((m) =>
+          setMessages((prev) => {
+            const next = prev.map((m) =>
               m.id === aiMsgId
                 ? {
                     ...m,
@@ -149,8 +176,10 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
                     isCutOff: isDone ? isReplyCutOff(text) && text.length > 60 : false
                   }
                 : m
-            )
-          );
+            );
+            if (isDone) syncSavedSession(chatId, next, conversationHistoryRef.current);
+            return next;
+          });
 
           if (isDone) {
             resolve();
@@ -164,10 +193,13 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
         typingRafRef.current = requestAnimationFrame(tick);
       });
     },
-    [stopTypingAnimation]
+    [stopTypingAnimation, syncSavedSession]
   );
 
   const startNewChat = useCallback(() => {
+    if (currentSessionIdRef.current && messagesRef.current.length > 0) {
+      syncSavedSession(currentSessionIdRef.current, messagesRef.current, conversationHistoryRef.current);
+    }
     stopTypingAnimation();
     if (activeAbortRef.current) {
       try {
@@ -179,13 +211,49 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
       window.speechSynthesis.cancel();
     }
     activeChatSessionRef.current += 1;
-    hasRecordedRecentRef.current = false;
+    currentSessionIdRef.current = null;
+    setActiveChatId(null);
     isSendingRef.current = false;
     setIsSendingMessage(false);
     setMessages([]);
     conversationHistoryRef.current = [];
     setGreetingVariant((v) => (v + 1) % 3);
-  }, [stopTypingAnimation]);
+  }, [stopTypingAnimation, syncSavedSession]);
+
+  const selectRecentChat = useCallback(
+    (chatId) => {
+      if (chatId === 'welcome') {
+        startNewChat();
+        return;
+      }
+      if (currentSessionIdRef.current === chatId) return;
+      if (currentSessionIdRef.current && messagesRef.current.length > 0) {
+        syncSavedSession(currentSessionIdRef.current, messagesRef.current, conversationHistoryRef.current);
+      }
+      const saved = savedSessionsRef.current.get(chatId);
+      if (!saved) return;
+
+      stopTypingAnimation();
+      if (activeAbortRef.current) {
+        try {
+          activeAbortRef.current.abort();
+        } catch {}
+        activeAbortRef.current = null;
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      activeChatSessionRef.current += 1;
+      isSendingRef.current = false;
+      setIsSendingMessage(false);
+      currentSessionIdRef.current = chatId;
+      setActiveChatId(chatId);
+      conversationHistoryRef.current = [...saved.history];
+      currentLanguageRef.current = saved.lang || 'en';
+      setMessages(saved.messages);
+    },
+    [startNewChat, stopTypingAnimation, syncSavedSession]
+  );
 
   const sendMessage = useCallback(
     async (rawText) => {
@@ -197,29 +265,33 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
       const sessionId = activeChatSessionRef.current;
       ensurePlaybackUnlocked?.();
 
+      const chatId = ensureRecentChatForPrompt(text);
       const userId = makeId('user');
       const aiMsgId = makeId('ai');
-      recordRecentIfFirst(text);
-
-      setMessages((prev) => [
-        ...prev,
-        { id: userId, role: 'user', content: text },
-        {
-          id: aiMsgId,
-          role: 'assistant',
-          content: '',
-          fullContent: '',
-          isLoading: true,
-          isTyping: false,
-          isCutOff: false,
-          isContinuing: false,
-          continueRetry: false,
-          isError: false
-        }
-      ]);
 
       conversationHistoryRef.current.push({ role: 'user', content: text });
       conversationHistoryRef.current = manageConversationHistory(conversationHistoryRef.current, 8);
+
+      setMessages((prev) => {
+        const next = [
+          ...prev,
+          { id: userId, role: 'user', content: text },
+          {
+            id: aiMsgId,
+            role: 'assistant',
+            content: '',
+            fullContent: '',
+            isLoading: true,
+            isTyping: false,
+            isCutOff: false,
+            isContinuing: false,
+            continueRetry: false,
+            isError: false
+          }
+        ];
+        syncSavedSession(chatId, next, conversationHistoryRef.current);
+        return next;
+      });
 
       const controller = new AbortController();
       activeAbortRef.current = controller;
@@ -268,7 +340,7 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
         conversationHistoryRef.current.push({ role: 'assistant', content: aiReply });
         conversationHistoryRef.current = manageConversationHistory(conversationHistoryRef.current, 8);
 
-        await animateAIReplyReveal(aiMsgId, aiReply, sessionId);
+        await animateAIReplyReveal(aiMsgId, aiReply, sessionId, chatId);
         return true;
       } catch (error) {
         console.error('Chat error:', error);
@@ -278,8 +350,8 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
             ? 'Request timed out. Please try again.'
             : error?.message || 'Server connection error. Please check your network.';
         showErrorToast(errMsg);
-        setMessages((prev) =>
-          prev.map((m) =>
+        setMessages((prev) => {
+          const next = prev.map((m) =>
             m.id === aiMsgId
               ? {
                   ...m,
@@ -291,8 +363,10 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
                   isError: true
                 }
               : m
-          )
-        );
+          );
+          syncSavedSession(chatId, next, conversationHistoryRef.current);
+          return next;
+        });
         return true;
       } finally {
         clearTimeout(timeoutId);
@@ -303,62 +377,69 @@ export function useChatSession({ showErrorToast, ensurePlaybackUnlocked }) {
         }
       }
     },
-    [animateAIReplyReveal, ensurePlaybackUnlocked, recordRecentIfFirst, showErrorToast]
+    [animateAIReplyReveal, ensurePlaybackUnlocked, ensureRecentChatForPrompt, showErrorToast, syncSavedSession]
   );
 
-  const continueMessage = useCallback(async (aiMsgId, currentReplyText) => {
-    setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? { ...m, isContinuing: true } : m)));
-    try {
-      const cont = await continueChatCompletion({
-        historySlice: conversationHistoryRef.current.slice(-5),
-        currentReplyText,
-        currentLanguage: currentLanguageRef.current
-      });
-      if (cont) {
-        const merged = currentReplyText.trimEnd() + '\n\n' + cont.trimStart();
-        if (
-          conversationHistoryRef.current.length &&
-          conversationHistoryRef.current[conversationHistoryRef.current.length - 1].role === 'assistant'
-        ) {
-          conversationHistoryRef.current[conversationHistoryRef.current.length - 1].content = merged;
+  const continueMessage = useCallback(
+    async (aiMsgId, currentReplyText) => {
+      const chatId = currentSessionIdRef.current;
+      setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? { ...m, isContinuing: true } : m)));
+      try {
+        const cont = await continueChatCompletion({
+          historySlice: conversationHistoryRef.current.slice(-5),
+          currentReplyText,
+          currentLanguage: currentLanguageRef.current
+        });
+        if (cont) {
+          const merged = currentReplyText.trimEnd() + '\n\n' + cont.trimStart();
+          if (
+            conversationHistoryRef.current.length &&
+            conversationHistoryRef.current[conversationHistoryRef.current.length - 1].role === 'assistant'
+          ) {
+            conversationHistoryRef.current[conversationHistoryRef.current.length - 1].content = merged;
+          }
+          setMessages((prev) => {
+            const next = prev.map((m) =>
+              m.id === aiMsgId
+                ? {
+                    ...m,
+                    content: merged,
+                    fullContent: merged,
+                    isContinuing: false,
+                    isCutOff: false
+                  }
+                : m
+            );
+            syncSavedSession(chatId, next, conversationHistoryRef.current);
+            return next;
+          });
+        } else {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === aiMsgId ? { ...m, isContinuing: false, isCutOff: false } : m))
+          );
         }
+      } catch {
         setMessages((prev) =>
-          prev.map((m) =>
-            m.id === aiMsgId
-              ? {
-                  ...m,
-                  content: merged,
-                  fullContent: merged,
-                  isContinuing: false,
-                  isCutOff: false
-                }
-              : m
-          )
-        );
-      } else {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === aiMsgId ? { ...m, isContinuing: false, isCutOff: false } : m))
+          prev.map((m) => (m.id === aiMsgId ? { ...m, isContinuing: false, continueRetry: true } : m))
         );
       }
-    } catch {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === aiMsgId ? { ...m, isContinuing: false, continueRetry: true } : m))
-      );
-    }
-  }, []);
+    },
+    [syncSavedSession]
+  );
 
   return {
     messages,
     recentChats,
+    activeChatId,
     isSendingMessage,
     isChatActive,
     greetingVariant,
     conversationHistoryRef,
     currentLanguageRef,
-    recordRecentIfFirst,
     appendUserMessage,
     appendCompletedAIMessage,
     startNewChat,
+    selectRecentChat,
     sendMessage,
     continueMessage
   };

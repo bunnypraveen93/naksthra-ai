@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function Sidebar({ isOpen, onClose, onNewChat, recentChats }) {
+export function Sidebar({ isOpen, onClose, onNewChat, recentChats, activeChatId, onSelectChat }) {
   return (
     <>
       <div
@@ -27,25 +27,33 @@ export function Sidebar({ isOpen, onClose, onNewChat, recentChats }) {
         </div>
 
         <button type="button" className="new-chat-btn" onClick={onNewChat}>
-          <i className="fa-solid fa-plus" aria-hidden="true" /> New Chat
+          <i className="fa-regular fa-pen-to-square" aria-hidden="true" />
+          <span>New chat</span>
         </button>
 
         <div className="recent-label">Recent</div>
         <div className="recent-list" id="recentList">
           {recentChats.map((item) => (
-            <div key={item.id} className="menu-item">
+            <button
+              key={item.id}
+              type="button"
+              className={item.id === activeChatId ? 'menu-item active' : 'menu-item'}
+              onClick={() => onSelectChat?.(item.id)}
+            >
               <i className="fa-regular fa-message" aria-hidden="true" />
-              <span>{item.title}</span>
-            </div>
+              <span className="menu-item-title">{item.title}</span>
+            </button>
           ))}
         </div>
 
         <div className="sidebar-bottom">
-          <div className="menu-item" onClick={() => alert('Settings coming soon!')}>
-            <i className="fa-solid fa-gear" aria-hidden="true" /> Settings
-          </div>
+          <button type="button" className="menu-item" onClick={() => alert('Settings coming soon!')}>
+            <i className="fa-solid fa-gear" aria-hidden="true" />
+            <span>Settings</span>
+          </button>
           <a href="index.html" className="menu-item">
-            <i className="fa-solid fa-arrow-left" aria-hidden="true" /> Back to Website
+            <i className="fa-solid fa-arrow-left" aria-hidden="true" />
+            <span>Back to Website</span>
           </a>
         </div>
       </aside>

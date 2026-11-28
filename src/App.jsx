@@ -34,6 +34,7 @@ export function App() {
   const {
     messages,
     recentChats,
+    activeChatId,
     isSendingMessage,
     isChatActive,
     greetingVariant,
@@ -42,6 +43,7 @@ export function App() {
     appendUserMessage,
     appendCompletedAIMessage,
     startNewChat,
+    selectRecentChat,
     sendMessage,
     continueMessage
   } = useChatSession({
@@ -49,7 +51,6 @@ export function App() {
     ensurePlaybackUnlocked: ensurePlaybackUnlockedProxy
   });
 
-  // Sync body.chat-active so top-bar, bottom-bar, send-btn, and pitch-black background styles match exactly
   useEffect(() => {
     document.body.classList.toggle('chat-active', isChatActive);
     return () => document.body.classList.remove('chat-active');
@@ -102,17 +103,32 @@ export function App() {
     setSidebarOpen(false);
   }, [cancelVoiceDictation, startNewChat]);
 
+  const handleSelectRecent = useCallback(
+    (chatId) => {
+      cancelVoiceDictation();
+      selectRecentChat(chatId);
+      setSidebarOpen(false);
+    },
+    [cancelVoiceDictation, selectRecentChat]
+  );
+
   return (
     <div className="app-shell">
       <Toast message={toast.message} visible={toast.visible} />
 
-      <TopBar onToggleMenu={() => setSidebarOpen((o) => !o)} />
+      <TopBar
+        onToggleMenu={() => setSidebarOpen((o) => !o)}
+        isChatActive={isChatActive}
+        onNewChat={handleNewChat}
+      />
 
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onNewChat={handleNewChat}
         recentChats={recentChats}
+        activeChatId={activeChatId}
+        onSelectChat={handleSelectRecent}
       />
 
       <ChatContainer
