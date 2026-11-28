@@ -142,8 +142,8 @@ body.chat-active .top-bar {
   min-width: 0;
 }
 .top-brand img {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   object-fit: cover;
   border: 1px solid rgba(56, 189, 248, 0.38);
@@ -151,7 +151,7 @@ body.chat-active .top-bar {
   flex-shrink: 0;
 }
 .top-brand-text {
-  font-size: 1.15rem;
+  font-size: clamp(1.3rem, 4.4vw, 1.5rem);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -304,7 +304,7 @@ body.chat-active .top-bar {
   padding: 11px 14px;
   border-radius: 999px;
   color: #c4c7c5;
-  font-size: 0.92rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -488,7 +488,7 @@ body.chat-active .top-bar {
   border-radius: 22px 22px 6px 22px;
   padding: clamp(10px, 1.8vw, 12px) clamp(14px, 2.4vw, 18px);
   max-width: min(84%, 580px);
-  font-size: clamp(1rem, 1.3vw, 1.0625rem);
+  font-size: clamp(1.1rem, 1.6vw, 1.1875rem);
   line-height: 1.6;
   word-wrap: break-word;
   overflow-wrap: anywhere;
@@ -512,7 +512,7 @@ body.chat-active .top-bar {
   max-width: 100%;
   min-width: 0;
   font-family: var(--font-main);
-  font-size: clamp(1rem, 1.3vw, 1.0625rem);
+  font-size: clamp(1.1rem, 1.6vw, 1.1875rem);
   font-weight: 400;
   line-height: 1.78;
   letter-spacing: 0;
@@ -531,7 +531,7 @@ body.chat-active .top-bar {
   margin-bottom: 0;
 }
 .msg-row.ai .msg-bubble h1 {
-  font-size: clamp(1.3rem, 2.3vw, 1.5rem);
+  font-size: clamp(1.45rem, 2.6vw, 1.65rem);
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.35;
@@ -541,7 +541,7 @@ body.chat-active .top-bar {
   padding-bottom: 6px;
 }
 .msg-row.ai .msg-bubble h2 {
-  font-size: clamp(1.2rem, 2vw, 1.35rem);
+  font-size: clamp(1.32rem, 2.3vw, 1.5rem);
   font-weight: 650;
   letter-spacing: -0.01em;
   line-height: 1.38;
@@ -549,7 +549,7 @@ body.chat-active .top-bar {
   color: #ffffff;
 }
 .msg-row.ai .msg-bubble h3 {
-  font-size: clamp(1.1rem, 1.7vw, 1.2rem);
+  font-size: clamp(1.2rem, 1.9vw, 1.32rem);
   font-weight: 650;
   line-height: 1.4;
   margin: 1.25em 0 0.5em;
@@ -558,7 +558,7 @@ body.chat-active .top-bar {
 .msg-row.ai .msg-bubble h4,
 .msg-row.ai .msg-bubble h5,
 .msg-row.ai .msg-bubble h6 {
-  font-size: clamp(1rem, 1.45vw, 1.08rem);
+  font-size: clamp(1.12rem, 1.6vw, 1.2rem);
   font-weight: 600;
   line-height: 1.45;
   margin: 1.1em 0 0.4em;
@@ -738,9 +738,9 @@ body.chat-active .top-bar {
   background: transparent;
   border: 1px solid transparent;
   color: rgba(255, 255, 255, 0.68);
-  padding: 4px 9px;
-  border-radius: 7px;
-  font-size: 0.78rem;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.92rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -845,7 +845,7 @@ body.chat-active .bottom-bar {
   border: none;
   outline: none;
   color: #f1f3f4;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.5;
   resize: none;
   height: 26px;
@@ -855,7 +855,7 @@ body.chat-active .bottom-bar {
 }
 .chat-input::placeholder {
   color: #9aa0a6;
-  font-size: 0.96rem;
+  font-size: 1.04rem;
 }
 .chat-input-actions {
   display: flex;
@@ -985,7 +985,7 @@ body.chat-active .send-btn .btn-icon-send {
   cursor: not-allowed;
 }
 .bottom-disclaimer {
-  font-size: clamp(0.68rem, 1.5vw, 0.73rem);
+  font-size: clamp(0.76rem, 1.8vw, 0.82rem);
   color: #71767b;
   text-align: center;
   padding: 0 8px;
