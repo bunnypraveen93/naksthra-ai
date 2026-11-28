@@ -1,2 +1,5 @@
 stop_siren.flag
 siren.pid
+node_modules
+dist
+
