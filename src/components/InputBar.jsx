@@ -144,12 +144,12 @@ export const InputBar = forwardRef(function InputBar(
           >
             <svg
               className="mic-icon-idle"
-              width="18"
-              height="18"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.2"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
@@ -158,7 +158,7 @@ export const InputBar = forwardRef(function InputBar(
               <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
               <line x1="12" y1="19" x2="12" y2="22" />
             </svg>
-            <svg className="mic-icon-stop" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg className="mic-icon-stop" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <rect x="6" y="6" width="12" height="12" rx="3" />
             </svg>
             <i className="fa-solid fa-spinner fa-spin mic-icon-spinner" aria-hidden="true" />
@@ -176,12 +176,12 @@ export const InputBar = forwardRef(function InputBar(
           >
             <svg
               className="btn-icon-wave"
-              width="20"
-              height="20"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.4"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
@@ -194,12 +194,12 @@ export const InputBar = forwardRef(function InputBar(
             </svg>
             <svg
               className="btn-icon-send"
-              width="19"
-              height="19"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.5"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"

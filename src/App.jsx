@@ -116,11 +116,7 @@ export function App() {
     <div className="app-shell">
       <Toast message={toast.message} visible={toast.visible} />
 
-      <TopBar
-        onToggleMenu={() => setSidebarOpen((o) => !o)}
-        isChatActive={isChatActive}
-        onNewChat={handleNewChat}
-      />
+      <TopBar onToggleMenu={() => setSidebarOpen((o) => !o)} onNewChat={handleNewChat} />
 
       <Sidebar
         isOpen={sidebarOpen}
