@@ -68,7 +68,8 @@ export function splitSpeechChunks(cleanText) {
   const txt = String(cleanText || '').trim();
   if (!txt || txt.length <= 190) return txt ? [txt] : [];
   const rawParts = txt
-    .split(/(?<=[.!?।])\s+/)
+    .replace(/([.!?।])\s+/g, '$1\n')
+    .split('\n')
     .map((p) => p.trim())
     .filter(Boolean);
   if (rawParts.length <= 1) return [txt];
