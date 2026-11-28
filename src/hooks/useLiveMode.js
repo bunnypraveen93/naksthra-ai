@@ -13,8 +13,39 @@ import {
 } from '../utils/language';
 import { cleanTeluguOutput, sanitizeForSpeech, splitSpeechChunks } from '../utils/textCleaners';
 
+/* ------------------------------------------------------------------ */
+/* LATENCY / CALL-FEEL TUNING KNOBS (change these to fine-tune)        */
+/* ------------------------------------------------------------------ */
+const FRAME_SIZE = 1024; // mic frame size (smaller = faster reaction, ~21ms at 48kHz)
+
+// End-of-speech detection (lower = faster replies, but may cut slow speakers)
+const SILENCE_HANG_SHORT_MS = 380; // silence needed to end a short sentence
+const SILENCE_HANG_LONG_MS = 480; // silence needed to end a long sentence
+const MAX_UTTERANCE_MS = 12000;
+
+// Barge-in: user can interrupt AI by just talking (like a real phone call)
+const BARGE_IN_ENABLED = true; // set false if loudspeaker echo causes false interrupts
+const BARGE_IN_MIN_RMS = 0.045; // mic loudness needed to interrupt while AI speaks
+const BARGE_IN_SPEAKING_MS = 260; // sustained voice needed to interrupt AI speech
+const BARGE_IN_THINKING_MS = 200; // sustained voice needed to interrupt while thinking
+const BARGE_IN_GRACE_MS = 700; // ignore interrupts right after AI starts speaking
+
+const RESTART_LISTEN_DELAY_MS = 60; // delay before listening again after AI finishes
+const AFTER_AI_COOLDOWN_MS = 150; // ignore tiny echo tail right after AI audio ends
+const LIVE_HISTORY_TURNS = 6;
+
 const GENERIC_PLACEHOLDERS_RE =
   /^(Connecting\.\.\.|Listening\.\.\.|Thinking\.\.\.|కనెక్ట్ అవుతోంది\.\.\.|ఏంటి విశేషాలు\?|వింటున్నాను\.\.\.|ఆలోచిస్తున్నాను\.\.\.)$/i;
+
+function createAudioContext() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  try {
+    return new AC({ latencyHint: 'interactive' });
+  } catch {
+    return new AC();
+  }
+}
 
 export function useLiveMode({
   conversationHistoryRef,
@@ -61,6 +92,10 @@ export function useLiveMode({
   const activeSpeechFramesRef = useRef(0);
   const lastSpeechChunkIdxRef = useRef(0);
 
+  const bargeMsRef = useRef(0);
+  const aiSpeechStartedAtRef = useRef(0);
+  const lastAIEndAtRef = useRef(0);
+
   const playbackAudioCtxRef = useRef(null);
   const keepAliveOscRef = useRef(null);
   const keepAliveGainRef = useRef(null);
@@ -85,8 +120,8 @@ export function useLiveMode({
 
   const getPlaybackAudioContext = useCallback(() => {
     if (!playbackAudioCtxRef.current) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) playbackAudioCtxRef.current = new AC();
+      const ctx = createAudioContext();
+      if (ctx) playbackAudioCtxRef.current = ctx;
     }
     return playbackAudioCtxRef.current;
   }, []);
@@ -117,6 +152,16 @@ export function useLiveMode({
       liveAnalyserNodeRef.current = analyser;
     }
     return liveAnalyserNodeRef.current;
+  }, []);
+
+  // When barge-in is OFF we mute the mic while AI talks (old behaviour).
+  // When barge-in is ON the mic stays open so the user can interrupt like a real call.
+  const pauseMicForAI = useCallback(() => {
+    aiSpeechStartedAtRef.current = Date.now();
+    bargeMsRef.current = 0;
+    if (BARGE_IN_ENABLED) return;
+    if (mediaStreamRef.current) mediaStreamRef.current.getAudioTracks().forEach((t) => (t.enabled = false));
+    if (recorderCtxRef.current?.state === 'running') recorderCtxRef.current.suspend().catch(() => {});
   }, []);
 
   const stopOrbVoicePulse = useCallback(() => {
@@ -160,6 +205,7 @@ export function useLiveMode({
 
   const stopAudioPlayback = useCallback(() => {
     livePlaybackSessionRef.current += 1;
+    lastAIEndAtRef.current = Date.now();
     stopOrbVoicePulse();
     if (activeAudioSourcesRef.current.length) {
       for (const src of activeAudioSourcesRef.current) {
@@ -263,12 +309,20 @@ export function useLiveMode({
   // Forward declarations via refs to break circular async callback dependencies cleanly
   const startContinuousListeningRef = useRef(null);
 
+  const scheduleListenRestart = useCallback((delay = RESTART_LISTEN_DELAY_MS) => {
+    lastAIEndAtRef.current = Date.now();
+    if (!isLiveActiveRef.current) return;
+    setTimeout(() => {
+      if (isLiveActiveRef.current && !isAITalkingRef.current) startContinuousListeningRef.current?.();
+    }, delay);
+  }, []);
+
   const fallbackBrowserSpeech = useCallback(
     (text, lang = currentLanguageRef.current) => {
       return new Promise((resolve) => {
         const done = () => {
           isAITalkingRef.current = false;
-          if (isLiveActiveRef.current) setTimeout(() => startContinuousListeningRef.current?.(), 220);
+          scheduleListenRestart();
           resolve();
         };
         if ('speechSynthesis' in window) {
@@ -295,6 +349,7 @@ export function useLiveMode({
           const u = new SpeechSynthesisUtterance(text);
           u.lang = localeMap[lang] || 'en-IN';
           isAITalkingRef.current = true;
+          pauseMicForAI();
           updateLiveDisplay('speaking', 'SPEAKING', `"${text}"`);
           u.onend = u.onerror = done;
           window.speechSynthesis.speak(u);
@@ -303,7 +358,7 @@ export function useLiveMode({
         }
       });
     },
-    [currentLanguageRef, updateLiveDisplay]
+    [currentLanguageRef, pauseMicForAI, scheduleListenRestart, updateLiveDisplay]
   );
 
   const playAudioBuffersSequentialWithElement = useCallback(
@@ -311,9 +366,8 @@ export function useLiveMode({
       stopAudioPlayback();
       const mySession = livePlaybackSessionRef.current;
       isAITalkingRef.current = true;
+      pauseMicForAI();
       updateLiveDisplay('speaking', 'SPEAKING', `"${displayText}"`);
-      if (mediaStreamRef.current) mediaStreamRef.current.getAudioTracks().forEach((t) => (t.enabled = false));
-      if (recorderCtxRef.current?.state === 'running') recorderCtxRef.current.suspend().catch(() => {});
 
       const player = livePlayerRef.current;
       for (const item of items) {
@@ -350,14 +404,10 @@ export function useLiveMode({
 
       if (mySession === livePlaybackSessionRef.current) {
         isAITalkingRef.current = false;
-        if (isLiveActiveRef.current) {
-          setTimeout(() => {
-            if (isLiveActiveRef.current && !isAITalkingRef.current) startContinuousListeningRef.current?.();
-          }, 220);
-        }
+        scheduleListenRestart();
       }
     },
-    [stopAudioPlayback, updateLiveDisplay]
+    [pauseMicForAI, scheduleListenRestart, stopAudioPlayback, updateLiveDisplay]
   );
 
   const playPipelinedChunksWebAudio = useCallback(
@@ -368,9 +418,8 @@ export function useLiveMode({
       stopAudioPlayback();
       const mySession = livePlaybackSessionRef.current;
       isAITalkingRef.current = true;
+      pauseMicForAI();
       updateLiveDisplay('speaking', 'SPEAKING', `"${displayText}"`);
-      if (mediaStreamRef.current) mediaStreamRef.current.getAudioTracks().forEach((t) => (t.enabled = false));
-      if (recorderCtxRef.current?.state === 'running') recorderCtxRef.current.suspend().catch(() => {});
       if (ctx.state === 'suspended') await ctx.resume().catch(() => {});
 
       const destNode = ensureLivePlaybackNodes(ctx);
@@ -435,21 +484,26 @@ export function useLiveMode({
             stopOrbVoicePulse();
             activeAudioSourcesRef.current = [];
             isAITalkingRef.current = false;
-            if (isLiveActiveRef.current) {
-              setTimeout(() => {
-                if (isLiveActiveRef.current && !isAITalkingRef.current) startContinuousListeningRef.current?.();
-              }, 220);
-            }
+            scheduleListenRestart();
           }
           resolve();
         };
         lastSource.onended = finish;
-        const remainMs = Math.max(150, Math.ceil((nextScheduleTime - ctx.currentTime) * 1000) + 250);
+        const remainMs = Math.max(150, Math.ceil((nextScheduleTime - ctx.currentTime) * 1000) + 150);
         setTimeout(finish, remainMs);
       });
       return true;
     },
-    [ensureLivePlaybackNodes, getPlaybackAudioContext, startOrbVoicePulse, stopAudioPlayback, stopOrbVoicePulse, updateLiveDisplay]
+    [
+      ensureLivePlaybackNodes,
+      getPlaybackAudioContext,
+      pauseMicForAI,
+      scheduleListenRestart,
+      startOrbVoicePulse,
+      stopAudioPlayback,
+      stopOrbVoicePulse,
+      updateLiveDisplay
+    ]
   );
 
   const speakAIResponse = useCallback(
@@ -594,11 +648,10 @@ export function useLiveMode({
         if (began) return;
         began = true;
         isAITalkingRef.current = true;
+        pauseMicForAI();
         updateLiveDisplay('speaking', 'SPEAKING', '');
-        if (mediaStreamRef.current) mediaStreamRef.current.getAudioTracks().forEach((t) => (t.enabled = false));
-        if (recorderCtxRef.current?.state === 'running') recorderCtxRef.current.suspend().catch(() => {});
         startOrbVoicePulse(ensureLivePlaybackNodes(ctx));
-        nextTime = ctx.currentTime + 0.03;
+        nextTime = ctx.currentTime + 0.02;
       }
 
       function emit(seg) {
@@ -609,6 +662,7 @@ export function useLiveMode({
         spoken.add(spokenKey);
         if (!voice) voice = resolveTtsVoice(clean, hintLang);
         const v = voice;
+        // TTS request fires immediately (parallel); playback is chained in order below
         const p = fetchTtsChunkAudio(clean, v.targetLang, v.speaker, v.useEl, signal, v.model).catch(() => null);
         chain = chain.then(async () => {
           const item = await p;
@@ -634,9 +688,10 @@ export function useLiveMode({
         });
       }
 
+      // Earlier first-chunk cut = voice starts sooner
       function drain(final) {
         while (true) {
-          const minLen = count === 0 ? 24 : 45;
+          const minLen = count === 0 ? 14 : 40;
           const re = /[.!?\u0964\u2026]+["')\]]*(?=\s)/g;
           let m;
           let cut = -1;
@@ -647,9 +702,15 @@ export function useLiveMode({
               break;
             }
           }
-          if (cut < 0 && !final && count === 0 && buf.length >= 70) {
-            const c = buf.lastIndexOf(',');
-            if (c >= 30) cut = c + 1;
+          if (cut < 0 && !final && count === 0) {
+            if (buf.length >= 40) {
+              const c = buf.lastIndexOf(',');
+              if (c >= 18) cut = c + 1;
+            }
+            if (cut < 0 && buf.length >= 90) {
+              const sp = buf.lastIndexOf(' ');
+              if (sp >= 40) cut = sp;
+            }
           }
           if (cut < 0) break;
           emit(buf.slice(0, cut));
@@ -691,16 +752,12 @@ export function useLiveMode({
                 stopOrbVoicePulse();
                 activeAudioSourcesRef.current = [];
                 isAITalkingRef.current = false;
-                if (isLiveActiveRef.current) {
-                  setTimeout(() => {
-                    if (isLiveActiveRef.current && !isAITalkingRef.current) startContinuousListeningRef.current?.();
-                  }, 140);
-                }
+                scheduleListenRestart(RESTART_LISTEN_DELAY_MS);
               }
               resolve();
             };
             lastSource.onended = done;
-            setTimeout(done, Math.max(150, Math.ceil((nextTime - ctx.currentTime) * 1000) + 250));
+            setTimeout(done, Math.max(150, Math.ceil((nextTime - ctx.currentTime) * 1000) + 150));
           });
         }
       };
@@ -709,6 +766,8 @@ export function useLiveMode({
       ensureLivePlaybackNodes,
       fallbackBrowserSpeech,
       getPlaybackAudioContext,
+      pauseMicForAI,
+      scheduleListenRestart,
       startOrbVoicePulse,
       stopAudioPlayback,
       stopOrbVoicePulse,
@@ -739,12 +798,13 @@ export function useLiveMode({
       const turnHistory =
         resolvedTurnLang !== previousTurnLang
           ? conversationHistoryRef.current.slice(-1)
-          : conversationHistoryRef.current.slice(-4);
+          : conversationHistoryRef.current.slice(-LIVE_HISTORY_TURNS);
 
       try {
         const llmT0 = performance.now();
         const speaker = createLiveSpeaker(signal, resolvedTurnLang);
         let aiText = '';
+        let firstTokenLogged = false;
         try {
           aiText = await streamLiveChatModel(
             'qwen/qwen3.8-27b',
@@ -756,7 +816,13 @@ export function useLiveMode({
             resolvedTurnLang,
             previousTurnLang,
             sttMeta,
-            (d) => speaker.push(d)
+            (d) => {
+              if (!firstTokenLogged) {
+                firstTokenLogged = true;
+                console.log(`[Live] LLM first token: ${(performance.now() - llmT0).toFixed(0)}ms`);
+              }
+              speaker.push(d);
+            }
           );
         } catch (e) {
           if (e?.name === 'AbortError') throw e;
@@ -836,7 +902,7 @@ export function useLiveMode({
       } catch (err) {
         if (err?.name === 'AbortError' || !isLiveActiveRef.current) return;
         console.warn('[Live] LLM error:', err);
-        if (isLiveActiveRef.current) setTimeout(() => startContinuousListeningRef.current?.(), 700);
+        if (isLiveActiveRef.current) setTimeout(() => startContinuousListeningRef.current?.(), 300);
       }
     },
     [
@@ -892,25 +958,58 @@ export function useLiveMode({
       } catch (err) {
         if (err?.name === 'AbortError' || !isLiveActiveRef.current) return;
         showErrorToast('Voice error. Retrying...');
-        if (isLiveActiveRef.current) setTimeout(() => startContinuousListeningRef.current?.(), 700);
+        if (isLiveActiveRef.current) setTimeout(() => startContinuousListeningRef.current?.(), 300);
       }
     },
     [currentLanguageRef, processLiveUserVoice, resolveLiveTurnLanguage, showErrorToast, updateLiveDisplay]
   );
 
+  // User started talking while AI was speaking/thinking: cut AI off and keep capturing the user
+  const triggerBargeIn = useCallback(
+    (now) => {
+      if (liveTurnAbortCtrlRef.current) {
+        try {
+          liveTurnAbortCtrlRef.current.abort();
+        } catch {}
+        liveTurnAbortCtrlRef.current = null;
+      }
+      stopAudioPlayback();
+      isProcessingTurnRef.current = false;
+      bargeMsRef.current = 0;
+
+      pcmChunksRef.current = [...preSpeechBufferRef.current];
+      preSpeechBufferRef.current = [];
+      speechStartedRef.current = true;
+      speechStartTimeRef.current = now - 250;
+      lastSpeechTimeRef.current = now;
+      activeSpeechFramesRef.current = 6;
+      lastSpeechChunkIdxRef.current = pcmChunksRef.current.length;
+      updateLiveDisplay(
+        'listening',
+        'LISTENING',
+        currentLanguageRef.current === 'te' ? TELUGU_LIVE_STATUS_TEXT.listeningActive : 'Listening...'
+      );
+    },
+    [currentLanguageRef, stopAudioPlayback, updateLiveDisplay]
+  );
+
   const startContinuousListening = useCallback(async () => {
     if (!isLiveActiveRef.current || isAITalkingRef.current) return;
+    // User is already mid-sentence (barge-in) - never wipe what we are capturing
+    if (speechStartedRef.current && !isProcessingTurnRef.current) return;
+
     isProcessingTurnRef.current = false;
     pcmChunksRef.current = [];
     preSpeechBufferRef.current = [];
     speechStartedRef.current = false;
     activeSpeechFramesRef.current = 0;
     lastSpeechChunkIdxRef.current = 0;
+    bargeMsRef.current = 0;
 
     if (!mediaStreamRef.current || mediaStreamRef.current.getTracks().every((t) => t.readyState === 'ended')) {
       try {
         mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
         });
       } catch {
         showErrorToast('Microphone permission denied.');
@@ -922,10 +1021,9 @@ export function useLiveMode({
     }
 
     if (!recorderCtxRef.current || recorderCtxRef.current.state === 'closed') {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      const recCtx = new AC();
+      const recCtx = createAudioContext();
       const micSrc = recCtx.createMediaStreamSource(mediaStreamRef.current);
-      const proc = recCtx.createScriptProcessor(2048, 1, 1);
+      const proc = recCtx.createScriptProcessor(FRAME_SIZE, 1, 1);
       const gain = recCtx.createGain();
       gain.gain.value = 0;
       micSrc.connect(proc);
@@ -946,16 +1044,51 @@ export function useLiveMode({
     );
 
     processorNodeRef.current.onaudioprocess = (event) => {
-      if (!isLiveActiveRef.current || isAITalkingRef.current || isProcessingTurnRef.current) return;
+      if (!isLiveActiveRef.current) return;
+
       const copy = new Float32Array(event.inputBuffer.getChannelData(0));
       let sum = 0;
       for (let i = 0; i < copy.length; i++) sum += copy[i] * copy[i];
       const rms = Math.sqrt(sum / copy.length);
       const now = Date.now();
+      const sr = recorderCtxRef.current?.sampleRate || 48000;
+      const frameMs = (copy.length / sr) * 1000;
+
+      const aiBusy = isAITalkingRef.current;
+      const thinking = isProcessingTurnRef.current && !aiBusy;
+
+      /* ---- AI is speaking or thinking: only watch for barge-in ---- */
+      if (aiBusy || thinking) {
+        if (!BARGE_IN_ENABLED) return;
+
+        // keep a rolling buffer so the start of the user's words is not lost
+        preSpeechBufferRef.current.push(copy);
+        const maxFrames = Math.ceil(650 / frameMs);
+        while (preSpeechBufferRef.current.length > maxFrames) preSpeechBufferRef.current.shift();
+
+        if (aiBusy && now - aiSpeechStartedAtRef.current < BARGE_IN_GRACE_MS) {
+          bargeMsRef.current = 0;
+          return;
+        }
+
+        const thr = aiBusy
+          ? Math.max(BARGE_IN_MIN_RMS, liveNoiseFloorRef.current * 6)
+          : Math.max(0.02, liveNoiseFloorRef.current * 3.5);
+        if (rms > thr) bargeMsRef.current += frameMs;
+        else bargeMsRef.current = Math.max(0, bargeMsRef.current - frameMs * 0.5);
+
+        const needMs = aiBusy ? BARGE_IN_SPEAKING_MS : BARGE_IN_THINKING_MS;
+        if (bargeMsRef.current >= needMs) triggerBargeIn(now);
+        return;
+      }
+
+      /* ---- Normal listening ---- */
       const threshold = Math.max(0.015, Math.min(0.034, liveNoiseFloorRef.current * 2.5));
 
       if (rms > threshold) {
         if (!speechStartedRef.current) {
+          // ignore the tiny echo tail right after AI audio stops
+          if (now - lastAIEndAtRef.current < AFTER_AI_COOLDOWN_MS) return;
           speechStartedRef.current = true;
           speechStartTimeRef.current = now;
           activeSpeechFramesRef.current = 0;
@@ -974,20 +1107,20 @@ export function useLiveMode({
       } else if (speechStartedRef.current) {
         pcmChunksRef.current.push(copy);
         const speechDur = now - speechStartTimeRef.current;
-        const silenceHangMs = speechDur < 2200 ? 450 : 560;
-        if (now - lastSpeechTimeRef.current > silenceHangMs || speechDur > 12000) {
+        const silenceHangMs = speechDur < 1800 ? SILENCE_HANG_SHORT_MS : SILENCE_HANG_LONG_MS;
+        if (now - lastSpeechTimeRef.current > silenceHangMs || speechDur > MAX_UTTERANCE_MS) {
           isProcessingTurnRef.current = true;
-          const trimEnd = Math.min(pcmChunksRef.current.length, lastSpeechChunkIdxRef.current + 3);
+          bargeMsRef.current = 0;
+          const trimEnd = Math.min(pcmChunksRef.current.length, lastSpeechChunkIdxRef.current + 2);
           const captured = pcmChunksRef.current.slice(0, Math.max(1, trimEnd));
-          const sr = recorderCtxRef.current.sampleRate;
           const voicedFrames = activeSpeechFramesRef.current;
           pcmChunksRef.current = [];
+          preSpeechBufferRef.current = [];
           speechStartedRef.current = false;
           activeSpeechFramesRef.current = 0;
           const totalDurSec = captured.reduce((a, c) => a + c.length, 0) / sr;
-          const voicedDurationMs = ((voicedFrames * 2048) / sr) * 1000;
-          const minVoicedFrames = sr <= 20000 ? 2 : 4;
-          if (totalDurSec < 0.3 || voicedFrames < minVoicedFrames || voicedDurationMs < 160) {
+          const voicedDurationMs = voicedFrames * frameMs;
+          if (totalDurSec < 0.25 || voicedFrames < 3 || voicedDurationMs < 140) {
             isProcessingTurnRef.current = false;
             return;
           }
@@ -996,10 +1129,11 @@ export function useLiveMode({
       } else {
         liveNoiseFloorRef.current = liveNoiseFloorRef.current * 0.92 + rms * 0.08;
         preSpeechBufferRef.current.push(copy);
-        if (preSpeechBufferRef.current.length > 6) preSpeechBufferRef.current.shift();
+        const maxPre = Math.ceil(220 / frameMs);
+        while (preSpeechBufferRef.current.length > maxPre) preSpeechBufferRef.current.shift();
       }
     };
-  }, [currentLanguageRef, processWavWithSTT, showErrorToast, updateLiveDisplay]);
+  }, [currentLanguageRef, processWavWithSTT, showErrorToast, triggerBargeIn, updateLiveDisplay]);
 
   useEffect(() => {
     startContinuousListeningRef.current = startContinuousListening;
@@ -1013,6 +1147,7 @@ export function useLiveMode({
     isLiveActiveRef.current = true;
     isAITalkingRef.current = false;
     isProcessingTurnRef.current = false;
+    speechStartedRef.current = false;
     lastLiveTurnLangRef.current = null;
     livePendingLangRef.current = null;
     livePendingCountRef.current = 0;
@@ -1028,6 +1163,7 @@ export function useLiveMode({
   const closeLiveMode = useCallback(() => {
     isLiveActiveRef.current = false;
     isProcessingTurnRef.current = false;
+    speechStartedRef.current = false;
     livePendingLangRef.current = null;
     livePendingCountRef.current = 0;
     if (liveTurnAbortCtrlRef.current) {
@@ -1039,6 +1175,7 @@ export function useLiveMode({
     setIsLiveActive(false);
     stopAudioPlayback();
     try {
+      if (processorNodeRef.current) processorNodeRef.current.onaudioprocess = null;
       processorNodeRef.current?.disconnect();
       micSourceNodeRef.current?.disconnect();
       silentGainNodeRef.current?.disconnect();
@@ -1064,6 +1201,7 @@ export function useLiveMode({
       }
       stopAudioPlayback();
       isProcessingTurnRef.current = false;
+      speechStartedRef.current = false;
       startContinuousListening();
     }
   }, [startContinuousListening, stopAudioPlayback]);
@@ -1095,6 +1233,18 @@ export function useLiveMode({
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [closeLiveMode, isLiveActive]);
+
+  // Mobile: when user returns to the tab, wake audio contexts so the call keeps working
+  useEffect(() => {
+    if (!isLiveActive) return;
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || !isLiveActiveRef.current) return;
+      playbackAudioCtxRef.current?.resume?.().catch(() => {});
+      recorderCtxRef.current?.resume?.().catch(() => {});
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [isLiveActive]);
 
   useEffect(() => {
     return () => {
